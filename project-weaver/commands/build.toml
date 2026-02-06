@@ -1,0 +1,30 @@
+description = "Run the full Project Weaver AI Software Agency pipeline to build a project from requirements to code"
+
+prompt = """
+The user wants to build a software project using the Project Weaver AI Software Agency.
+
+First, check if a .weaver/ project already exists using mcp__weaver__get_project_status.
+If not, ask the user for a project name and description, then use mcp__weaver__init_project.
+
+Next, gather requirements:
+1. Use mcp__weaver__gather_requirements to get structured questions
+2. Ask the user each unanswered question one at a time
+3. Store answers using mcp__weaver__update_project_context
+4. When all questions are answered (or user says "that's enough"), proceed
+
+Then use mcp__weaver__run_pipeline to get the execution plan and execute each stage sequentially:
+1. Product Manager: Create spec and user stories (use gather_requirements if needed)
+2. Architect: Design architecture with Mermaid diagrams
+3. Developer: Write all code files using mcp__weaver__save_file for each file
+4. QA: Write test files using mcp__weaver__save_file, verify acceptance criteria
+5. Code Reviewer: Review code and approve (or use mcp__weaver__request_revision)
+6. Developer: Ship - finalize the project
+
+For each stage:
+- Follow the DRAFT -> SELF-REVIEW -> REFINE -> RECORD pattern
+- Actually do the work - write real code, real tests, real architecture docs
+- Create structured widgets for the dashboard
+- Record everything on the context board and log events
+
+Additional user context: {{args}}
+"""

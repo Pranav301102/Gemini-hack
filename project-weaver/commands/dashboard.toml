@@ -1,0 +1,24 @@
+description = "Launch the Project Weaver observability dashboard to view agent activity and pipeline progress"
+
+prompt = """
+The user wants to launch the Project Weaver observability dashboard.
+
+Tell them to run these commands:
+
+```bash
+cd ~/.gemini/extensions/project-weaver/dashboard
+npm install  # first time only
+npm run dev
+```
+
+Then open http://localhost:3000 in their browser.
+
+The dashboard shows:
+- Real-time agent activity feed from .weaver/logs/
+- Shared context board viewer from .weaver/context.json
+- Pipeline progress with stage tracking
+- Mermaid architecture diagrams
+- Agent communication and debates
+
+If the dashboard directory doesn't exist yet, let them know it needs to be set up first.
+"""

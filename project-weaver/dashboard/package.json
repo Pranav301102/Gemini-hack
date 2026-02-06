@@ -1,0 +1,26 @@
+{
+  "name": "project-weaver-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "next": "15.5.2",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-markdown": "^10.1.0",
+    "react-icons": "^5.5.0",
+    "mermaid": "^11.11.0",
+    "chokidar": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "typescript": "^5.7",
+    "tailwindcss": "^4",
+    "@tailwindcss/postcss": "^4"
+  }
+}

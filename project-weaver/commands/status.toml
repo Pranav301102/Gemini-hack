@@ -1,0 +1,15 @@
+description = "Show the current status of the Project Weaver project pipeline and agents"
+
+prompt = """
+Show the current Project Weaver project status.
+
+1. Call mcp__weaver__get_project_status to get the overview
+2. Display clearly:
+   - Project name and description
+   - Pipeline progress (which stages are complete, in-progress, pending)
+   - Each agent's current status and task
+   - Number of context board entries by type
+   - Last updated timestamp
+
+Format with clear sections, bullet points, and a visual pipeline progress indicator.
+"""

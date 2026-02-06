@@ -1,0 +1,43 @@
+import type { AgentRole, ContextEntry, ProjectContext } from '../types.js';
+/**
+ * Build a full prompt for an agent, incorporating:
+ * - Their role-specific system prompt
+ * - Project context (name, description, requirements, tech stack)
+ * - Recent context board entries from other agents
+ * - Any additional context passed by the orchestrator
+ */
+export declare function getAgentPrompt(role: AgentRole, project: ProjectContext, recentEntries: ContextEntry[], additionalContext?: string): string;
+/** Get just the system prompt for an agent (no project context) */
+export declare function getAgentSystemPrompt(role: AgentRole): string;
+/** Get agent config */
+export declare function getAgentConfig(role: AgentRole): {
+    role: AgentRole;
+    displayName: string;
+    defaultStages: readonly ["spec", "stories"];
+    outputTypes: readonly ["decision", "artifact", "handoff"];
+    systemPrompt: string;
+} | {
+    role: AgentRole;
+    displayName: string;
+    defaultStages: readonly ["architecture"];
+    outputTypes: readonly ["decision", "artifact", "handoff"];
+    systemPrompt: string;
+} | {
+    role: AgentRole;
+    displayName: string;
+    defaultStages: readonly ["implementation", "ship"];
+    outputTypes: readonly ["artifact", "question", "handoff"];
+    systemPrompt: string;
+} | {
+    role: AgentRole;
+    displayName: string;
+    defaultStages: readonly ["testing"];
+    outputTypes: readonly ["artifact", "feedback", "handoff"];
+    systemPrompt: string;
+} | {
+    role: AgentRole;
+    displayName: string;
+    defaultStages: readonly ["review"];
+    outputTypes: readonly ["feedback", "decision", "handoff"];
+    systemPrompt: string;
+};

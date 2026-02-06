@@ -1,0 +1,20 @@
+{
+  "name": "project-weaver",
+  "version": "1.0.0",
+  "description": "AI Software Agency - Gemini CLI Extension. A full dev team simulated by specialized agents.",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
+  }
+}
