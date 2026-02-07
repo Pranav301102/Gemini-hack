@@ -1,9 +1,10 @@
-import { ContextBoard, ContextEntry, AgentRole, AgentState, PipelineStage, WeaverEvent, EntryType, TrackedFile, DashboardWidget, ProjectContext, RequirementsQuestion } from '../types.js';
+import { ContextBoard, ContextEntry, AgentRole, AgentState, PipelineStage, WeaverEvent, EntryType, TrackedFile, DashboardWidget, ProjectContext, RequirementsQuestion, ApprovalState, ProjectIndex } from '../types.js';
 export declare class BoardManager {
     private workspacePath;
     constructor(workspacePath: string);
     private get weaverDir();
     private get contextFilePath();
+    private get indexFilePath();
     private get logsDir();
     private get artifactsDir();
     private generateId;
@@ -20,7 +21,17 @@ export declare class BoardManager {
     /** Update an agent's state */
     updateAgentState(role: AgentRole, updates: Partial<Omit<AgentState, 'role'>>): void;
     /** Advance a pipeline stage */
-    advanceStage(stage: PipelineStage, status: 'in-progress' | 'complete', agent?: AgentRole): void;
+    advanceStage(stage: PipelineStage, status: 'in-progress' | 'complete', agent?: AgentRole | 'user'): void;
+    /** Reset pipeline from a given stage onwards */
+    resetToStage(stage: PipelineStage): void;
+    /** Set the approval gate state */
+    setApproval(approval: ApprovalState): void;
+    /** Get the current approval state */
+    getApproval(): ApprovalState | undefined;
+    /** Write the project index to .weaver/index.json */
+    writeIndex(index: ProjectIndex): void;
+    /** Read the project index from .weaver/index.json */
+    readIndex(): ProjectIndex | null;
     /** Get filtered entries from the context board */
     getFilteredEntries(filters?: {
         agent?: AgentRole;
@@ -32,7 +43,7 @@ export declare class BoardManager {
     saveArtifact(filename: string, content: string): string;
     /** Track a file written to the workspace by an agent */
     trackFile(filePath: string, agent: AgentRole, stage: PipelineStage): TrackedFile;
-    /** Update project context (e.g., from requirements gathering) */
+    /** Update project context */
     updateProjectContext(updates: Partial<ProjectContext>): void;
     /** Add a widget to the dashboard */
     addWidget(widget: DashboardWidget): void;

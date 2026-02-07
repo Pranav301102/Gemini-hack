@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { HiCheck, HiClock, HiDocumentText, HiChip, HiCollection } from 'react-icons/hi'
+import { HiCheck, HiClock, HiDocumentText, HiChip, HiCollection, HiUser } from 'react-icons/hi'
 
 interface StageInfo {
   status: 'pending' | 'in-progress' | 'complete' | 'skipped'
@@ -51,12 +51,14 @@ interface PipelineProgressProps {
   onStageClick: (stage: string) => void
 }
 
-const STAGE_ORDER = ['spec', 'stories', 'architecture', 'implementation', 'testing', 'review', 'ship']
+const STAGE_ORDER = ['read', 'architecture', 'spec', 'stories', 'approval', 'implementation', 'testing', 'review', 'ship']
 
 const STAGE_LABELS: Record<string, string> = {
+  read: 'Read',
+  architecture: 'Architecture',
   spec: 'Spec',
   stories: 'Stories',
-  architecture: 'Architecture',
+  approval: 'Approval',
   implementation: 'Implementation',
   testing: 'Testing',
   review: 'Review',
@@ -64,9 +66,11 @@ const STAGE_LABELS: Record<string, string> = {
 }
 
 const STAGE_AGENTS: Record<string, string> = {
+  read: 'Architect',
+  architecture: 'Architect',
   spec: 'Product Manager',
   stories: 'Product Manager',
-  architecture: 'Architect',
+  approval: 'User',
   implementation: 'Developer',
   testing: 'QA Engineer',
   review: 'Code Reviewer',
@@ -181,11 +185,14 @@ const PipelineProgress: React.FC<PipelineProgressProps> = ({
                 {/* Status icon */}
                 <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${
                   status === 'complete' ? 'bg-green-500/20 text-green-400' :
+                  status === 'in-progress' && stage === 'approval' ? 'bg-orange-500/20 text-orange-400' :
                   status === 'in-progress' ? 'bg-yellow-500/20 text-yellow-400' :
                   'bg-gray-800 text-gray-600'
                 }`}>
                   {status === 'complete' ? <HiCheck className="w-3 h-3" /> :
+                   status === 'in-progress' && stage === 'approval' ? <HiUser className="w-3 h-3 animate-pulse" /> :
                    status === 'in-progress' ? <HiClock className="w-3 h-3 animate-pulse" /> :
+                   stage === 'approval' ? <HiUser className="w-3 h-3" /> :
                    <span className="text-[10px]">{idx + 1}</span>}
                 </div>
 

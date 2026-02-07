@@ -16,10 +16,13 @@ import {
   DashboardWidget,
   ProjectContext,
   RequirementsQuestion,
+  ApprovalState,
+  ProjectIndex,
 } from '../types.js';
 
 const WEAVER_DIR = '.weaver';
 const CONTEXT_FILE = 'context.json';
+const INDEX_FILE = 'index.json';
 const LOGS_DIR = 'logs';
 const ARTIFACTS_DIR = 'artifacts';
 
@@ -36,6 +39,10 @@ export class BoardManager {
 
   private get contextFilePath(): string {
     return path.join(this.weaverDir, CONTEXT_FILE);
+  }
+
+  private get indexFilePath(): string {
+    return path.join(this.weaverDir, INDEX_FILE);
   }
 
   private get logsDir(): string {
@@ -74,7 +81,7 @@ export class BoardManager {
     }
 
     const board: ContextBoard = {
-      version: '1.0.0',
+      version: '2.0.0',
       projectId: this.generateId(),
       project: {
         name: projectName,
@@ -87,7 +94,7 @@ export class BoardManager {
       files: [],
       widgets: [],
       pipeline: {
-        currentStage: 'spec',
+        currentStage: 'read',
         stages,
       },
       createdAt: now,
@@ -146,14 +153,14 @@ export class BoardManager {
     board.agents[role] = {
       ...board.agents[role],
       ...updates,
-      role, // ensure role is never overwritten
+      role,
       lastActive: new Date().toISOString(),
     };
     this.writeBoard(board);
   }
 
   /** Advance a pipeline stage */
-  advanceStage(stage: PipelineStage, status: 'in-progress' | 'complete', agent?: AgentRole): void {
+  advanceStage(stage: PipelineStage, status: 'in-progress' | 'complete', agent?: AgentRole | 'user'): void {
     const board = this.readBoard();
     const now = new Date().toISOString();
 
@@ -172,10 +179,71 @@ export class BoardManager {
     this.logEvent({
       level: 'info',
       stage,
-      agent,
+      agent: agent !== 'user' ? agent : undefined,
       action: `stage_${status === 'in-progress' ? 'started' : 'completed'}`,
       message: `Pipeline stage "${stage}" ${status === 'in-progress' ? 'started' : 'completed'}`,
     });
+  }
+
+  /** Reset pipeline from a given stage onwards */
+  resetToStage(stage: PipelineStage): void {
+    const board = this.readBoard();
+    const idx = PIPELINE_STAGES.indexOf(stage);
+
+    for (let i = idx; i < PIPELINE_STAGES.length; i++) {
+      const s = PIPELINE_STAGES[i];
+      board.pipeline.stages[s].status = 'pending';
+      board.pipeline.stages[s].startedAt = undefined;
+      board.pipeline.stages[s].completedAt = undefined;
+    }
+
+    board.pipeline.currentStage = stage;
+
+    if (idx <= PIPELINE_STAGES.indexOf('approval')) {
+      board.approval = undefined;
+    }
+
+    this.writeBoard(board);
+
+    this.logEvent({
+      level: 'info',
+      stage,
+      action: 'pipeline_reset',
+      message: `Pipeline reset to stage "${stage}"`,
+    });
+  }
+
+  /** Set the approval gate state */
+  setApproval(approval: ApprovalState): void {
+    const board = this.readBoard();
+    board.approval = approval;
+    this.writeBoard(board);
+
+    this.logEvent({
+      level: 'info',
+      stage: 'approval',
+      action: `approval_${approval.status}`,
+      message: `Approval gate: ${approval.status}`,
+      data: { comments: approval.comments },
+    });
+  }
+
+  /** Get the current approval state */
+  getApproval(): ApprovalState | undefined {
+    const board = this.readBoard();
+    return board.approval;
+  }
+
+  /** Write the project index to .weaver/index.json */
+  writeIndex(index: ProjectIndex): void {
+    fs.writeFileSync(this.indexFilePath, JSON.stringify(index, null, 2), 'utf-8');
+  }
+
+  /** Read the project index from .weaver/index.json */
+  readIndex(): ProjectIndex | null {
+    if (!fs.existsSync(this.indexFilePath)) return null;
+    const raw = fs.readFileSync(this.indexFilePath, 'utf-8');
+    return JSON.parse(raw) as ProjectIndex;
   }
 
   /** Get filtered entries from the context board */
@@ -220,7 +288,6 @@ export class BoardManager {
       size: stat?.size ?? 0,
     };
 
-    // Update or add
     const idx = board.files.findIndex(f => f.path === filePath);
     if (idx >= 0) {
       board.files[idx] = file;
@@ -232,7 +299,7 @@ export class BoardManager {
     return file;
   }
 
-  /** Update project context (e.g., from requirements gathering) */
+  /** Update project context */
   updateProjectContext(updates: Partial<ProjectContext>): void {
     const board = this.readBoard();
     board.project = { ...board.project, ...updates };
@@ -277,7 +344,6 @@ export class BoardManager {
       timestamp: new Date().toISOString(),
     };
 
-    // Ensure logs directory exists
     if (!fs.existsSync(this.logsDir)) {
       fs.mkdirSync(this.logsDir, { recursive: true });
     }

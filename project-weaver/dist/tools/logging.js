@@ -1,11 +1,12 @@
 import { z } from 'zod';
 import { BoardManager } from '../context/board.js';
+import { STAGE_NAMES } from '../types.js';
 export function registerLogging(server) {
     server.tool('log_event', 'Log an event to .weaver/logs/ for the observability dashboard. Events are JSONL (one JSON per line) in date-stamped files.', {
         workspacePath: z.string().describe('Absolute path to the workspace directory'),
         level: z.enum(['info', 'warn', 'error', 'debug']).describe('Log level'),
         agent: z.enum(['product-manager', 'architect', 'developer', 'qa', 'code-reviewer']).optional().describe('Agent that generated this event'),
-        stage: z.enum(['spec', 'stories', 'architecture', 'implementation', 'testing', 'review', 'ship']).optional().describe('Pipeline stage'),
+        stage: z.enum(STAGE_NAMES).optional().describe('Pipeline stage'),
         action: z.string().describe('Action identifier (e.g., "code_generated", "test_failed", "review_complete")'),
         message: z.string().describe('Human-readable event description'),
         data: z.record(z.unknown()).optional().describe('Additional structured data'),

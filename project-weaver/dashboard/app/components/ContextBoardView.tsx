@@ -57,9 +57,11 @@ const AGENT_LABELS: Record<string, string> = {
 }
 
 const STAGE_LABELS: Record<string, string> = {
+  read: 'Read',
+  architecture: 'Architecture',
   spec: 'Specification',
   stories: 'User Stories',
-  architecture: 'Architecture',
+  approval: 'Approval',
   implementation: 'Implementation',
   testing: 'Testing',
   review: 'Code Review',

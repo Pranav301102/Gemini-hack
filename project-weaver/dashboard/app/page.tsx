@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react'
 import PipelineProgress from './components/PipelineProgress'
 import AgentActivityFeed from './components/AgentActivityFeed'
 import ContextBoardView from './components/ContextBoardView'
+import ApprovalGate from './components/ApprovalGate'
 import { HiRefresh, HiFolder } from 'react-icons/hi'
 import type { DashboardWidget } from './components/WidgetRenderer'
 
@@ -219,14 +220,24 @@ export default function Dashboard() {
           />
         </div>
 
-        {/* Center panel: Context Board */}
+        {/* Center panel: Context Board / Approval Gate */}
         <div className="flex-1 overflow-hidden border-r border-gray-800">
-          <ContextBoardView
-            entries={entries}
-            widgets={widgets}
-            selectedStage={selectedStage}
-            onStageFilter={setSelectedStage}
-          />
+          {pipeline?.currentStage === 'approval' && pipeline?.stages?.approval?.status !== 'complete' ? (
+            <div className="h-full overflow-y-auto">
+              <ApprovalGate
+                entries={entries}
+                projectPath={projectPath}
+                onApprovalComplete={loadData}
+              />
+            </div>
+          ) : (
+            <ContextBoardView
+              entries={entries}
+              widgets={widgets}
+              selectedStage={selectedStage}
+              onStageFilter={setSelectedStage}
+            />
+          )}
         </div>
 
         {/* Right panel: Activity Feed */}

@@ -1,8 +1,8 @@
 // Agent roles - the 5 specialized dev team members
 export type AgentRole = 'product-manager' | 'architect' | 'developer' | 'qa' | 'code-reviewer';
 
-// Pipeline stages from spec to ship
-export type PipelineStage = 'spec' | 'stories' | 'architecture' | 'implementation' | 'testing' | 'review' | 'ship';
+// Pipeline stages: read → architecture → spec → stories → approval → implementation → testing → review → ship
+export type PipelineStage = 'read' | 'architecture' | 'spec' | 'stories' | 'approval' | 'implementation' | 'testing' | 'review' | 'ship';
 
 export type AgentStatus = 'idle' | 'thinking' | 'working' | 'blocked' | 'done' | 'error';
 
@@ -11,6 +11,9 @@ export type TaskPriority = 'critical' | 'high' | 'medium' | 'low';
 export type EntryType = 'decision' | 'artifact' | 'question' | 'feedback' | 'handoff';
 
 export type StageStatus = 'pending' | 'in-progress' | 'complete' | 'skipped';
+
+// Shared Zod-compatible stage names array (use in z.enum() calls)
+export const STAGE_NAMES = ['read', 'architecture', 'spec', 'stories', 'approval', 'implementation', 'testing', 'review', 'ship'] as const;
 
 // Context board entry - how agents communicate
 export interface ContextEntry {
@@ -62,6 +65,142 @@ export interface RequirementsQuestion {
   field: keyof ProjectContext | 'custom';
   answered: boolean;
   answer?: string;
+}
+
+// ─── Approval Gate ───
+
+export type ApprovalStatus = 'pending' | 'approved' | 'changes-requested';
+
+export interface ApprovalState {
+  status: ApprovalStatus;
+  reviewedAt?: string;
+  comments?: string;
+  requestedChanges?: string[];
+}
+
+// ─── Style Guide (authored by Architect, enforced by Reviewer) ───
+
+export interface StyleGuide {
+  naming: {
+    files: string;
+    functions: string;
+    classes: string;
+    constants: string;
+    variables: string;
+  };
+  patterns: string[];
+  rules: string[];
+  imports: string;
+  errorHandling: string;
+  testing: string;
+}
+
+// ─── Project Code Index (stored in .weaver/index.json) ───
+
+export interface FunctionSignature {
+  name: string;
+  params: { name: string; type?: string }[];
+  returnType?: string;
+  exported: boolean;
+  line: number;
+  description?: string;    // From JSDoc or preceding comment
+  isComponent?: boolean;   // React/Vue component
+  isAsync?: boolean;
+  enrichedDescription?: string;  // LLM-generated semantic description
+  purpose?: string;              // Role in the system
+}
+
+export interface ClassDefinition {
+  name: string;
+  methods: { name: string; params: string[]; returnType?: string; description?: string }[];
+  properties: { name: string; type?: string }[];
+  exported: boolean;
+  line: number;
+  description?: string;
+  extends?: string;
+  implements?: string[];
+  enrichedDescription?: string;
+  purpose?: string;
+}
+
+export interface VariableDeclaration {
+  name: string;
+  type?: string;
+  value?: string;          // Short preview of value (truncated)
+  kind: 'const' | 'let' | 'var';
+  exported: boolean;
+  line: number;
+  description?: string;
+  enrichedDescription?: string;
+}
+
+export interface TypeDefinition {
+  name: string;
+  kind: 'interface' | 'type' | 'enum';
+  fields?: { name: string; type: string; optional?: boolean }[];  // Interface/type fields
+  values?: string[];  // Enum values or union members
+  description?: string;
+  enrichedDescription?: string;
+}
+
+export interface FileIndex {
+  path: string;
+  size: number;
+  language: string;
+  description?: string;    // File-level description from top comment
+  enrichedDescription?: string;  // LLM-generated file summary
+  functions: FunctionSignature[];
+  classes: ClassDefinition[];
+  variables: VariableDeclaration[];
+  exports: string[];
+  imports: { source: string; names: string[] }[];
+  types: TypeDefinition[];
+}
+
+export interface ProjectIndex {
+  version: string;
+  indexedAt: string;
+  rootPath: string;
+  techStack: string[];
+  fileTree: { path: string; size: number; type: 'file' | 'directory' }[];
+  files: FileIndex[];
+  totalFiles: number;
+  totalFunctions: number;
+  totalClasses: number;
+  totalVariables: number;
+  totalTypes: number;
+  // Agent Memory fields
+  enrichedAt?: string;
+  enrichmentProgress?: { totalItems: number; enrichedItems: number; lastBatchFile?: string };
+  dependencyGraph?: DependencyGraph;
+}
+
+// ─── Dependency Graph (computed from imports) ───
+
+export interface DependencyEdge {
+  from: string;   // relative file path
+  to: string;     // relative file path (resolved)
+  imports: string[];
+}
+
+export interface DependencyGraph {
+  edges: DependencyEdge[];
+  entryPoints: string[];
+  sharedModules: { file: string; importedBy: number }[];
+  clusters: { directory: string; files: string[]; internalEdges: number; externalEdges: number }[];
+  circularDeps: string[][];
+}
+
+// ─── Enrichment Types ───
+
+export interface EnrichmentItem {
+  file: string;
+  name: string;
+  kind: 'function' | 'class' | 'type' | 'variable';
+  signature: string;
+  codeSnippet: string;
+  existingDescription?: string;
+  line: number;
 }
 
 // ─── Structured Widget Types (ported from clin-ops) ───
@@ -164,7 +303,7 @@ export interface StageInfo {
   status: StageStatus;
   startedAt?: string;
   completedAt?: string;
-  assignedAgent?: AgentRole;
+  assignedAgent?: AgentRole | 'user';
 }
 
 // The full context board - shared state for all agents
@@ -180,6 +319,8 @@ export interface ContextBoard {
     currentStage: PipelineStage;
     stages: Record<PipelineStage, StageInfo>;
   };
+  approval?: ApprovalState;
+  styleGuide?: StyleGuide;
   createdAt: string;
   updatedAt: string;
 }
@@ -200,13 +341,15 @@ export interface WeaverEvent {
 export const AGENT_ROLES: AgentRole[] = ['product-manager', 'architect', 'developer', 'qa', 'code-reviewer'];
 
 // All pipeline stages in order
-export const PIPELINE_STAGES: PipelineStage[] = ['spec', 'stories', 'architecture', 'implementation', 'testing', 'review', 'ship'];
+export const PIPELINE_STAGES: PipelineStage[] = ['read', 'architecture', 'spec', 'stories', 'approval', 'implementation', 'testing', 'review', 'ship'];
 
-// Maps pipeline stages to responsible agents
-export const STAGE_AGENT_MAP: Record<PipelineStage, AgentRole> = {
+// Maps pipeline stages to responsible agents (approval is user-driven)
+export const STAGE_AGENT_MAP: Record<PipelineStage, AgentRole | 'user'> = {
+  'read': 'architect',
+  'architecture': 'architect',
   'spec': 'product-manager',
   'stories': 'product-manager',
-  'architecture': 'architect',
+  'approval': 'user',
   'implementation': 'developer',
   'testing': 'qa',
   'review': 'code-reviewer',
@@ -215,12 +358,14 @@ export const STAGE_AGENT_MAP: Record<PipelineStage, AgentRole> = {
 
 // Human-readable stage descriptions
 export const STAGE_DESCRIPTIONS: Record<PipelineStage, string> = {
-  'spec': 'Analyze requirements and create a detailed specification',
+  'read': 'Scan existing codebase and auto-detect project structure, tech stack, and patterns',
+  'architecture': 'Design system architecture, file structure, coding style guide, and technical decisions',
+  'spec': 'Analyze requirements and create a detailed specification aligned with architecture',
   'stories': 'Break down the spec into user stories with acceptance criteria',
-  'architecture': 'Design system architecture, file structure, and technical decisions',
-  'implementation': 'Write production code across all files',
+  'approval': 'User reviews architect design and PM spec, then approves or requests changes',
+  'implementation': 'Write production code following the style guide',
   'testing': 'Write and run tests for the implementation',
-  'review': 'Review code for bugs, security, and best practices',
+  'review': 'Review code for bugs, security, style guide compliance, and best practices',
   'ship': 'Finalize and prepare the project for deployment',
 };
 

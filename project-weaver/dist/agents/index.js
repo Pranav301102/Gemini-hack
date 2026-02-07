@@ -67,11 +67,20 @@ export function getAgentPrompt(role, project, recentEntries, additionalContext) 
             recentWork += `\n### Feedback & Issues:\n${formatEntries(feedback, 3)}\n`;
         }
     }
+    // Inject style guide prominently for Developer and Code Reviewer
+    let styleGuideSection = '';
+    if (role === 'developer' || role === 'code-reviewer') {
+        const styleGuideEntry = recentEntries.find(e => e.type === 'decision' && e.metadata?.isStyleGuide === true);
+        if (styleGuideEntry) {
+            styleGuideSection = `\n---\n\n## 🎨 Coding Style Guide (from Architect)\n\n${styleGuideEntry.content}\n`;
+        }
+    }
     const parts = [
         config.systemPrompt,
         '\n---\n',
         '## Project Context\n',
         projectSummary,
+        styleGuideSection,
         recentWork,
     ];
     if (additionalContext) {

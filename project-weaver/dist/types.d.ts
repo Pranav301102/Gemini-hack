@@ -1,9 +1,10 @@
 export type AgentRole = 'product-manager' | 'architect' | 'developer' | 'qa' | 'code-reviewer';
-export type PipelineStage = 'spec' | 'stories' | 'architecture' | 'implementation' | 'testing' | 'review' | 'ship';
+export type PipelineStage = 'read' | 'architecture' | 'spec' | 'stories' | 'approval' | 'implementation' | 'testing' | 'review' | 'ship';
 export type AgentStatus = 'idle' | 'thinking' | 'working' | 'blocked' | 'done' | 'error';
 export type TaskPriority = 'critical' | 'high' | 'medium' | 'low';
 export type EntryType = 'decision' | 'artifact' | 'question' | 'feedback' | 'handoff';
 export type StageStatus = 'pending' | 'in-progress' | 'complete' | 'skipped';
+export declare const STAGE_NAMES: readonly ["read", "architecture", "spec", "stories", "approval", "implementation", "testing", "review", "ship"];
 export interface ContextEntry {
     id: string;
     timestamp: string;
@@ -45,6 +46,153 @@ export interface RequirementsQuestion {
     field: keyof ProjectContext | 'custom';
     answered: boolean;
     answer?: string;
+}
+export type ApprovalStatus = 'pending' | 'approved' | 'changes-requested';
+export interface ApprovalState {
+    status: ApprovalStatus;
+    reviewedAt?: string;
+    comments?: string;
+    requestedChanges?: string[];
+}
+export interface StyleGuide {
+    naming: {
+        files: string;
+        functions: string;
+        classes: string;
+        constants: string;
+        variables: string;
+    };
+    patterns: string[];
+    rules: string[];
+    imports: string;
+    errorHandling: string;
+    testing: string;
+}
+export interface FunctionSignature {
+    name: string;
+    params: {
+        name: string;
+        type?: string;
+    }[];
+    returnType?: string;
+    exported: boolean;
+    line: number;
+    description?: string;
+    isComponent?: boolean;
+    isAsync?: boolean;
+    enrichedDescription?: string;
+    purpose?: string;
+}
+export interface ClassDefinition {
+    name: string;
+    methods: {
+        name: string;
+        params: string[];
+        returnType?: string;
+        description?: string;
+    }[];
+    properties: {
+        name: string;
+        type?: string;
+    }[];
+    exported: boolean;
+    line: number;
+    description?: string;
+    extends?: string;
+    implements?: string[];
+    enrichedDescription?: string;
+    purpose?: string;
+}
+export interface VariableDeclaration {
+    name: string;
+    type?: string;
+    value?: string;
+    kind: 'const' | 'let' | 'var';
+    exported: boolean;
+    line: number;
+    description?: string;
+    enrichedDescription?: string;
+}
+export interface TypeDefinition {
+    name: string;
+    kind: 'interface' | 'type' | 'enum';
+    fields?: {
+        name: string;
+        type: string;
+        optional?: boolean;
+    }[];
+    values?: string[];
+    description?: string;
+    enrichedDescription?: string;
+}
+export interface FileIndex {
+    path: string;
+    size: number;
+    language: string;
+    description?: string;
+    enrichedDescription?: string;
+    functions: FunctionSignature[];
+    classes: ClassDefinition[];
+    variables: VariableDeclaration[];
+    exports: string[];
+    imports: {
+        source: string;
+        names: string[];
+    }[];
+    types: TypeDefinition[];
+}
+export interface ProjectIndex {
+    version: string;
+    indexedAt: string;
+    rootPath: string;
+    techStack: string[];
+    fileTree: {
+        path: string;
+        size: number;
+        type: 'file' | 'directory';
+    }[];
+    files: FileIndex[];
+    totalFiles: number;
+    totalFunctions: number;
+    totalClasses: number;
+    totalVariables: number;
+    totalTypes: number;
+    enrichedAt?: string;
+    enrichmentProgress?: {
+        totalItems: number;
+        enrichedItems: number;
+        lastBatchFile?: string;
+    };
+    dependencyGraph?: DependencyGraph;
+}
+export interface DependencyEdge {
+    from: string;
+    to: string;
+    imports: string[];
+}
+export interface DependencyGraph {
+    edges: DependencyEdge[];
+    entryPoints: string[];
+    sharedModules: {
+        file: string;
+        importedBy: number;
+    }[];
+    clusters: {
+        directory: string;
+        files: string[];
+        internalEdges: number;
+        externalEdges: number;
+    }[];
+    circularDeps: string[][];
+}
+export interface EnrichmentItem {
+    file: string;
+    name: string;
+    kind: 'function' | 'class' | 'type' | 'variable';
+    signature: string;
+    codeSnippet: string;
+    existingDescription?: string;
+    line: number;
 }
 export type WidgetType = 'diagram' | 'kpi' | 'table' | 'timeline' | 'workflow' | 'list' | 'text' | 'chart';
 export type DiagramType = 'gantt' | 'flowchart' | 'sequence' | 'er' | 'class' | 'state' | 'pie' | 'journey' | 'gitgraph' | 'mindmap' | 'timeline' | 'C4';
@@ -123,7 +271,7 @@ export interface StageInfo {
     status: StageStatus;
     startedAt?: string;
     completedAt?: string;
-    assignedAgent?: AgentRole;
+    assignedAgent?: AgentRole | 'user';
 }
 export interface ContextBoard {
     version: string;
@@ -137,6 +285,8 @@ export interface ContextBoard {
         currentStage: PipelineStage;
         stages: Record<PipelineStage, StageInfo>;
     };
+    approval?: ApprovalState;
+    styleGuide?: StyleGuide;
     createdAt: string;
     updatedAt: string;
 }
@@ -152,6 +302,6 @@ export interface WeaverEvent {
 }
 export declare const AGENT_ROLES: AgentRole[];
 export declare const PIPELINE_STAGES: PipelineStage[];
-export declare const STAGE_AGENT_MAP: Record<PipelineStage, AgentRole>;
+export declare const STAGE_AGENT_MAP: Record<PipelineStage, AgentRole | 'user'>;
 export declare const STAGE_DESCRIPTIONS: Record<PipelineStage, string>;
 export declare const AGENT_DISPLAY_NAMES: Record<AgentRole, string>;

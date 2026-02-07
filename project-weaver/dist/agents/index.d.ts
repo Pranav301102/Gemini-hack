@@ -19,7 +19,7 @@ export declare function getAgentConfig(role: AgentRole): {
 } | {
     role: AgentRole;
     displayName: string;
-    defaultStages: readonly ["architecture"];
+    defaultStages: readonly ["read", "architecture"];
     outputTypes: readonly ["decision", "artifact", "handoff"];
     systemPrompt: string;
 } | {

@@ -13,12 +13,13 @@ Next, gather requirements:
 4. When all questions are answered (or user says "that's enough"), proceed
 
 Then use mcp__weaver__run_pipeline to get the execution plan and execute each stage sequentially:
-1. Product Manager: Create spec and user stories (use gather_requirements if needed)
-2. Architect: Design architecture with Mermaid diagrams
-3. Developer: Write all code files using mcp__weaver__save_file for each file
-4. QA: Write test files using mcp__weaver__save_file, verify acceptance criteria
-5. Code Reviewer: Review code and approve (or use mcp__weaver__request_revision)
-6. Developer: Ship - finalize the project
+1. Architect: Scan codebase (if existing), design architecture + Coding Style Guide
+2. Product Manager: Create spec and user stories ALIGNED with architecture
+3. ⚠️ APPROVAL: Pause and tell the user to review on the dashboard. Wait for approval.
+4. Developer: Write all code files following the style guide using mcp__weaver__save_file
+5. QA: Write test files using mcp__weaver__save_file, verify acceptance criteria
+6. Code Reviewer: Review code including style guide compliance, approve or use mcp__weaver__request_revision
+7. Developer: Ship - finalize the project
 
 For each stage:
 - Follow the DRAFT -> SELF-REVIEW -> REFINE -> RECORD pattern

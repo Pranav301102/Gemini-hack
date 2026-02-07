@@ -1,0 +1,20 @@
+description = "Scan an existing project, build code index, then run the Project Weaver pipeline"
+
+prompt = """
+The user wants to analyze an existing codebase and enhance it using the Project Weaver AI Software Agency.
+
+1. Use mcp__weaver__read_project to scan the current workspace and detect the tech stack, file structure, and project patterns
+2. Use mcp__weaver__index_project to build the code index (function signatures, classes, imports, exports)
+3. Show the user a summary of what was detected (tech stack, file counts, key patterns)
+4. Use mcp__weaver__run_pipeline to get the execution plan and start from the "read" stage
+5. Follow each stage's instructions:
+   - Architect analyzes the existing code and designs improvements/additions + Coding Style Guide
+   - PM writes spec aligned with architecture
+   - User reviews and approves from dashboard (WAIT for approval)
+   - Developer writes code following the style guide
+   - QA writes tests
+   - Code Reviewer reviews including style guide compliance
+   - Developer ships
+
+Additional user context: {{args}}
+"""

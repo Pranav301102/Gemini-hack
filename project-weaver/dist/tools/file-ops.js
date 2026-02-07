@@ -2,6 +2,7 @@ import { z } from 'zod';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { BoardManager } from '../context/board.js';
+import { STAGE_NAMES } from '../types.js';
 export function registerFileOps(server) {
     // --- save_file ---
     server.tool('save_file', 'Write a code file to the workspace. Used by Developer and QA agents to create actual project files. Records the file in the context board for tracking.', {
@@ -9,7 +10,7 @@ export function registerFileOps(server) {
         filePath: z.string().describe('Relative file path from workspace root (e.g., "src/index.ts", "tests/app.test.ts")'),
         content: z.string().describe('Complete file content to write'),
         agent: z.enum(['product-manager', 'architect', 'developer', 'qa', 'code-reviewer']).describe('Agent writing this file'),
-        stage: z.enum(['spec', 'stories', 'architecture', 'implementation', 'testing', 'review', 'ship']).describe('Current pipeline stage'),
+        stage: z.enum(STAGE_NAMES).describe('Current pipeline stage'),
     }, async ({ workspacePath, filePath, content, agent, stage }) => {
         const manager = new BoardManager(workspacePath);
         // Prevent path traversal

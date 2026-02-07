@@ -18,6 +18,18 @@ export function registerAgentRunner(server) {
             };
         }
         const board = manager.readBoard();
+        // Guard: approval stage is user-driven, no agent assignment
+        if (board.pipeline.currentStage === 'approval') {
+            return {
+                content: [{
+                        type: 'text',
+                        text: JSON.stringify({
+                            success: false,
+                            message: 'The approval stage is a user gate — no agent can be assigned. Use check_approval or get_approval_summary instead.',
+                        }),
+                    }],
+            };
+        }
         // Update agent state to working
         manager.updateAgentState(agent, {
             status: 'working',
@@ -88,7 +100,7 @@ export function registerAgentRunner(server) {
         };
     });
     // --- request_revision ---
-    server.tool('request_revision', 'Code Reviewer sends work back to the Developer with specific feedback. Resets the Developer to working state and creates a feedback entry. Max 2 revision cycles.', {
+    server.tool('request_revision', 'Code Reviewer sends work back to the Developer with specific feedback. Resets the pipeline to implementation stage and creates a feedback entry. Max 2 revision cycles. Can also be triggered from the approval stage to reset to architecture.', {
         workspacePath: z.string().describe('Absolute path to the workspace directory'),
         feedback: z.string().describe('Specific feedback on what needs to change'),
         files: z.array(z.string()).optional().describe('Specific files that need revision'),
@@ -101,6 +113,37 @@ export function registerAgentRunner(server) {
             };
         }
         const board = manager.readBoard();
+        const currentStage = board.pipeline.currentStage;
+        // If called from approval stage, reset to architecture instead
+        if (currentStage === 'approval') {
+            manager.resetToStage('architecture');
+            manager.addEntry({
+                agent: 'code-reviewer',
+                stage: 'approval',
+                type: 'feedback',
+                title: 'Approval Rejection',
+                content: feedback,
+                metadata: { files: files ?? [], severity: severity ?? 'major', source: 'approval' },
+            });
+            manager.logEvent({
+                level: 'warn',
+                stage: 'approval',
+                action: 'approval_rejected',
+                message: `Approval rejected: ${feedback.substring(0, 100)}`,
+                data: { files, severity },
+            });
+            return {
+                content: [{
+                        type: 'text',
+                        text: JSON.stringify({
+                            success: true,
+                            message: 'Approval rejected. Pipeline reset to architecture stage.',
+                            feedback,
+                            instruction: 'Pipeline has been reset to the architecture stage. Re-assign the Architect to address the feedback.',
+                        }),
+                    }],
+            };
+        }
         // Count existing revision cycles to prevent infinite loops
         const revisionEntries = board.entries.filter(e => e.type === 'feedback' && e.agent === 'code-reviewer' && e.title.startsWith('Revision Request'));
         if (revisionEntries.length >= 2) {
@@ -121,18 +164,8 @@ export function registerAgentRunner(server) {
         });
         // Reset QA to idle (will need to re-test)
         manager.updateAgentState('qa', { status: 'idle', currentTask: undefined });
-        // Move pipeline back to implementation
-        manager.advanceStage('implementation', 'in-progress', 'developer');
-        // Reset review and testing stages directly
-        const updatedBoard = manager.readBoard();
-        updatedBoard.pipeline.stages['review'].status = 'pending';
-        updatedBoard.pipeline.stages['review'].startedAt = undefined;
-        updatedBoard.pipeline.stages['review'].completedAt = undefined;
-        updatedBoard.pipeline.stages['testing'].status = 'pending';
-        updatedBoard.pipeline.stages['testing'].startedAt = undefined;
-        updatedBoard.pipeline.stages['testing'].completedAt = undefined;
-        updatedBoard.pipeline.currentStage = 'implementation';
-        manager.writeBoard(updatedBoard);
+        // Move pipeline back to implementation using resetToStage
+        manager.resetToStage('implementation');
         // Record feedback entry on the context board
         manager.addEntry({
             agent: 'code-reviewer',

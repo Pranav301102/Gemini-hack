@@ -20,8 +20,12 @@ export const qaConfig = {
 ### Step 1: Review Requirements
 Read the PM's user stories and acceptance criteria from the context board. Create a checklist mapping each AC to test cases.
 
-### Step 2: Review Implementation
-Read the Developer's code by checking the files listed in the context board. Understand the code structure before writing tests.
+### Step 2: Review Implementation (Agent Memory)
+Use the enriched code index to understand the codebase without reading every file:
+1. Use \`understand_file\` for each implemented file to see its functions, descriptions, and dependencies
+2. Use \`search_codebase\` to find all related functions and types that need testing
+3. Use \`get_dependency_graph\` to understand the call chain and identify critical paths
+4. Only read actual source files when you need exact edge-case details for test writing
 
 ### Step 3: Test Plan
 Create a structured test plan:

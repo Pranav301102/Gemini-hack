@@ -1,8 +1,8 @@
 import { z } from 'zod';
 import { BoardManager } from '../context/board.js';
-import { AGENT_DISPLAY_NAMES } from '../types.js';
+import { AGENT_DISPLAY_NAMES, STAGE_NAMES } from '../types.js';
 const agentEnum = z.enum(['product-manager', 'architect', 'developer', 'qa', 'code-reviewer']);
-const stageEnum = z.enum(['spec', 'stories', 'architecture', 'implementation', 'testing', 'review', 'ship']);
+const stageEnum = z.enum(STAGE_NAMES);
 const entryTypeEnum = z.enum(['decision', 'artifact', 'question', 'feedback', 'handoff']);
 export function registerContextBoardTools(server) {
     // --- get_context_board ---
@@ -45,14 +45,15 @@ export function registerContextBoardTools(server) {
         title: z.string().describe('Brief title summarizing this entry'),
         content: z.string().describe('Detailed content - user stories, architecture docs, code, test results, review feedback, etc.'),
         parentId: z.string().optional().describe('ID of a parent entry if this is a reply/thread'),
-    }, async ({ workspacePath, agent, stage, type, title, content, parentId }) => {
+        metadata: z.record(z.unknown()).optional().describe('Optional metadata (e.g., { isStyleGuide: true } for style guide entries)'),
+    }, async ({ workspacePath, agent, stage, type, title, content, parentId, metadata }) => {
         const manager = new BoardManager(workspacePath);
         if (!manager.exists()) {
             return {
                 content: [{ type: 'text', text: JSON.stringify({ success: false, message: 'Project not initialized.' }) }],
             };
         }
-        const entry = manager.addEntry({ agent, stage, type, title, content, parentId });
+        const entry = manager.addEntry({ agent, stage, type, title, content, parentId, metadata });
         // If it's a handoff, also update the pipeline stage
         if (type === 'handoff') {
             manager.advanceStage(stage, 'complete', agent);
