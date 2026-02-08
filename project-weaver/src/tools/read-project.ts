@@ -297,7 +297,7 @@ export function registerReadProject(server: McpServer): void {
       manager.logEvent({
         level: 'info',
         agent: 'architect',
-        stage: 'read',
+        phase: 'read',
         action: 'project_scanned',
         message: `Scanned ${files.length} files across ${dirs.length} directories. Tech stack: ${techStack.join(', ')}`,
         data: { fileCount: files.length, dirCount: dirs.length, techStack, langCounts },

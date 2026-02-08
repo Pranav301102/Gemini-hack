@@ -1,31 +1,45 @@
-description = "Run the full Project Weaver AI Software Agency pipeline to build a project from requirements to code"
+description = "Architect + PM brainstorm together to create a plan with memory maps for the project"
 
 prompt = """
-The user wants to build a software project using the Project Weaver AI Software Agency.
+The user wants to create a plan for their project using Project Weaver.
 
-First, check if a .weaver/ project already exists using mcp__weaver__get_project_status.
-If not, ask the user for a project name and description, then use mcp__weaver__init_project.
+First, check if a .weaver/ project exists using mcp__weaver__get_project_status.
 
-Next, gather requirements:
-1. Use mcp__weaver__gather_requirements to get structured questions
-2. Ask the user each unanswered question one at a time
-3. Store answers using mcp__weaver__update_project_context
-4. When all questions are answered (or user says "that's enough"), proceed
+If NO project exists:
+1. Ask the user for a project name and brief description
+2. Use mcp__weaver__init_project to initialize
+3. Use mcp__weaver__run_plan to get the brainstorm instructions
+4. Since this is a new project, use mcp__weaver__gather_requirements to get questions
+5. Ask the user each unanswered question
+6. Store answers using mcp__weaver__update_project_context
+7. Then follow the brainstorm instructions below
 
-Then use mcp__weaver__run_pipeline to get the execution plan and execute each stage sequentially:
-1. Architect: Scan codebase (if existing), design architecture + Coding Style Guide
-2. Product Manager: Create spec and user stories ALIGNED with architecture
-3. ⚠️ APPROVAL: Pause and tell the user to review on the dashboard. Wait for approval.
-4. Developer: Write all code files following the style guide using mcp__weaver__save_file
-5. QA: Write test files using mcp__weaver__save_file, verify acceptance criteria
-6. Code Reviewer: Review code including style guide compliance, approve or use mcp__weaver__request_revision
-7. Developer: Ship - finalize the project
+If a project EXISTS with a code index:
+1. Use mcp__weaver__run_plan to get the brainstorm instructions
+2. Do NOT ask requirements questions — use the indexed project data
+3. Start by loading code maps for instant codebase understanding:
+   - Use mcp__weaver__get_code_maps with view="summary" to get the high-level overview
+   - Use mcp__weaver__get_code_maps with view="modules" to understand architecture
+   - Use mcp__weaver__get_code_maps with view="classes" to understand type hierarchies
+   - Use mcp__weaver__get_code_maps with view="api" to see all endpoints
+4. Follow the brainstorm instructions with code maps context:
+   a. Activate the Architect agent to analyze the codebase (code maps give instant structural understanding)
+   b. Activate the PM agent to identify product improvements (code maps show API and module coverage)
+   c. Alternate between agents in a collaborative brainstorm
+   d. Build proposed changes with file-level granularity
+   e. Use mcp__weaver__add_proposed_change for each change
+   f. Use mcp__weaver__add_brainstorm_entry to log the discussion
+   g. Group changes into logical ChangeGroups
+   h. Use mcp__weaver__save_plan to finalize
 
-For each stage:
-- Follow the DRAFT -> SELF-REVIEW -> REFINE -> RECORD pattern
-- Actually do the work - write real code, real tests, real architecture docs
-- Create structured widgets for the dashboard
-- Record everything on the context board and log events
+5. Create dashboard widgets:
+   - A "diagram" widget with the current architecture (Mermaid)
+   - A "diagram" widget with the proposed changes (Mermaid)
+   - A "table" widget showing the file change map
+   - A "kpi" widget with plan metrics (total changes, files affected, etc.)
+   - A "list" widget for the prioritized change groups
+
+6. Tell the user: "Plan created. Run /dashboard to view it, or /status to see a summary."
 
 Additional user context: {{args}}
 """

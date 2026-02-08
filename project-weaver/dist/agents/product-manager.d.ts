@@ -2,7 +2,7 @@ import type { AgentRole } from '../types.js';
 export declare const productManagerConfig: {
     role: AgentRole;
     displayName: string;
-    defaultStages: readonly ["spec", "stories"];
-    outputTypes: readonly ["decision", "artifact", "handoff"];
+    phases: readonly ["plan"];
+    outputTypes: readonly ["brainstorm", "proposal", "decision", "artifact", "memory-map"];
     systemPrompt: string;
 };

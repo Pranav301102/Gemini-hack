@@ -48,6 +48,19 @@ export async function GET(request: NextRequest) {
             if (mtime > lastContextModified) {
               lastContextModified = mtime
               const context = JSON.parse(fs.readFileSync(contextFile, 'utf-8'))
+              // Migrate old pipeline format
+              if (context.pipeline && !context.phase) {
+                const cs = context.pipeline.currentStage
+                context.phase = cs === 'read' ? 'read' : ['architecture','spec','stories','approval'].includes(cs) ? 'plan' : 'ready'
+                if (Array.isArray(context.entries)) {
+                  const stageMap: Record<string, string> = { read:'read', architecture:'plan', spec:'plan', stories:'plan', approval:'plan', implementation:'ready', testing:'ready', review:'ready', ship:'ready' }
+                  const typeMap: Record<string, string> = { handoff:'decision', feedback:'proposal' }
+                  for (const e of context.entries) {
+                    if (e.stage && !e.phase) e.phase = stageMap[e.stage] ?? 'plan'
+                    if (typeMap[e.type]) e.type = typeMap[e.type]
+                  }
+                }
+              }
               sendEvent('context', context)
             }
           }

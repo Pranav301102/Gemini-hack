@@ -155,6 +155,51 @@ function isReactFCType(typeText: string | undefined): boolean {
   return /^React\.\s*(FC|FunctionComponent|VFC|ComponentType)|^FC\b|^FunctionComponent\b/.test(typeText);
 }
 
+/** Extract function call sites from a function body */
+function extractCallsites(body: SgNode | null): { name: string; line: number }[] | undefined {
+  if (!body) return undefined;
+  const callsites: { name: string; line: number }[] = [];
+  const seen = new Set<string>();
+
+  const calls = body.findAll('call_expression');
+  for (const call of calls) {
+    const firstChild = call.children().find(c => c.isNamed());
+    if (!firstChild) continue;
+
+    let name: string;
+    const kind = firstChild.kind();
+    if (kind === 'identifier') {
+      name = firstChild.text();
+    } else if (kind === 'member_expression') {
+      // obj.method or this.method
+      name = firstChild.text();
+      // Simplify long chains: keep last 2 parts
+      const parts = name.split('.');
+      if (parts.length > 2) {
+        name = parts.slice(-2).join('.');
+      }
+    } else {
+      continue;
+    }
+
+    // Skip common built-ins and noise
+    if (['console.log', 'console.error', 'console.warn', 'require', 'import',
+         'setTimeout', 'setInterval', 'clearTimeout', 'clearInterval',
+         'parseInt', 'parseFloat', 'JSON.stringify', 'JSON.parse',
+         'Object.keys', 'Object.values', 'Object.entries', 'Object.assign',
+         'Array.isArray', 'Promise.all', 'Promise.resolve',
+         'String', 'Number', 'Boolean', 'Error'].includes(name)) continue;
+
+    const key = name;
+    if (!seen.has(key)) {
+      seen.add(key);
+      callsites.push({ name, line: call.range().start.line + 1 });
+    }
+  }
+
+  return callsites.length > 0 ? callsites : undefined;
+}
+
 // ─── AST-Based TypeScript/JavaScript Extraction ───
 
 interface ExtractResult {
@@ -314,6 +359,9 @@ function extractFunctionDecl(node: SgNode, exported: boolean): FunctionSignature
     fn.isComponent = true;
   }
 
+  // Extract callsites from function body
+  fn.callsites = extractCallsites(body);
+
   return fn;
 }
 
@@ -365,11 +413,14 @@ function processVariableDeclaration(
         // e.g., const handler: RequestHandler = () => {}
       }
 
+      // Extract callsites from arrow/function expression body
+      const body = findNamedChild(fnNode, 'statement_block');
+      fn.callsites = extractCallsites(body);
+
       result.functions.push(fn);
       if (exported) result.exports.push(name);
 
       // Extract inner functions from the body
-      const body = findNamedChild(fnNode, 'statement_block');
       if (body) {
         extractInnerFunctions(body, name, result);
       }
@@ -406,7 +457,7 @@ function extractInnerFunctions(body: SgNode, parentName: string, result: Extract
     if (ck === 'function_declaration') {
       const fn = extractFunctionDecl(child, false);
       fn.name = `${parentName}.${fn.name}`;
-      result.functions.push(fn);
+      result.functions.push(fn); // callsites already extracted by extractFunctionDecl
     } else if (ck === 'lexical_declaration' || ck === 'variable_declaration') {
       // Check for arrow functions
       for (const declarator of findChildren(child, 'variable_declarator')) {
@@ -420,6 +471,7 @@ function extractInnerFunctions(body: SgNode, parentName: string, result: Extract
           const isAsync = fnNode.text().trimStart().startsWith('async');
           const jsDoc = getJSDocFromPrev(child);
 
+          const innerBody = findNamedChild(fnNode, 'statement_block');
           result.functions.push({
             name: `${parentName}.${nameNode.text()}`,
             params: extractParams(paramsNode),
@@ -428,6 +480,7 @@ function extractInnerFunctions(body: SgNode, parentName: string, result: Extract
             line: child.range().start.line + 1,
             description: jsDoc,
             isAsync,
+            callsites: extractCallsites(innerBody),
           });
         }
       }
@@ -1011,7 +1064,7 @@ export function registerIndexer(server: McpServer): void {
         manager.logEvent({
           level: 'info',
           agent: 'architect',
-          stage: 'read',
+          phase: 'read',
           action: 'project_indexed',
           message: `Indexed ${fileIndexes.length} files: ${totalFunctions} functions, ${totalClasses} classes, ${totalVariables} variables, ${totalTypes} types`,
           data: { totalFiles: fileIndexes.length, totalFunctions, totalClasses, totalVariables, totalTypes, languages },

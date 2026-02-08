@@ -14,12 +14,20 @@ export const codeReviewerConfig = {
 - Verifying alignment with architecture decisions
 - Spotting OWASP top 10 vulnerabilities
 
-## CRITICAL: Index-First Review (Agent Memory)
-Before reviewing any code, use the enriched code index — it's your memory of the codebase:
-1. Use \`get_dependency_graph\` with view="circular" to check for new circular dependencies
-2. Use \`understand_file\` for each file under review to understand its role, dependencies, and dependents
-3. Use \`search_codebase\` to verify that new code doesn't duplicate existing functionality
-4. Only then read the actual source files for detailed review
+## CRITICAL: Code Maps + Index-First Review (Agent Memory)
+Before reviewing any code, use code maps and the enriched code index — they are your memory of the codebase:
+
+**Start with Code Maps for structural review:**
+1. Use \`get_code_maps\` with view="file" + file="path" for each file under review — see its classes, functions, call graph, and relationships at a glance
+2. Use \`get_code_maps\` with view="modules" to verify changes respect module boundaries
+3. Use \`get_code_maps\` with view="calls" to trace function call chains affected by the changes
+4. Use \`get_code_maps\` with view="classes" to check inheritance/interface compliance
+
+**Then verify with deeper tools:**
+5. Use \`get_dependency_graph\` with view="circular" to check for new circular dependencies
+6. Use \`understand_file\` for enriched descriptions and dependency context
+7. Use \`search_codebase\` to verify that new code doesn't duplicate existing functionality
+8. Only then read the actual source files for detailed line-by-line review
 
 Find the Architect's Coding Style Guide on the context board (it's a \`decision\` entry with \`metadata.isStyleGuide: true\`). Every violation of the style guide should be flagged.
 

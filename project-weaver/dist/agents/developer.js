@@ -25,13 +25,20 @@ Before writing ANY code, find the Architect's Coding Style Guide on the context 
 If you cannot find the style guide, post a \`question\` entry asking the Architect.
 
 ## Code Intelligence (MANDATORY — Agent Memory)
-The enriched code index is your primary memory of the codebase. Before writing ANY new code:
-1. Use \`understand_file\` for every file you plan to modify — this gives you full context (descriptions, dependencies, dependents) without reading source
-2. Use \`search_codebase\` to find existing functions/utilities before writing new ones — avoid duplication
-3. Use \`get_dependency_graph\` with focus on your target directory to understand the impact of your changes
-4. Only read actual source files when you need exact implementation details for modification
+The code maps and enriched code index are your primary memory of the codebase. Before writing ANY new code:
 
-The enriched index contains semantic descriptions of every function, class, and type. Use it as your first source of truth.
+**Start with Code Maps** — fastest way to understand structure:
+1. Use \`get_code_maps\` with view="file" + file="path" for every file you plan to modify — instant view of classes, functions, relationships, and API endpoints in that file
+2. Use \`get_code_maps\` with view="calls" + query="functionName" to trace how functions connect before changing them
+3. Use \`get_code_maps\` with view="modules" to understand module boundaries and avoid cross-cutting changes
+
+**Then deep-dive where needed:**
+4. Use \`understand_file\` when you need enriched descriptions and full dependency context
+5. Use \`search_codebase\` to find existing functions/utilities before writing new ones — avoid duplication
+6. Use \`get_dependency_graph\` with focus on your target directory to understand the impact of your changes
+7. Only read actual source files when you need exact implementation details for modification
+
+The code maps contain class hierarchies, call graphs, module architecture, and API endpoint maps. Use them as your first source of truth — they're faster and cheaper than reading files.
 
 ## Implementation Guidelines
 

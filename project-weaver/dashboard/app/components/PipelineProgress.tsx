@@ -1,7 +1,9 @@
 'use client'
 
-import React from 'react'
-import { HiCheck, HiClock, HiDocumentText, HiChip, HiCollection, HiUser } from 'react-icons/hi'
+import React, { useState } from 'react'
+import { HiCheck, HiClock, HiDocumentText, HiChip, HiCollection, HiUser, HiSparkles } from 'react-icons/hi'
+import EnrichmentPanel from './EnrichmentPanel'
+import CodeExplainPopover from './CodeExplainPopover'
 
 interface StageInfo {
   status: 'pending' | 'in-progress' | 'complete' | 'skipped'
@@ -49,6 +51,9 @@ interface PipelineProgressProps {
   files: TrackedFile[]
   selectedStage: string | null
   onStageClick: (stage: string) => void
+  geminiReady?: boolean
+  projectPath?: string
+  enrichmentProgress?: { totalItems: number; enrichedItems: number } | null
 }
 
 const STAGE_ORDER = ['read', 'architecture', 'spec', 'stories', 'approval', 'implementation', 'testing', 'review', 'ship']
@@ -96,7 +101,11 @@ const STATUS_COLORS: Record<string, string> = {
 
 const PipelineProgress: React.FC<PipelineProgressProps> = ({
   pipeline, agents, projectName, projectDescription, project, files, selectedStage, onStageClick,
+  geminiReady, projectPath, enrichmentProgress,
 }) => {
+  const [showEnrichment, setShowEnrichment] = useState(false)
+  const [explainFile, setExplainFile] = useState<string | null>(null)
+
   const completedCount = pipeline
     ? Object.values(pipeline.stages).filter(s => s.status === 'complete').length
     : 0
@@ -224,6 +233,24 @@ const PipelineProgress: React.FC<PipelineProgressProps> = ({
           })}
         </div>
 
+        {/* Enrich Codebase button */}
+        {geminiReady && !!projectPath && (
+          <div className="mt-4">
+            <button
+              onClick={() => setShowEnrichment(true)}
+              className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-xs hover:bg-yellow-500/20 transition-colors"
+            >
+              <HiSparkles className="w-3.5 h-3.5" />
+              Enrich Codebase
+              {enrichmentProgress && enrichmentProgress.totalItems > 0 && (
+                <span className="text-[10px] text-yellow-500/70 ml-1">
+                  ({enrichmentProgress.enrichedItems}/{enrichmentProgress.totalItems})
+                </span>
+              )}
+            </button>
+          </div>
+        )}
+
         {/* Files tracker */}
         {files.length > 0 && (
           <>
@@ -233,11 +260,18 @@ const PipelineProgress: React.FC<PipelineProgressProps> = ({
             </h3>
             <div className="space-y-1 max-h-40 overflow-y-auto">
               {files.map((file, i) => (
-                <div key={i} className="flex items-center gap-2 px-3 py-1.5 rounded bg-gray-900/50 text-[10px]">
+                <button
+                  key={i}
+                  onClick={() => geminiReady && projectPath ? setExplainFile(file.path) : undefined}
+                  className={`w-full flex items-center gap-2 px-3 py-1.5 rounded bg-gray-900/50 text-[10px] text-left ${
+                    geminiReady && projectPath ? 'hover:bg-gray-800/50 cursor-pointer' : ''
+                  }`}
+                  title={geminiReady ? 'Click for AI explanation' : undefined}
+                >
                   <HiChip className="w-3 h-3 text-green-500 flex-shrink-0" />
                   <span className="text-gray-300 truncate flex-1 font-mono">{file.path}</span>
                   <span className="text-gray-600 flex-shrink-0">{(file.size / 1024).toFixed(1)}k</span>
-                </div>
+                </button>
               ))}
             </div>
           </>
@@ -266,6 +300,24 @@ const PipelineProgress: React.FC<PipelineProgressProps> = ({
           })}
         </div>
       </div>
+
+      {/* Enrichment panel modal */}
+      {showEnrichment && projectPath && (
+        <EnrichmentPanel
+          projectPath={projectPath}
+          initialProgress={enrichmentProgress ?? undefined}
+          onClose={() => setShowEnrichment(false)}
+        />
+      )}
+
+      {/* Code explain popover */}
+      {explainFile && projectPath && (
+        <CodeExplainPopover
+          filePath={explainFile}
+          projectPath={projectPath}
+          onClose={() => setExplainFile(null)}
+        />
+      )}
     </div>
   )
 }

@@ -174,7 +174,7 @@ export function registerDependencyGraph(server) {
         manager.logEvent({
             level: 'info',
             agent: 'architect',
-            stage: 'read',
+            phase: 'read',
             action: 'dependency_graph_built',
             message: `Built dependency graph: ${graph.edges.length} edges, ${graph.entryPoints.length} entry points, ${graph.circularDeps.length} circular deps`,
             data: {

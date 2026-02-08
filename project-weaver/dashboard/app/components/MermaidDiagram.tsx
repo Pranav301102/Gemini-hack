@@ -28,10 +28,12 @@ function cleanMermaidSyntax(raw: string): string {
   chart = chart.replace(/;\s*$/gm, '')
 
   // Fix parentheses inside square brackets: [text(stuff)] -> ["text(stuff)"]
-  chart = chart.replace(/\[([^\[]*)\(([^)]*)\)([^\]]*)\]/g, '["$1($2)$3"]')
+  // Skip already-quoted content (starts with ")
+  chart = chart.replace(/\[([^\["]*)\(([^)]*)\)([^\]]*)\]/g, '["$1($2)$3"]')
 
   // Fix parentheses inside curly braces: {text(stuff)} -> {"text(stuff)"}
-  chart = chart.replace(/\{([^{]*)\(([^)]*)\)([^}]*)\}/g, '{"$1($2)$3"}')
+  // Skip already-quoted content (starts with ")
+  chart = chart.replace(/\{([^{"]*)\(([^)]*)\)([^}]*)\}/g, '{"$1($2)$3"}')
 
   // Fix spaces in node IDs by wrapping labels in quotes
   // e.g., A[My Long Label] -> A["My Long Label"]

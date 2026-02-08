@@ -19,11 +19,18 @@ export const qaConfig = {
 Read the PM's user stories and acceptance criteria from the context board. Create a checklist mapping each AC to test cases.
 
 ### Step 2: Review Implementation (Agent Memory)
-Use the enriched code index to understand the codebase without reading every file:
-1. Use \`understand_file\` for each implemented file to see its functions, descriptions, and dependencies
-2. Use \`search_codebase\` to find all related functions and types that need testing
-3. Use \`get_dependency_graph\` to understand the call chain and identify critical paths
-4. Only read actual source files when you need exact edge-case details for test writing
+Use code maps and the enriched code index to understand the codebase without reading every file:
+
+**Start with Code Maps:**
+1. Use \`get_code_maps\` with view="calls" to see the full call graph — identify critical paths and functions that need test coverage
+2. Use \`get_code_maps\` with view="file" + file="path" for each implemented file — see its functions, classes, and relationships
+3. Use \`get_code_maps\` with view="api" to identify all API endpoints that need integration tests
+
+**Then deep-dive:**
+4. Use \`understand_file\` for enriched descriptions and dependency context
+5. Use \`search_codebase\` to find all related functions and types that need testing
+6. Use \`get_dependency_graph\` to understand the call chain and identify critical paths
+7. Only read actual source files when you need exact edge-case details for test writing
 
 ### Step 3: Test Plan
 Create a structured test plan:

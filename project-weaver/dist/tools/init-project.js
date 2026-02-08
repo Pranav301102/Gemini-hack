@@ -36,13 +36,13 @@ export function registerInitProject(server) {
                             logs: '.weaver/logs/',
                             artifacts: '.weaver/artifacts/',
                         },
-                        nextStep: 'Use gather_requirements to ask the user clarifying questions, then run_pipeline to execute the full development lifecycle.',
+                        nextStep: 'Use read_project to scan the codebase, or run_plan to start planning.',
                     }),
                 }],
         };
     });
     // --- gather_requirements ---
-    server.tool('gather_requirements', 'Get a structured set of questions to ask the user before starting the pipeline. The PM agent should ask these questions to gather complete project context. Store answers using update_project_context.', {
+    server.tool('gather_requirements', 'Get a structured set of questions to ask the user before planning. Only use for NEW projects (no existing codebase). Store answers using update_project_context.', {
         workspacePath: z.string().describe('Absolute path to the workspace directory'),
     }, async ({ workspacePath }) => {
         const manager = new BoardManager(workspacePath);
@@ -75,7 +75,7 @@ export function registerInitProject(server) {
         manager.logEvent({
             level: 'info',
             agent: 'product-manager',
-            stage: 'spec',
+            phase: 'plan',
             action: 'requirements_gathering',
             message: `Requirements gathering started: ${unanswered.length} questions remaining`,
         });
@@ -88,8 +88,8 @@ export function registerInitProject(server) {
                         unansweredCount: unanswered.length,
                         answeredCount: questions.length - unanswered.length,
                         instruction: unanswered.length > 0
-                            ? `Ask the user these ${unanswered.length} questions one at a time. After each answer, use update_project_context to store it. When all questions are answered, proceed with the pipeline.`
-                            : 'All requirements gathered! Proceed with run_pipeline.',
+                            ? `Ask the user these ${unanswered.length} questions one at a time. After each answer, use update_project_context to store it. When done, proceed with run_plan.`
+                            : 'All requirements gathered! Proceed with run_plan.',
                     }),
                 }],
         };
@@ -125,7 +125,7 @@ export function registerInitProject(server) {
         manager.logEvent({
             level: 'info',
             agent: 'product-manager',
-            stage: 'spec',
+            phase: 'plan',
             action: 'project_context_updated',
             message: `Project context updated: ${Object.keys(cleanUpdates).join(', ')}`,
         });

@@ -1,31 +1,26 @@
-// Agent roles - the 5 specialized dev team members
+// Agent roles - core planning agents + on-demand execution agents
 export type AgentRole = 'product-manager' | 'architect' | 'developer' | 'qa' | 'code-reviewer';
 
-// Pipeline stages: read → architecture → spec → stories → approval → implementation → testing → review → ship
-export type PipelineStage = 'read' | 'architecture' | 'spec' | 'stories' | 'approval' | 'implementation' | 'testing' | 'review' | 'ship';
+// Project phases: read → plan → ready
+export type ProjectPhase = 'read' | 'plan' | 'ready';
 
-export type AgentStatus = 'idle' | 'thinking' | 'working' | 'blocked' | 'done' | 'error';
+export type AgentStatus = 'idle' | 'thinking' | 'working' | 'done';
 
 export type TaskPriority = 'critical' | 'high' | 'medium' | 'low';
 
-export type EntryType = 'decision' | 'artifact' | 'question' | 'feedback' | 'handoff';
-
-export type StageStatus = 'pending' | 'in-progress' | 'complete' | 'skipped';
-
-// Shared Zod-compatible stage names array (use in z.enum() calls)
-export const STAGE_NAMES = ['read', 'architecture', 'spec', 'stories', 'approval', 'implementation', 'testing', 'review', 'ship'] as const;
+export type EntryType = 'brainstorm' | 'proposal' | 'decision' | 'artifact' | 'question' | 'memory-map';
 
 // Context board entry - how agents communicate
 export interface ContextEntry {
   id: string;
   timestamp: string;
   agent: AgentRole;
-  stage: PipelineStage;
+  phase: ProjectPhase;
   type: EntryType;
   title: string;
   content: string;
   metadata?: Record<string, unknown>;
-  parentId?: string; // For threaded discussions between agents
+  parentId?: string;
 }
 
 // Individual agent state
@@ -47,13 +42,14 @@ export interface ProjectContext {
   targetUsers?: string;
   deploymentTarget?: string;
   existingIntegrations?: string;
+  isExistingProject?: boolean;
 }
 
-// Tracked file written by Developer/QA agents
+// Tracked file written by agents
 export interface TrackedFile {
   path: string;
   agent: AgentRole;
-  stage: PipelineStage;
+  phase: ProjectPhase;
   timestamp: string;
   size: number;
 }
@@ -67,32 +63,84 @@ export interface RequirementsQuestion {
   answer?: string;
 }
 
-// ─── Approval Gate ───
+// ─── Plan & Memory Map Types ───
 
-export type ApprovalStatus = 'pending' | 'approved' | 'changes-requested';
+export type ChangeType = 'create' | 'modify' | 'refactor' | 'delete' | 'extend';
+export type ChangePriority = 'must-have' | 'should-have' | 'nice-to-have';
+export type ChangeComplexity = 'trivial' | 'small' | 'medium' | 'large' | 'epic';
 
-export interface ApprovalState {
-  status: ApprovalStatus;
-  reviewedAt?: string;
-  comments?: string;
-  requestedChanges?: string[];
+/** A single proposed change to a specific location in the codebase */
+export interface ProposedChange {
+  id: string;
+  file: string;
+  changeType: ChangeType;
+  title: string;
+  description: string;
+  rationale: string;
+  priority: ChangePriority;
+  complexity: ChangeComplexity;
+  affectedFunctions?: string[];
+  affectedClasses?: string[];
+  affectedTypes?: string[];
+  dependencies: string[];
+  codeSnippet?: string;
 }
 
-// ─── Style Guide (authored by Architect, enforced by Reviewer) ───
+/** A group of related changes that form a logical unit */
+export interface ChangeGroup {
+  id: string;
+  name: string;
+  description: string;
+  agent: AgentRole;
+  changes: ProposedChange[];
+  order: number;
+}
 
-export interface StyleGuide {
-  naming: {
-    files: string;
-    functions: string;
-    classes: string;
-    constants: string;
-    variables: string;
-  };
-  patterns: string[];
-  rules: string[];
-  imports: string;
-  errorHandling: string;
-  testing: string;
+/** The complete plan document with memory maps */
+export interface ProjectPlan {
+  id: string;
+  version: string;
+  createdAt: string;
+  updatedAt: string;
+  summary: string;
+  goals: string[];
+  approach: string;
+  changeGroups: ChangeGroup[];
+  architectureNotes: string;
+  riskAssessment: string;
+  fileMap: FileChangeMap[];
+  discussion: BrainstormEntry[];
+  diagrams: PlanDiagram[];
+}
+
+/** Summary of all changes to a single file */
+export interface FileChangeMap {
+  file: string;
+  exists: boolean;
+  language: string;
+  currentDescription?: string;
+  changes: { changeId: string; changeType: ChangeType; summary: string }[];
+  totalChanges: number;
+  maxPriority: ChangePriority;
+}
+
+/** A brainstorm entry from the agent discussion */
+export interface BrainstormEntry {
+  id: string;
+  timestamp: string;
+  agent: AgentRole;
+  type: 'observation' | 'proposal' | 'question' | 'agreement' | 'counter-proposal' | 'decision';
+  content: string;
+  referencedFiles?: string[];
+  referencedChanges?: string[];
+}
+
+/** Architecture diagram in the plan */
+export interface PlanDiagram {
+  id: string;
+  title: string;
+  type: 'current-architecture' | 'proposed-architecture' | 'change-impact' | 'dependency-flow';
+  mermaidCode: string;
 }
 
 // ─── Project Code Index (stored in .weaver/index.json) ───
@@ -103,11 +151,12 @@ export interface FunctionSignature {
   returnType?: string;
   exported: boolean;
   line: number;
-  description?: string;    // From JSDoc or preceding comment
-  isComponent?: boolean;   // React/Vue component
+  description?: string;
+  isComponent?: boolean;
   isAsync?: boolean;
-  enrichedDescription?: string;  // LLM-generated semantic description
-  purpose?: string;              // Role in the system
+  enrichedDescription?: string;
+  purpose?: string;
+  callsites?: { name: string; line: number }[];
 }
 
 export interface ClassDefinition {
@@ -126,7 +175,7 @@ export interface ClassDefinition {
 export interface VariableDeclaration {
   name: string;
   type?: string;
-  value?: string;          // Short preview of value (truncated)
+  value?: string;
   kind: 'const' | 'let' | 'var';
   exported: boolean;
   line: number;
@@ -137,8 +186,8 @@ export interface VariableDeclaration {
 export interface TypeDefinition {
   name: string;
   kind: 'interface' | 'type' | 'enum';
-  fields?: { name: string; type: string; optional?: boolean }[];  // Interface/type fields
-  values?: string[];  // Enum values or union members
+  fields?: { name: string; type: string; optional?: boolean }[];
+  values?: string[];
   description?: string;
   enrichedDescription?: string;
 }
@@ -147,8 +196,8 @@ export interface FileIndex {
   path: string;
   size: number;
   language: string;
-  description?: string;    // File-level description from top comment
-  enrichedDescription?: string;  // LLM-generated file summary
+  description?: string;
+  enrichedDescription?: string;
   functions: FunctionSignature[];
   classes: ClassDefinition[];
   variables: VariableDeclaration[];
@@ -169,17 +218,17 @@ export interface ProjectIndex {
   totalClasses: number;
   totalVariables: number;
   totalTypes: number;
-  // Agent Memory fields
   enrichedAt?: string;
   enrichmentProgress?: { totalItems: number; enrichedItems: number; lastBatchFile?: string };
   dependencyGraph?: DependencyGraph;
+  codeMaps?: CodeMaps;
 }
 
 // ─── Dependency Graph (computed from imports) ───
 
 export interface DependencyEdge {
-  from: string;   // relative file path
-  to: string;     // relative file path (resolved)
+  from: string;
+  to: string;
   imports: string[];
 }
 
@@ -189,6 +238,107 @@ export interface DependencyGraph {
   sharedModules: { file: string; importedBy: number }[];
   clusters: { directory: string; files: string[]; internalEdges: number; externalEdges: number }[];
   circularDeps: string[][];
+}
+
+// ─── Code Maps (generated during read phase for LLM traversal) ───
+
+export interface CodeMaps {
+  version: string;
+  generatedAt: string;
+  classMap: ClassMap;
+  moduleMap: ModuleMap;
+  callGraph: CallGraph;
+  apiMap: APIMap;
+}
+
+export interface ClassMap {
+  classes: ClassNode[];
+  interfaces: InterfaceNode[];
+  relationships: ClassRelationship[];
+}
+
+export interface ClassNode {
+  id: string;
+  name: string;
+  file: string;
+  line: number;
+  extends: string | null;
+  implements: string[];
+  exported: boolean;
+  methods: { name: string; visibility: string; params: string; returnType?: string }[];
+  properties: { name: string; type?: string; visibility: string }[];
+  description?: string;
+}
+
+export interface InterfaceNode {
+  id: string;
+  name: string;
+  file: string;
+  line: number;
+  extends?: string[];
+  exported: boolean;
+  fields: { name: string; type: string; optional?: boolean }[];
+  description?: string;
+}
+
+export type ClassRelationshipType = 'extends' | 'implements' | 'uses' | 'creates';
+
+export interface ClassRelationship {
+  from: string;
+  to: string;
+  type: ClassRelationshipType;
+}
+
+export interface ModuleMap {
+  modules: ModuleNode[];
+  connections: ModuleConnection[];
+  layers: { name: string; modules: string[] }[];
+}
+
+export interface ModuleNode {
+  id: string;
+  path: string;
+  fileCount: number;
+  exports: string[];
+  publicAPI: string[];
+  responsibility?: string;
+}
+
+export interface ModuleConnection {
+  from: string;
+  to: string;
+  imports: number;
+  exportsUsed: string[];
+}
+
+export interface CallGraph {
+  functions: CallNode[];
+}
+
+export interface CallNode {
+  id: string;
+  name: string;
+  file: string;
+  line: number;
+  exported: boolean;
+  calls: string[];
+  calledBy: string[];
+  description?: string;
+}
+
+export interface APIMap {
+  endpoints: APIEndpoint[];
+}
+
+export interface APIEndpoint {
+  method: string;
+  path: string;
+  file: string;
+  handler: string;
+  params?: string[];
+  bodyShape?: string;
+  responseShape?: string;
+  description?: string;
 }
 
 // ─── Enrichment Types ───
@@ -203,7 +353,7 @@ export interface EnrichmentItem {
   line: number;
 }
 
-// ─── Structured Widget Types (ported from clin-ops) ───
+// ─── Structured Widget Types ───
 
 export type WidgetType = 'diagram' | 'kpi' | 'table' | 'timeline' | 'workflow' | 'list' | 'text' | 'chart';
 
@@ -298,14 +448,6 @@ export type DashboardWidget =
   | TextWidget
   | ChartWidget;
 
-// Pipeline stage tracking
-export interface StageInfo {
-  status: StageStatus;
-  startedAt?: string;
-  completedAt?: string;
-  assignedAgent?: AgentRole | 'user';
-}
-
 // The full context board - shared state for all agents
 export interface ContextBoard {
   version: string;
@@ -315,12 +457,8 @@ export interface ContextBoard {
   entries: ContextEntry[];
   files: TrackedFile[];
   widgets: DashboardWidget[];
-  pipeline: {
-    currentStage: PipelineStage;
-    stages: Record<PipelineStage, StageInfo>;
-  };
-  approval?: ApprovalState;
-  styleGuide?: StyleGuide;
+  phase: ProjectPhase;
+  plan?: ProjectPlan;
   createdAt: string;
   updatedAt: string;
 }
@@ -331,7 +469,7 @@ export interface WeaverEvent {
   timestamp: string;
   level: 'info' | 'warn' | 'error' | 'debug';
   agent?: AgentRole;
-  stage?: PipelineStage;
+  phase?: ProjectPhase;
   action: string;
   message: string;
   data?: Record<string, unknown>;
@@ -340,33 +478,14 @@ export interface WeaverEvent {
 // All agent roles as array for iteration
 export const AGENT_ROLES: AgentRole[] = ['product-manager', 'architect', 'developer', 'qa', 'code-reviewer'];
 
-// All pipeline stages in order
-export const PIPELINE_STAGES: PipelineStage[] = ['read', 'architecture', 'spec', 'stories', 'approval', 'implementation', 'testing', 'review', 'ship'];
+// Project phases in order
+export const PROJECT_PHASES: ProjectPhase[] = ['read', 'plan', 'ready'];
 
-// Maps pipeline stages to responsible agents (approval is user-driven)
-export const STAGE_AGENT_MAP: Record<PipelineStage, AgentRole | 'user'> = {
-  'read': 'architect',
-  'architecture': 'architect',
-  'spec': 'product-manager',
-  'stories': 'product-manager',
-  'approval': 'user',
-  'implementation': 'developer',
-  'testing': 'qa',
-  'review': 'code-reviewer',
-  'ship': 'developer',
-};
-
-// Human-readable stage descriptions
-export const STAGE_DESCRIPTIONS: Record<PipelineStage, string> = {
+// Phase descriptions
+export const PHASE_DESCRIPTIONS: Record<ProjectPhase, string> = {
   'read': 'Scan existing codebase and auto-detect project structure, tech stack, and patterns',
-  'architecture': 'Design system architecture, file structure, coding style guide, and technical decisions',
-  'spec': 'Analyze requirements and create a detailed specification aligned with architecture',
-  'stories': 'Break down the spec into user stories with acceptance criteria',
-  'approval': 'User reviews architect design and PM spec, then approves or requests changes',
-  'implementation': 'Write production code following the style guide',
-  'testing': 'Write and run tests for the implementation',
-  'review': 'Review code for bugs, security, style guide compliance, and best practices',
-  'ship': 'Finalize and prepare the project for deployment',
+  'plan': 'Architect + PM brainstorm and create a plan with memory maps',
+  'ready': 'Plan complete — ready for implementation',
 };
 
 // Agent display names

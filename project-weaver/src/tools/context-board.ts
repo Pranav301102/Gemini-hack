@@ -1,26 +1,26 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { BoardManager } from '../context/board.js';
-import { AGENT_DISPLAY_NAMES, STAGE_NAMES } from '../types.js';
+import { AGENT_DISPLAY_NAMES } from '../types.js';
 
 const agentEnum = z.enum(['product-manager', 'architect', 'developer', 'qa', 'code-reviewer']);
-const stageEnum = z.enum(STAGE_NAMES);
-const entryTypeEnum = z.enum(['decision', 'artifact', 'question', 'feedback', 'handoff']);
+const phaseEnum = z.enum(['read', 'plan', 'ready']);
+const entryTypeEnum = z.enum(['brainstorm', 'proposal', 'decision', 'artifact', 'question', 'memory-map']);
 
 export function registerContextBoardTools(server: McpServer): void {
 
   // --- get_context_board ---
   server.tool(
     'get_context_board',
-    'Read the shared context board showing all agent decisions, artifacts, and pipeline status. Use filters to narrow results.',
+    'Read the shared context board showing all agent decisions, artifacts, and project status. Use filters to narrow results.',
     {
       workspacePath: z.string().describe('Absolute path to the workspace directory'),
       agent: agentEnum.optional().describe('Filter entries by agent role'),
-      stage: stageEnum.optional().describe('Filter entries by pipeline stage'),
+      phase: phaseEnum.optional().describe('Filter entries by project phase'),
       type: entryTypeEnum.optional().describe('Filter by entry type'),
       limit: z.number().optional().describe('Max entries to return (default 50, newest first)'),
     },
-    async ({ workspacePath, agent, stage, type, limit }) => {
+    async ({ workspacePath, agent, phase, type, limit }) => {
       const manager = new BoardManager(workspacePath);
       if (!manager.exists()) {
         return {
@@ -29,7 +29,7 @@ export function registerContextBoardTools(server: McpServer): void {
       }
 
       const board = manager.readBoard();
-      const entries = manager.getFilteredEntries({ agent, stage, type, limit });
+      const entries = manager.getFilteredEntries({ agent, phase, type, limit });
 
       return {
         content: [{
@@ -37,11 +37,12 @@ export function registerContextBoardTools(server: McpServer): void {
           text: JSON.stringify({
             success: true,
             project: board.project,
-            pipeline: board.pipeline,
+            phase: board.phase,
             agents: board.agents,
             entries,
             totalEntries: board.entries.length,
             returnedEntries: entries.length,
+            hasPlan: !!board.plan,
           }),
         }],
       };
@@ -51,18 +52,18 @@ export function registerContextBoardTools(server: McpServer): void {
   // --- update_context_board ---
   server.tool(
     'update_context_board',
-    'Write an agent decision, artifact, question, feedback, or handoff to the shared context board. This is how agents communicate.',
+    'Write an agent entry to the shared context board. This is how agents communicate observations, proposals, decisions, and artifacts.',
     {
       workspacePath: z.string().describe('Absolute path to the workspace directory'),
       agent: agentEnum.describe('Which agent is writing this entry'),
-      stage: stageEnum.describe('Current pipeline stage'),
-      type: entryTypeEnum.describe('Type of entry: decision (key choice made), artifact (code/doc produced), question (needs clarification), feedback (review/bug), handoff (pass to next agent)'),
+      phase: phaseEnum.describe('Current project phase'),
+      type: entryTypeEnum.describe('Type of entry: brainstorm (discussion), proposal (suggested change), decision (agreed upon), artifact (document/code), question (needs clarification), memory-map (structured change plan)'),
       title: z.string().describe('Brief title summarizing this entry'),
-      content: z.string().describe('Detailed content - user stories, architecture docs, code, test results, review feedback, etc.'),
+      content: z.string().describe('Detailed content'),
       parentId: z.string().optional().describe('ID of a parent entry if this is a reply/thread'),
-      metadata: z.record(z.unknown()).optional().describe('Optional metadata (e.g., { isStyleGuide: true } for style guide entries)'),
+      metadata: z.record(z.unknown()).optional().describe('Optional metadata'),
     },
-    async ({ workspacePath, agent, stage, type, title, content, parentId, metadata }) => {
+    async ({ workspacePath, agent, phase, type, title, content, parentId, metadata }) => {
       const manager = new BoardManager(workspacePath);
       if (!manager.exists()) {
         return {
@@ -70,12 +71,7 @@ export function registerContextBoardTools(server: McpServer): void {
         };
       }
 
-      const entry = manager.addEntry({ agent, stage, type, title, content, parentId, metadata });
-
-      // If it's a handoff, also update the pipeline stage
-      if (type === 'handoff') {
-        manager.advanceStage(stage, 'complete', agent);
-      }
+      const entry = manager.addEntry({ agent, phase, type, title, content, parentId, metadata });
 
       return {
         content: [{
@@ -93,7 +89,7 @@ export function registerContextBoardTools(server: McpServer): void {
   // --- get_project_status ---
   server.tool(
     'get_project_status',
-    'Get a high-level overview: pipeline progress, agent statuses, and summary statistics.',
+    'Get a high-level overview: project phase, agent statuses, plan summary, and statistics.',
     {
       workspacePath: z.string().describe('Absolute path to the workspace directory'),
     },
@@ -106,14 +102,21 @@ export function registerContextBoardTools(server: McpServer): void {
       }
 
       const board = manager.readBoard();
-      const completedStages = Object.values(board.pipeline.stages).filter(s => s.status === 'complete').length;
-      const totalStages = Object.keys(board.pipeline.stages).length;
+      const plan = manager.readPlan();
 
       // Count entries by type
       const entryCounts = board.entries.reduce((acc, e) => {
         acc[e.type] = (acc[e.type] || 0) + 1;
         return acc;
       }, {} as Record<string, number>);
+
+      const planSummary = plan ? {
+        summary: plan.summary,
+        changeGroups: plan.changeGroups.length,
+        totalChanges: plan.changeGroups.reduce((sum, g) => sum + g.changes.length, 0),
+        filesAffected: plan.fileMap.length,
+        discussionEntries: plan.discussion.length,
+      } : null;
 
       return {
         content: [{
@@ -122,9 +125,9 @@ export function registerContextBoardTools(server: McpServer): void {
             success: true,
             project: board.project.name,
             description: board.project.description,
-            currentStage: board.pipeline.currentStage,
-            progress: `${completedStages}/${totalStages} stages complete`,
-            pipeline: board.pipeline.stages,
+            phase: board.phase,
+            hasPlan: !!plan,
+            planSummary,
             agents: Object.fromEntries(
               Object.entries(board.agents).map(([role, state]) => [
                 role,

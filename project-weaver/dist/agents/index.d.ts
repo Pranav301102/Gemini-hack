@@ -13,14 +13,14 @@ export declare function getAgentSystemPrompt(role: AgentRole): string;
 export declare function getAgentConfig(role: AgentRole): {
     role: AgentRole;
     displayName: string;
-    defaultStages: readonly ["spec", "stories"];
-    outputTypes: readonly ["decision", "artifact", "handoff"];
+    phases: readonly ["plan"];
+    outputTypes: readonly ["brainstorm", "proposal", "decision", "artifact", "memory-map"];
     systemPrompt: string;
 } | {
     role: AgentRole;
     displayName: string;
-    defaultStages: readonly ["read", "architecture"];
-    outputTypes: readonly ["decision", "artifact", "handoff"];
+    phases: readonly ["read", "plan"];
+    outputTypes: readonly ["brainstorm", "proposal", "decision", "artifact", "memory-map"];
     systemPrompt: string;
 } | {
     role: AgentRole;

@@ -2,16 +2,15 @@ import { z } from 'zod';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { BoardManager } from '../context/board.js';
-import { STAGE_NAMES } from '../types.js';
 export function registerFileOps(server) {
     // --- save_file ---
-    server.tool('save_file', 'Write a code file to the workspace. Used by Developer and QA agents to create actual project files. Records the file in the context board for tracking.', {
+    server.tool('save_file', 'Write a code file to the workspace. Used by agents to create actual project files. Records the file in the context board for tracking.', {
         workspacePath: z.string().describe('Absolute path to the workspace directory'),
         filePath: z.string().describe('Relative file path from workspace root (e.g., "src/index.ts", "tests/app.test.ts")'),
         content: z.string().describe('Complete file content to write'),
         agent: z.enum(['product-manager', 'architect', 'developer', 'qa', 'code-reviewer']).describe('Agent writing this file'),
-        stage: z.enum(STAGE_NAMES).describe('Current pipeline stage'),
-    }, async ({ workspacePath, filePath, content, agent, stage }) => {
+        phase: z.enum(['read', 'plan', 'ready']).describe('Current project phase'),
+    }, async ({ workspacePath, filePath, content, agent, phase }) => {
         const manager = new BoardManager(workspacePath);
         // Prevent path traversal
         const resolved = path.resolve(workspacePath, filePath);
@@ -26,11 +25,11 @@ export function registerFileOps(server) {
         fs.writeFileSync(resolved, content, 'utf-8');
         // Track the file in context board
         if (manager.exists()) {
-            manager.trackFile(filePath, agent, stage);
+            manager.trackFile(filePath, agent, phase);
             manager.logEvent({
                 level: 'info',
                 agent,
-                stage,
+                phase,
                 action: 'file_created',
                 message: `${agent} wrote file: ${filePath} (${content.length} bytes)`,
                 data: { filePath, size: content.length },
@@ -49,7 +48,7 @@ export function registerFileOps(server) {
         };
     });
     // --- list_files ---
-    server.tool('list_project_files', 'List all files tracked by Project Weaver that agents have created during the pipeline.', {
+    server.tool('list_project_files', 'List all files tracked by Project Weaver that agents have created.', {
         workspacePath: z.string().describe('Absolute path to the workspace directory'),
     }, async ({ workspacePath }) => {
         const manager = new BoardManager(workspacePath);

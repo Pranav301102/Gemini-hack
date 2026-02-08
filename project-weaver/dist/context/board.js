@@ -1,10 +1,11 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as crypto from 'node:crypto';
-import { AGENT_ROLES, PIPELINE_STAGES, } from '../types.js';
+import { AGENT_ROLES, } from '../types.js';
 const WEAVER_DIR = '.weaver';
 const CONTEXT_FILE = 'context.json';
 const INDEX_FILE = 'index.json';
+const PLAN_FILE = 'plan.json';
 const LOGS_DIR = 'logs';
 const ARTIFACTS_DIR = 'artifacts';
 export class BoardManager {
@@ -20,6 +21,9 @@ export class BoardManager {
     }
     get indexFilePath() {
         return path.join(this.weaverDir, INDEX_FILE);
+    }
+    get planFilePath() {
+        return path.join(this.weaverDir, PLAN_FILE);
     }
     get logsDir() {
         return path.join(this.weaverDir, LOGS_DIR);
@@ -44,12 +48,8 @@ export class BoardManager {
         for (const role of AGENT_ROLES) {
             agents[role] = { role, status: 'idle', lastActive: now };
         }
-        const stages = {};
-        for (const stage of PIPELINE_STAGES) {
-            stages[stage] = { status: 'pending' };
-        }
         const board = {
-            version: '2.0.0',
+            version: '3.0.0',
             projectId: this.generateId(),
             project: {
                 name: projectName,
@@ -61,10 +61,7 @@ export class BoardManager {
             entries: [],
             files: [],
             widgets: [],
-            pipeline: {
-                currentStage: 'read',
-                stages,
-            },
+            phase: 'read',
             createdAt: now,
             updatedAt: now,
         };
@@ -77,15 +74,66 @@ export class BoardManager {
         });
         return board;
     }
-    /** Read the context board from disk */
+    /** Read the context board from disk (with migration from old format) */
     readBoard() {
         const raw = fs.readFileSync(this.contextFilePath, 'utf-8');
-        return JSON.parse(raw);
+        const board = JSON.parse(raw);
+        // Migration: old pipeline-based format → new phase-based format
+        if (board.pipeline && !board.phase) {
+            const currentStage = board.pipeline.currentStage;
+            if (currentStage === 'read') {
+                board.phase = 'read';
+            }
+            else {
+                board.phase = 'plan';
+            }
+            delete board.pipeline;
+            delete board.approval;
+            delete board.styleGuide;
+            // Migrate entries: stage → phase
+            if (board.entries) {
+                for (const entry of board.entries) {
+                    if (entry.stage && !entry.phase) {
+                        entry.phase = entry.stage === 'read' ? 'read' : 'plan';
+                        delete entry.stage;
+                    }
+                    // Migrate old entry types
+                    if (entry.type === 'handoff')
+                        entry.type = 'decision';
+                    if (entry.type === 'feedback')
+                        entry.type = 'proposal';
+                }
+            }
+            // Migrate tracked files
+            if (board.files) {
+                for (const file of board.files) {
+                    if (file.stage && !file.phase) {
+                        file.phase = file.stage === 'read' ? 'read' : 'plan';
+                        delete file.stage;
+                    }
+                }
+            }
+            board.version = '3.0.0';
+            this.writeBoard(board);
+        }
+        return board;
     }
     /** Write the context board to disk */
     writeBoard(board) {
         board.updatedAt = new Date().toISOString();
         fs.writeFileSync(this.contextFilePath, JSON.stringify(board, null, 2), 'utf-8');
+    }
+    /** Set the current project phase */
+    setPhase(phase) {
+        const board = this.readBoard();
+        board.phase = phase;
+        this.writeBoard(board);
+        this.logEvent({
+            level: 'info',
+            phase,
+            action: 'phase_changed',
+            message: `Phase changed to: ${phase}`,
+        });
     }
     /** Add an entry to the context board */
     addEntry(entry) {
@@ -100,7 +148,7 @@ export class BoardManager {
         this.logEvent({
             level: 'info',
             agent: entry.agent,
-            stage: entry.stage,
+            phase: entry.phase,
             action: `context_${entry.type}`,
             message: `[${entry.agent}] ${entry.type}: ${entry.title}`,
             data: { entryId: fullEntry.id },
@@ -118,69 +166,102 @@ export class BoardManager {
         };
         this.writeBoard(board);
     }
-    /** Advance a pipeline stage */
-    advanceStage(stage, status, agent) {
+    /** Write the project plan to board and standalone file */
+    writePlan(plan) {
         const board = this.readBoard();
-        const now = new Date().toISOString();
-        if (status === 'in-progress') {
-            board.pipeline.stages[stage].status = 'in-progress';
-            board.pipeline.stages[stage].startedAt = now;
-            board.pipeline.currentStage = stage;
-            if (agent)
-                board.pipeline.stages[stage].assignedAgent = agent;
-        }
-        else if (status === 'complete') {
-            board.pipeline.stages[stage].status = 'complete';
-            board.pipeline.stages[stage].completedAt = now;
-        }
+        board.plan = plan;
+        board.phase = 'ready';
         this.writeBoard(board);
+        // Also write standalone plan file
+        fs.writeFileSync(this.planFilePath, JSON.stringify(plan, null, 2), 'utf-8');
         this.logEvent({
             level: 'info',
-            stage,
-            agent: agent !== 'user' ? agent : undefined,
-            action: `stage_${status === 'in-progress' ? 'started' : 'completed'}`,
-            message: `Pipeline stage "${stage}" ${status === 'in-progress' ? 'started' : 'completed'}`,
+            action: 'plan_saved',
+            message: `Plan saved with ${plan.changeGroups.length} change groups`,
+            data: {
+                totalChanges: plan.changeGroups.reduce((sum, g) => sum + g.changes.length, 0),
+                totalFiles: plan.fileMap.length,
+            },
         });
     }
-    /** Reset pipeline from a given stage onwards */
-    resetToStage(stage) {
+    /** Read the project plan */
+    readPlan() {
         const board = this.readBoard();
-        const idx = PIPELINE_STAGES.indexOf(stage);
-        for (let i = idx; i < PIPELINE_STAGES.length; i++) {
-            const s = PIPELINE_STAGES[i];
-            board.pipeline.stages[s].status = 'pending';
-            board.pipeline.stages[s].startedAt = undefined;
-            board.pipeline.stages[s].completedAt = undefined;
+        if (board.plan)
+            return board.plan;
+        // Fallback to standalone file
+        if (fs.existsSync(this.planFilePath)) {
+            const raw = fs.readFileSync(this.planFilePath, 'utf-8');
+            return JSON.parse(raw);
         }
-        board.pipeline.currentStage = stage;
-        if (idx <= PIPELINE_STAGES.indexOf('approval')) {
-            board.approval = undefined;
+        return null;
+    }
+    /** Add a proposed change to a change group in the plan */
+    addProposedChange(groupId, groupName, groupDescription, agent, change) {
+        const board = this.readBoard();
+        if (!board.plan) {
+            // Initialize a plan skeleton
+            board.plan = {
+                id: this.generateId(),
+                version: '1.0.0',
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                summary: '',
+                goals: [],
+                approach: '',
+                changeGroups: [],
+                architectureNotes: '',
+                riskAssessment: '',
+                fileMap: [],
+                discussion: [],
+                diagrams: [],
+            };
         }
+        let group = board.plan.changeGroups.find(g => g.id === groupId);
+        if (!group) {
+            group = {
+                id: groupId,
+                name: groupName,
+                description: groupDescription,
+                agent,
+                changes: [],
+                order: board.plan.changeGroups.length,
+            };
+            board.plan.changeGroups.push(group);
+        }
+        group.changes.push(change);
+        board.plan.updatedAt = new Date().toISOString();
         this.writeBoard(board);
-        this.logEvent({
-            level: 'info',
-            stage,
-            action: 'pipeline_reset',
-            message: `Pipeline reset to stage "${stage}"`,
-        });
     }
-    /** Set the approval gate state */
-    setApproval(approval) {
+    /** Add a brainstorm entry to the plan discussion */
+    addBrainstormEntry(entry) {
         const board = this.readBoard();
-        board.approval = approval;
+        if (!board.plan) {
+            board.plan = {
+                id: this.generateId(),
+                version: '1.0.0',
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                summary: '',
+                goals: [],
+                approach: '',
+                changeGroups: [],
+                architectureNotes: '',
+                riskAssessment: '',
+                fileMap: [],
+                discussion: [],
+                diagrams: [],
+            };
+        }
+        const fullEntry = {
+            ...entry,
+            id: this.generateId(),
+            timestamp: new Date().toISOString(),
+        };
+        board.plan.discussion.push(fullEntry);
+        board.plan.updatedAt = new Date().toISOString();
         this.writeBoard(board);
-        this.logEvent({
-            level: 'info',
-            stage: 'approval',
-            action: `approval_${approval.status}`,
-            message: `Approval gate: ${approval.status}`,
-            data: { comments: approval.comments },
-        });
-    }
-    /** Get the current approval state */
-    getApproval() {
-        const board = this.readBoard();
-        return board.approval;
+        return fullEntry;
     }
     /** Write the project index to .weaver/index.json */
     writeIndex(index) {
@@ -199,8 +280,8 @@ export class BoardManager {
         let entries = board.entries;
         if (filters?.agent)
             entries = entries.filter(e => e.agent === filters.agent);
-        if (filters?.stage)
-            entries = entries.filter(e => e.stage === filters.stage);
+        if (filters?.phase)
+            entries = entries.filter(e => e.phase === filters.phase);
         if (filters?.type)
             entries = entries.filter(e => e.type === filters.type);
         const limit = filters?.limit ?? 50;
@@ -215,7 +296,7 @@ export class BoardManager {
         return filePath;
     }
     /** Track a file written to the workspace by an agent */
-    trackFile(filePath, agent, stage) {
+    trackFile(filePath, agent, phase) {
         const board = this.readBoard();
         const stat = fs.existsSync(path.join(this.workspacePath, filePath))
             ? fs.statSync(path.join(this.workspacePath, filePath))
@@ -223,7 +304,7 @@ export class BoardManager {
         const file = {
             path: filePath,
             agent,
-            stage,
+            phase,
             timestamp: new Date().toISOString(),
             size: stat?.size ?? 0,
         };

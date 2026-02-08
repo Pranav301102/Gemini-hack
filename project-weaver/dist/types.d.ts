@@ -1,15 +1,13 @@
 export type AgentRole = 'product-manager' | 'architect' | 'developer' | 'qa' | 'code-reviewer';
-export type PipelineStage = 'read' | 'architecture' | 'spec' | 'stories' | 'approval' | 'implementation' | 'testing' | 'review' | 'ship';
-export type AgentStatus = 'idle' | 'thinking' | 'working' | 'blocked' | 'done' | 'error';
+export type ProjectPhase = 'read' | 'plan' | 'ready';
+export type AgentStatus = 'idle' | 'thinking' | 'working' | 'done';
 export type TaskPriority = 'critical' | 'high' | 'medium' | 'low';
-export type EntryType = 'decision' | 'artifact' | 'question' | 'feedback' | 'handoff';
-export type StageStatus = 'pending' | 'in-progress' | 'complete' | 'skipped';
-export declare const STAGE_NAMES: readonly ["read", "architecture", "spec", "stories", "approval", "implementation", "testing", "review", "ship"];
+export type EntryType = 'brainstorm' | 'proposal' | 'decision' | 'artifact' | 'question' | 'memory-map';
 export interface ContextEntry {
     id: string;
     timestamp: string;
     agent: AgentRole;
-    stage: PipelineStage;
+    phase: ProjectPhase;
     type: EntryType;
     title: string;
     content: string;
@@ -32,11 +30,12 @@ export interface ProjectContext {
     targetUsers?: string;
     deploymentTarget?: string;
     existingIntegrations?: string;
+    isExistingProject?: boolean;
 }
 export interface TrackedFile {
     path: string;
     agent: AgentRole;
-    stage: PipelineStage;
+    phase: ProjectPhase;
     timestamp: string;
     size: number;
 }
@@ -47,26 +46,80 @@ export interface RequirementsQuestion {
     answered: boolean;
     answer?: string;
 }
-export type ApprovalStatus = 'pending' | 'approved' | 'changes-requested';
-export interface ApprovalState {
-    status: ApprovalStatus;
-    reviewedAt?: string;
-    comments?: string;
-    requestedChanges?: string[];
+export type ChangeType = 'create' | 'modify' | 'refactor' | 'delete' | 'extend';
+export type ChangePriority = 'must-have' | 'should-have' | 'nice-to-have';
+export type ChangeComplexity = 'trivial' | 'small' | 'medium' | 'large' | 'epic';
+/** A single proposed change to a specific location in the codebase */
+export interface ProposedChange {
+    id: string;
+    file: string;
+    changeType: ChangeType;
+    title: string;
+    description: string;
+    rationale: string;
+    priority: ChangePriority;
+    complexity: ChangeComplexity;
+    affectedFunctions?: string[];
+    affectedClasses?: string[];
+    affectedTypes?: string[];
+    dependencies: string[];
+    codeSnippet?: string;
 }
-export interface StyleGuide {
-    naming: {
-        files: string;
-        functions: string;
-        classes: string;
-        constants: string;
-        variables: string;
-    };
-    patterns: string[];
-    rules: string[];
-    imports: string;
-    errorHandling: string;
-    testing: string;
+/** A group of related changes that form a logical unit */
+export interface ChangeGroup {
+    id: string;
+    name: string;
+    description: string;
+    agent: AgentRole;
+    changes: ProposedChange[];
+    order: number;
+}
+/** The complete plan document with memory maps */
+export interface ProjectPlan {
+    id: string;
+    version: string;
+    createdAt: string;
+    updatedAt: string;
+    summary: string;
+    goals: string[];
+    approach: string;
+    changeGroups: ChangeGroup[];
+    architectureNotes: string;
+    riskAssessment: string;
+    fileMap: FileChangeMap[];
+    discussion: BrainstormEntry[];
+    diagrams: PlanDiagram[];
+}
+/** Summary of all changes to a single file */
+export interface FileChangeMap {
+    file: string;
+    exists: boolean;
+    language: string;
+    currentDescription?: string;
+    changes: {
+        changeId: string;
+        changeType: ChangeType;
+        summary: string;
+    }[];
+    totalChanges: number;
+    maxPriority: ChangePriority;
+}
+/** A brainstorm entry from the agent discussion */
+export interface BrainstormEntry {
+    id: string;
+    timestamp: string;
+    agent: AgentRole;
+    type: 'observation' | 'proposal' | 'question' | 'agreement' | 'counter-proposal' | 'decision';
+    content: string;
+    referencedFiles?: string[];
+    referencedChanges?: string[];
+}
+/** Architecture diagram in the plan */
+export interface PlanDiagram {
+    id: string;
+    title: string;
+    type: 'current-architecture' | 'proposed-architecture' | 'change-impact' | 'dependency-flow';
+    mermaidCode: string;
 }
 export interface FunctionSignature {
     name: string;
@@ -82,6 +135,10 @@ export interface FunctionSignature {
     isAsync?: boolean;
     enrichedDescription?: string;
     purpose?: string;
+    callsites?: {
+        name: string;
+        line: number;
+    }[];
 }
 export interface ClassDefinition {
     name: string;
@@ -164,6 +221,7 @@ export interface ProjectIndex {
         lastBatchFile?: string;
     };
     dependencyGraph?: DependencyGraph;
+    codeMaps?: CodeMaps;
 }
 export interface DependencyEdge {
     from: string;
@@ -184,6 +242,108 @@ export interface DependencyGraph {
         externalEdges: number;
     }[];
     circularDeps: string[][];
+}
+export interface CodeMaps {
+    version: string;
+    generatedAt: string;
+    classMap: ClassMap;
+    moduleMap: ModuleMap;
+    callGraph: CallGraph;
+    apiMap: APIMap;
+}
+export interface ClassMap {
+    classes: ClassNode[];
+    interfaces: InterfaceNode[];
+    relationships: ClassRelationship[];
+}
+export interface ClassNode {
+    id: string;
+    name: string;
+    file: string;
+    line: number;
+    extends: string | null;
+    implements: string[];
+    exported: boolean;
+    methods: {
+        name: string;
+        visibility: string;
+        params: string;
+        returnType?: string;
+    }[];
+    properties: {
+        name: string;
+        type?: string;
+        visibility: string;
+    }[];
+    description?: string;
+}
+export interface InterfaceNode {
+    id: string;
+    name: string;
+    file: string;
+    line: number;
+    extends?: string[];
+    exported: boolean;
+    fields: {
+        name: string;
+        type: string;
+        optional?: boolean;
+    }[];
+    description?: string;
+}
+export type ClassRelationshipType = 'extends' | 'implements' | 'uses' | 'creates';
+export interface ClassRelationship {
+    from: string;
+    to: string;
+    type: ClassRelationshipType;
+}
+export interface ModuleMap {
+    modules: ModuleNode[];
+    connections: ModuleConnection[];
+    layers: {
+        name: string;
+        modules: string[];
+    }[];
+}
+export interface ModuleNode {
+    id: string;
+    path: string;
+    fileCount: number;
+    exports: string[];
+    publicAPI: string[];
+    responsibility?: string;
+}
+export interface ModuleConnection {
+    from: string;
+    to: string;
+    imports: number;
+    exportsUsed: string[];
+}
+export interface CallGraph {
+    functions: CallNode[];
+}
+export interface CallNode {
+    id: string;
+    name: string;
+    file: string;
+    line: number;
+    exported: boolean;
+    calls: string[];
+    calledBy: string[];
+    description?: string;
+}
+export interface APIMap {
+    endpoints: APIEndpoint[];
+}
+export interface APIEndpoint {
+    method: string;
+    path: string;
+    file: string;
+    handler: string;
+    params?: string[];
+    bodyShape?: string;
+    responseShape?: string;
+    description?: string;
 }
 export interface EnrichmentItem {
     file: string;
@@ -267,12 +427,6 @@ export interface ChartWidget extends BaseWidget {
     colors?: string[];
 }
 export type DashboardWidget = DiagramWidget | KPIWidget | TableWidget | TimelineWidget | WorkflowWidget | ListWidget | TextWidget | ChartWidget;
-export interface StageInfo {
-    status: StageStatus;
-    startedAt?: string;
-    completedAt?: string;
-    assignedAgent?: AgentRole | 'user';
-}
 export interface ContextBoard {
     version: string;
     projectId: string;
@@ -281,12 +435,8 @@ export interface ContextBoard {
     entries: ContextEntry[];
     files: TrackedFile[];
     widgets: DashboardWidget[];
-    pipeline: {
-        currentStage: PipelineStage;
-        stages: Record<PipelineStage, StageInfo>;
-    };
-    approval?: ApprovalState;
-    styleGuide?: StyleGuide;
+    phase: ProjectPhase;
+    plan?: ProjectPlan;
     createdAt: string;
     updatedAt: string;
 }
@@ -295,13 +445,12 @@ export interface WeaverEvent {
     timestamp: string;
     level: 'info' | 'warn' | 'error' | 'debug';
     agent?: AgentRole;
-    stage?: PipelineStage;
+    phase?: ProjectPhase;
     action: string;
     message: string;
     data?: Record<string, unknown>;
 }
 export declare const AGENT_ROLES: AgentRole[];
-export declare const PIPELINE_STAGES: PipelineStage[];
-export declare const STAGE_AGENT_MAP: Record<PipelineStage, AgentRole | 'user'>;
-export declare const STAGE_DESCRIPTIONS: Record<PipelineStage, string>;
+export declare const PROJECT_PHASES: ProjectPhase[];
+export declare const PHASE_DESCRIPTIONS: Record<ProjectPhase, string>;
 export declare const AGENT_DISPLAY_NAMES: Record<AgentRole, string>;

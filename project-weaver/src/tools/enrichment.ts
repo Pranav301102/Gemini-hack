@@ -289,7 +289,7 @@ export function registerEnrichment(server: McpServer): void {
       manager.logEvent({
         level: 'info',
         agent: 'architect',
-        stage: 'read',
+        phase: 'read',
         action: 'index_enriched',
         message: `Enriched ${updated} items (${enrichedItems}/${totalItems} total)`,
         data: { updated, totalItems, enrichedItems, remaining },

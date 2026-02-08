@@ -41,38 +41,33 @@ export function getAgentPrompt(role, project, recentEntries, additionalContext) 
         project.existingIntegrations
             ? `**Existing Integrations:** ${project.existingIntegrations}`
             : null,
+        project.isExistingProject !== undefined
+            ? `**Project Type:** ${project.isExistingProject ? 'Existing codebase (indexed)' : 'New project'}`
+            : null,
     ].filter(Boolean).join('\n');
-    // Group entries by type for better context
+    // Group entries by type for context
     const artifacts = recentEntries.filter(e => e.type === 'artifact');
     const decisions = recentEntries.filter(e => e.type === 'decision');
-    const feedback = recentEntries.filter(e => e.type === 'feedback');
-    const handoffs = recentEntries.filter(e => e.type === 'handoff');
+    const proposals = recentEntries.filter(e => e.type === 'proposal');
+    const brainstorms = recentEntries.filter(e => e.type === 'brainstorm');
     let recentWork = '';
     if (recentEntries.length > 0) {
         const formatEntries = (entries, limit) => entries.slice(-limit).map(e => {
             const preview = e.content.length > 500 ? e.content.substring(0, 500) + '...' : e.content;
-            return `- [${AGENT_DISPLAY_NAMES[e.agent]} / ${e.stage}] **${e.title}**\n  ${preview}`;
+            return `- [${AGENT_DISPLAY_NAMES[e.agent]} / ${e.phase}] **${e.title}**\n  ${preview}`;
         }).join('\n\n');
         recentWork = '\n**Context Board Summary:**\n';
-        if (handoffs.length > 0) {
-            recentWork += `\n### Handoffs (most relevant to you):\n${formatEntries(handoffs, 3)}\n`;
+        if (brainstorms.length > 0) {
+            recentWork += `\n### Brainstorm Discussion:\n${formatEntries(brainstorms, 5)}\n`;
+        }
+        if (proposals.length > 0) {
+            recentWork += `\n### Proposals:\n${formatEntries(proposals, 5)}\n`;
         }
         if (artifacts.length > 0) {
-            recentWork += `\n### Agent Artifacts:\n${formatEntries(artifacts, 5)}\n`;
+            recentWork += `\n### Artifacts:\n${formatEntries(artifacts, 5)}\n`;
         }
         if (decisions.length > 0) {
             recentWork += `\n### Decisions Made:\n${formatEntries(decisions, 5)}\n`;
-        }
-        if (feedback.length > 0) {
-            recentWork += `\n### Feedback & Issues:\n${formatEntries(feedback, 3)}\n`;
-        }
-    }
-    // Inject style guide prominently for Developer and Code Reviewer
-    let styleGuideSection = '';
-    if (role === 'developer' || role === 'code-reviewer') {
-        const styleGuideEntry = recentEntries.find(e => e.type === 'decision' && e.metadata?.isStyleGuide === true);
-        if (styleGuideEntry) {
-            styleGuideSection = `\n---\n\n## 🎨 Coding Style Guide (from Architect)\n\n${styleGuideEntry.content}\n`;
         }
     }
     const parts = [
@@ -80,7 +75,6 @@ export function getAgentPrompt(role, project, recentEntries, additionalContext) 
         '\n---\n',
         '## Project Context\n',
         projectSummary,
-        styleGuideSection,
         recentWork,
     ];
     if (additionalContext) {

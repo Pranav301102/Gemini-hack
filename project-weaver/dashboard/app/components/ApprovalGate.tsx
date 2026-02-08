@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import { HiCheckCircle, HiXCircle, HiExclamation, HiDocumentText, HiLightBulb } from 'react-icons/hi'
 import MarkdownRenderer from './MarkdownRenderer'
+import ApprovalAssistant from './ApprovalAssistant'
 
 interface ContextEntry {
   id: string
@@ -19,9 +20,10 @@ interface ApprovalGateProps {
   entries: ContextEntry[]
   projectPath: string
   onApprovalComplete: () => void
+  geminiReady?: boolean
 }
 
-const ApprovalGate: React.FC<ApprovalGateProps> = ({ entries, projectPath, onApprovalComplete }) => {
+const ApprovalGate: React.FC<ApprovalGateProps> = ({ entries, projectPath, onApprovalComplete, geminiReady }) => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showChangesForm, setShowChangesForm] = useState(false)
   const [comments, setComments] = useState('')
@@ -159,6 +161,13 @@ const ApprovalGate: React.FC<ApprovalGateProps> = ({ entries, projectPath, onApp
         {renderSection('spec', 'Product Specification', HiDocumentText, 'text-purple-400', specEntries)}
         {renderSection('stories', 'User Stories', HiDocumentText, 'text-green-400', storyEntries)}
       </div>
+
+      {/* AI Approval Assistant */}
+      {geminiReady && (
+        <div className="mb-6">
+          <ApprovalAssistant projectPath={projectPath} geminiReady={geminiReady} />
+        </div>
+      )}
 
       {/* Result banner */}
       {result && (

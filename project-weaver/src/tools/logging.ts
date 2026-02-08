@@ -1,7 +1,6 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { BoardManager } from '../context/board.js';
-import { STAGE_NAMES } from '../types.js';
 
 export function registerLogging(server: McpServer): void {
 
@@ -12,14 +11,14 @@ export function registerLogging(server: McpServer): void {
       workspacePath: z.string().describe('Absolute path to the workspace directory'),
       level: z.enum(['info', 'warn', 'error', 'debug']).describe('Log level'),
       agent: z.enum(['product-manager', 'architect', 'developer', 'qa', 'code-reviewer']).optional().describe('Agent that generated this event'),
-      stage: z.enum(STAGE_NAMES).optional().describe('Pipeline stage'),
+      phase: z.enum(['read', 'plan', 'ready']).optional().describe('Project phase'),
       action: z.string().describe('Action identifier (e.g., "code_generated", "test_failed", "review_complete")'),
       message: z.string().describe('Human-readable event description'),
       data: z.record(z.unknown()).optional().describe('Additional structured data'),
     },
-    async ({ workspacePath, level, agent, stage, action, message, data }) => {
+    async ({ workspacePath, level, agent, phase, action, message, data }) => {
       const manager = new BoardManager(workspacePath);
-      manager.logEvent({ level, agent, stage, action, message, data });
+      manager.logEvent({ level, agent, phase, action, message, data });
 
       return {
         content: [{

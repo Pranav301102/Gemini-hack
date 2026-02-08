@@ -1,11 +1,17 @@
 'use client'
 
 import React, { useState, useEffect, useCallback, useRef } from 'react'
-import PipelineProgress from './components/PipelineProgress'
+import PlanNavigator from './components/PlanNavigator'
+import PlanDetailView from './components/PlanDetailView'
 import AgentActivityFeed from './components/AgentActivityFeed'
 import ContextBoardView from './components/ContextBoardView'
-import ApprovalGate from './components/ApprovalGate'
-import { HiRefresh, HiFolder } from 'react-icons/hi'
+import CodeIntelView from './components/CodeIntelView'
+import type { CodeMaps } from './components/CodeIntelView'
+import SettingsModal from './components/SettingsModal'
+import GeminiKeyIndicator from './components/GeminiKeyIndicator'
+import ChatPanel from './components/ChatPanel'
+import { HiRefresh, HiFolder, HiChat } from 'react-icons/hi'
+import { getGeminiKey } from './lib/gemini-key'
 import type { DashboardWidget } from './components/WidgetRenderer'
 
 interface WeaverEvent {
@@ -13,7 +19,7 @@ interface WeaverEvent {
   timestamp: string
   level: 'info' | 'warn' | 'error' | 'debug'
   agent?: string
-  stage?: string
+  phase?: string
   action: string
   message: string
   data?: Record<string, unknown>
@@ -23,8 +29,9 @@ interface ContextEntry {
   id: string
   timestamp: string
   agent: string
-  stage: string
-  type: 'decision' | 'artifact' | 'question' | 'feedback' | 'handoff'
+  phase?: string
+  stage?: string // legacy support
+  type: 'brainstorm' | 'proposal' | 'decision' | 'artifact' | 'question' | 'memory-map'
   title: string
   content: string
   parentId?: string
@@ -40,19 +47,9 @@ interface AgentState {
 interface TrackedFile {
   path: string
   agent: string
-  stage: string
+  phase?: string
   timestamp: string
   size: number
-}
-
-interface PipelineData {
-  currentStage: string
-  stages: Record<string, {
-    status: 'pending' | 'in-progress' | 'complete' | 'skipped'
-    startedAt?: string
-    completedAt?: string
-    assignedAgent?: string
-  }>
 }
 
 interface ProjectData {
@@ -65,19 +62,49 @@ interface ProjectData {
   deploymentTarget?: string
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+interface PlanData {
+  id: string
+  summary: string
+  goals: string[]
+  approach: string
+  changeGroups: any[]
+  architectureNotes: string
+  riskAssessment: string
+  fileMap: any[]
+  discussion: any[]
+  diagrams: any[]
+}
+
 export default function Dashboard() {
   const [projectPath, setProjectPath] = useState('')
   const [isConnected, setIsConnected] = useState(false)
   const [events, setEvents] = useState<WeaverEvent[]>([])
   const [entries, setEntries] = useState<ContextEntry[]>([])
-  const [pipeline, setPipeline] = useState<PipelineData | null>(null)
+  const [phase, setPhase] = useState<string>('read')
+  const [plan, setPlan] = useState<PlanData | null>(null)
   const [agents, setAgents] = useState<Record<string, AgentState> | null>(null)
   const [project, setProject] = useState<ProjectData | null>(null)
   const [widgets, setWidgets] = useState<DashboardWidget[]>([])
   const [files, setFiles] = useState<TrackedFile[]>([])
-  const [selectedStage, setSelectedStage] = useState<string | null>(null)
+  const [selectedGroup, setSelectedGroup] = useState<string | null>(null)
+  const [selectedFile, setSelectedFile] = useState<string | null>(null)
+  const [selectedPhase, setSelectedPhase] = useState<string | null>(null)
+  const [codeMaps, setCodeMaps] = useState<CodeMaps | null>(null)
+  const [centerView, setCenterView] = useState<'context' | 'code-intel' | 'plan'>('context')
   const [error, setError] = useState<string | null>(null)
   const eventSourceRef = useRef<EventSource | null>(null)
+
+  // Gemini state
+  const [showSettings, setShowSettings] = useState(false)
+  const [showChat, setShowChat] = useState(false)
+  const [geminiReady, setGeminiReady] = useState(false)
+  const [enrichmentProgress, setEnrichmentProgress] = useState<{ totalItems: number; enrichedItems: number } | null>(null)
+
+  // Check for Gemini key on mount
+  useEffect(() => {
+    setGeminiReady(!!getGeminiKey())
+  }, [])
 
   // Load initial data
   const loadData = useCallback(async () => {
@@ -90,12 +117,15 @@ export default function Dashboard() {
 
       if (data.success) {
         setProject(data.context.project)
-        setPipeline(data.context.pipeline)
+        setPhase(data.context.phase ?? 'read')
+        setPlan(data.plan ?? data.context.plan ?? null)
         setAgents(data.context.agents)
         setEntries(data.context.entries ?? [])
         setWidgets(data.context.widgets ?? [])
         setFiles(data.context.files ?? [])
         setEvents(data.events ?? [])
+        if (data.enrichmentProgress) setEnrichmentProgress(data.enrichmentProgress)
+        if (data.codeMaps) setCodeMaps(data.codeMaps)
         setError(null)
       } else {
         setError(data.message)
@@ -127,7 +157,8 @@ export default function Dashboard() {
       try {
         const context = JSON.parse(event.data)
         setProject(context.project)
-        setPipeline(context.pipeline)
+        setPhase(context.phase ?? 'read')
+        setPlan(context.plan ?? null)
         setAgents(context.agents)
         setEntries(context.entries ?? [])
         setWidgets(context.widgets ?? [])
@@ -163,6 +194,17 @@ export default function Dashboard() {
     return cleanup
   }, [connectSSE])
 
+  // When selecting a group, clear file selection and vice versa
+  const handleGroupSelect = (groupId: string | null) => {
+    setSelectedGroup(groupId)
+    setSelectedFile(null)
+  }
+
+  const handleFileSelect = (file: string | null) => {
+    setSelectedFile(file)
+    setSelectedGroup(null)
+  }
+
   return (
     <div className="h-screen flex flex-col bg-gray-950">
       {/* Top bar */}
@@ -176,6 +218,9 @@ export default function Dashboard() {
         </div>
 
         <div className="flex-1" />
+
+        {/* Gemini key indicator */}
+        <GeminiKeyIndicator hasKey={geminiReady} onClick={() => setShowSettings(true)} />
 
         {/* Project path input */}
         <div className="flex items-center gap-2">
@@ -206,38 +251,93 @@ export default function Dashboard() {
 
       {/* Main 3-panel layout */}
       <main className="flex-1 flex overflow-hidden">
-        {/* Left panel: Pipeline Progress */}
-        <div className="w-64 flex-shrink-0 border-r border-gray-800 overflow-hidden">
-          <PipelineProgress
-            pipeline={pipeline}
-            agents={agents}
-            projectName={project?.name ?? ''}
-            projectDescription={project?.description ?? ''}
+        {/* Left panel: Plan Navigator */}
+        <div className="w-72 flex-shrink-0 border-r border-gray-800 overflow-hidden">
+          <PlanNavigator
+            plan={plan}
             project={project}
-            files={files}
-            selectedStage={selectedStage}
-            onStageClick={(stage) => setSelectedStage(selectedStage === stage ? null : stage)}
+            phase={phase}
+            selectedGroup={selectedGroup}
+            selectedFile={selectedFile}
+            onGroupSelect={handleGroupSelect}
+            onFileSelect={handleFileSelect}
+            agents={agents}
+            geminiReady={geminiReady}
+            projectPath={projectPath}
+            enrichmentProgress={enrichmentProgress}
           />
         </div>
 
-        {/* Center panel: Context Board / Approval Gate */}
-        <div className="flex-1 overflow-hidden border-r border-gray-800">
-          {pipeline?.currentStage === 'approval' && pipeline?.stages?.approval?.status !== 'complete' ? (
-            <div className="h-full overflow-y-auto">
-              <ApprovalGate
+        {/* Center panel: Context Board / Code Intel / Plan */}
+        <div className="flex-1 overflow-hidden border-r border-gray-800 flex flex-col">
+          {/* Center panel tabs */}
+          <div className="flex-shrink-0 border-b border-gray-800 px-4 flex gap-1">
+            <button
+              onClick={() => setCenterView('context')}
+              className={`px-3 py-2 text-xs font-medium border-b-2 transition-colors ${
+                centerView === 'context'
+                  ? 'border-blue-500 text-blue-400'
+                  : 'border-transparent text-gray-500 hover:text-gray-300'
+              }`}
+            >
+              Context Board
+            </button>
+            <button
+              onClick={() => setCenterView('code-intel')}
+              className={`px-3 py-2 text-xs font-medium border-b-2 transition-colors ${
+                centerView === 'code-intel'
+                  ? 'border-blue-500 text-blue-400'
+                  : 'border-transparent text-gray-500 hover:text-gray-300'
+              }`}
+            >
+              Code Intelligence
+              {codeMaps && (
+                <span className="ml-1 text-[10px] bg-gray-800 text-gray-500 px-1 rounded">
+                  {codeMaps.classMap.classes.length + codeMaps.moduleMap.modules.length}
+                </span>
+              )}
+            </button>
+            {plan && (
+              <button
+                onClick={() => setCenterView('plan')}
+                className={`px-3 py-2 text-xs font-medium border-b-2 transition-colors ${
+                  centerView === 'plan'
+                    ? 'border-blue-500 text-blue-400'
+                    : 'border-transparent text-gray-500 hover:text-gray-300'
+                }`}
+              >
+                Plan
+              </button>
+            )}
+          </div>
+
+          {/* Center panel content */}
+          <div className="flex-1 min-h-0 overflow-hidden">
+            {centerView === 'context' && (
+              <ContextBoardView
                 entries={entries}
+                widgets={widgets}
+                selectedPhase={selectedPhase}
+                onPhaseFilter={setSelectedPhase}
                 projectPath={projectPath}
-                onApprovalComplete={loadData}
+                geminiReady={geminiReady}
+                project={project}
+                phase={phase}
+                files={files}
               />
-            </div>
-          ) : (
-            <ContextBoardView
-              entries={entries}
-              widgets={widgets}
-              selectedStage={selectedStage}
-              onStageFilter={setSelectedStage}
-            />
-          )}
+            )}
+            {centerView === 'code-intel' && (
+              <CodeIntelView codeMaps={codeMaps} />
+            )}
+            {centerView === 'plan' && plan && (
+              <PlanDetailView
+                plan={plan}
+                selectedGroup={selectedGroup}
+                selectedFile={selectedFile}
+                widgets={widgets}
+              />
+            )}
+          </div>
         </div>
 
         {/* Right panel: Activity Feed */}
@@ -248,6 +348,32 @@ export default function Dashboard() {
           />
         </div>
       </main>
+
+      {/* Floating chat button */}
+      {geminiReady && !showChat && (
+        <button
+          onClick={() => setShowChat(true)}
+          className="fixed bottom-6 right-6 z-30 w-12 h-12 bg-blue-600 hover:bg-blue-500 rounded-full shadow-lg shadow-blue-500/30 flex items-center justify-center transition-all hover:scale-105"
+          title="Chat with codebase"
+        >
+          <HiChat className="w-5 h-5 text-white" />
+        </button>
+      )}
+
+      {/* Chat panel */}
+      <ChatPanel
+        projectPath={projectPath}
+        isOpen={showChat}
+        onClose={() => setShowChat(false)}
+      />
+
+      {/* Settings modal */}
+      {showSettings && (
+        <SettingsModal
+          onClose={() => setShowSettings(false)}
+          onKeyChange={(hasKey) => setGeminiReady(hasKey)}
+        />
+      )}
     </div>
   )
 }
