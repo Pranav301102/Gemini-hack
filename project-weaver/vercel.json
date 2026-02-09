@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "buildCommand": "cd dashboard && npm run build",
+  "outputDirectory": "dashboard/.next",
+  "framework": "nextjs",
+  "env": {
+    "WEAVER_PROJECT_PATH": "@weaver_project_path"
+  }
+}

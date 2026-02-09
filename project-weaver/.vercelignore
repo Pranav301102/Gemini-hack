@@ -1,0 +1,22 @@
+# Exclude MCP server build
+dist/
+src/
+skills/
+commands/
+scripts/
+hub/
+
+# Exclude test files
+__tests__/
+*.test.ts
+*.test.tsx
+
+# Node modules (will be installed by Vercel)
+node_modules/
+
+# Local env
+.env.local
+.env*.local
+
+# OS files
+.DS_Store

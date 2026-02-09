@@ -1,7 +1,7 @@
-description = "Launch the Project Weaver observability dashboard to view agent activity and pipeline progress"
+description = "Launch the Agent Weaver observability dashboard to view agent activity and pipeline progress"
 
 prompt = """
-The user wants to launch the Project Weaver observability dashboard.
+The user wants to launch the Agent Weaver observability dashboard.
 
 Tell them to run these commands:
 

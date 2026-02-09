@@ -1,419 +1,225 @@
 'use client'
 
-import React, { useState, useEffect, useCallback, useRef } from 'react'
-import PlanNavigator from './components/PlanNavigator'
-import PlanDetailView from './components/PlanDetailView'
-import AgentActivityFeed from './components/AgentActivityFeed'
-import ContextBoardView from './components/ContextBoardView'
-import CodeIntelView from './components/CodeIntelView'
-import type { CodeMaps } from './components/CodeIntelView'
-import DocsBrowser from './components/DocsBrowser'
-import type { DocsCollection } from './components/DocsBrowser'
-import SettingsModal from './components/SettingsModal'
-import GeminiKeyIndicator from './components/GeminiKeyIndicator'
-import ChatPanel from './components/ChatPanel'
-import { HiRefresh, HiFolder, HiChat } from 'react-icons/hi'
-import { getGeminiKey } from './lib/gemini-key'
-import type { DashboardWidget } from './components/WidgetRenderer'
+import React from 'react'
+import Link from 'next/link'
+import { HiCog, HiLightningBolt, HiUserGroup, HiChip, HiCode, HiCheckCircle } from 'react-icons/hi'
 
-interface WeaverEvent {
-  id: string
-  timestamp: string
-  level: 'info' | 'warn' | 'error' | 'debug'
-  agent?: string
-  phase?: string
-  action: string
-  message: string
-  data?: Record<string, unknown>
-}
-
-interface ContextEntry {
-  id: string
-  timestamp: string
-  agent: string
-  phase?: string
-  stage?: string // legacy support
-  type: 'brainstorm' | 'proposal' | 'decision' | 'artifact' | 'question' | 'memory-map'
-  title: string
-  content: string
-  parentId?: string
-}
-
-interface AgentState {
-  role: string
-  status: string
-  currentTask?: string
-  lastActive: string
-}
-
-interface TrackedFile {
-  path: string
-  agent: string
-  phase?: string
-  timestamp: string
-  size: number
-}
-
-interface ProjectData {
-  name: string
-  description: string
-  requirements: string[]
-  techStack?: string[]
-  constraints?: string[]
-  targetUsers?: string
-  deploymentTarget?: string
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-interface PlanData {
-  id: string
-  summary: string
-  goals: string[]
-  approach: string
-  changeGroups: any[]
-  architectureNotes: string
-  riskAssessment: string
-  fileMap: any[]
-  discussion: any[]
-  diagrams: any[]
-}
-
-export default function Dashboard() {
-  const [projectPath, setProjectPath] = useState('')
-  const [isConnected, setIsConnected] = useState(false)
-  const [events, setEvents] = useState<WeaverEvent[]>([])
-  const [entries, setEntries] = useState<ContextEntry[]>([])
-  const [phase, setPhase] = useState<string>('read')
-  const [plan, setPlan] = useState<PlanData | null>(null)
-  const [agents, setAgents] = useState<Record<string, AgentState> | null>(null)
-  const [project, setProject] = useState<ProjectData | null>(null)
-  const [widgets, setWidgets] = useState<DashboardWidget[]>([])
-  const [files, setFiles] = useState<TrackedFile[]>([])
-  const [selectedGroup, setSelectedGroup] = useState<string | null>(null)
-  const [selectedFile, setSelectedFile] = useState<string | null>(null)
-  const [selectedPhase, setSelectedPhase] = useState<string | null>(null)
-  const [codeMaps, setCodeMaps] = useState<CodeMaps | null>(null)
-  const [docs, setDocs] = useState<DocsCollection | null>(null)
-  const [centerView, setCenterView] = useState<'context' | 'code-intel' | 'plan' | 'docs'>('context')
-  const [error, setError] = useState<string | null>(null)
-  const eventSourceRef = useRef<EventSource | null>(null)
-
-  // Gemini state
-  const [showSettings, setShowSettings] = useState(false)
-  const [showChat, setShowChat] = useState(false)
-  const [geminiReady, setGeminiReady] = useState(false)
-  const [enrichmentProgress, setEnrichmentProgress] = useState<{ totalItems: number; enrichedItems: number } | null>(null)
-  const [approval, setApproval] = useState<any>(null)
-
-  // Check for Gemini key on mount
-  useEffect(() => {
-    setGeminiReady(!!getGeminiKey())
-  }, [])
-
-  // Load initial data
-  const loadData = useCallback(async () => {
-    try {
-      const params = new URLSearchParams()
-      if (projectPath) params.set('path', projectPath)
-
-      const res = await fetch(`/api/weaver?${params}`)
-      const data = await res.json()
-
-      if (data.success) {
-        setProject(data.context.project)
-        setPhase(data.context.phase ?? 'read')
-        setPlan(data.plan ?? data.context.plan ?? null)
-        setAgents(data.context.agents)
-        setEntries(data.context.entries ?? [])
-        setWidgets(data.context.widgets ?? [])
-        setFiles(data.context.files ?? [])
-        setEvents(data.events ?? [])
-        if (data.enrichmentProgress) setEnrichmentProgress(data.enrichmentProgress)
-        if (data.codeMaps) setCodeMaps(data.codeMaps)
-        if (data.docs) setDocs(data.docs)
-        if (data.approval) setApproval(data.approval)
-        setError(null)
-      } else {
-        setError(data.message)
-      }
-    } catch (err) {
-      setError(`Failed to load data: ${err instanceof Error ? err.message : 'Unknown error'}`)
-    }
-  }, [projectPath])
-
-  // Connect to SSE for real-time updates
-  const connectSSE = useCallback(() => {
-    if (eventSourceRef.current) {
-      eventSourceRef.current.close()
-    }
-
-    const params = new URLSearchParams()
-    if (projectPath) params.set('path', projectPath)
-
-    const es = new EventSource(`/api/weaver/events?${params}`)
-    eventSourceRef.current = es
-
-    es.onopen = () => setIsConnected(true)
-    es.onerror = () => {
-      setIsConnected(false)
-      setTimeout(() => connectSSE(), 5000)
-    }
-
-    es.addEventListener('context', (event) => {
-      try {
-        const context = JSON.parse(event.data)
-        setProject(context.project)
-        setPhase(context.phase ?? 'read')
-        setPlan(context.plan ?? null)
-        setAgents(context.agents)
-        setEntries(context.entries ?? [])
-        setWidgets(context.widgets ?? [])
-        setFiles(context.files ?? [])
-        if (context.approval !== undefined) setApproval(context.approval ?? null)
-      } catch {
-        // Skip malformed events
-      }
-    })
-
-    es.addEventListener('log', (event) => {
-      try {
-        const logEvent = JSON.parse(event.data) as WeaverEvent
-        setEvents(prev => {
-          // Deduplicate by event ID
-          if (prev.some(e => e.id === logEvent.id)) return prev
-          return [...prev, logEvent]
-        })
-      } catch {
-        // Skip malformed events
-      }
-    })
-
-    es.addEventListener('docs', (event) => {
-      try {
-        const docsData = JSON.parse(event.data) as DocsCollection
-        setDocs(docsData)
-      } catch {
-        // Skip malformed events
-      }
-    })
-
-    return () => {
-      es.close()
-      setIsConnected(false)
-    }
-  }, [projectPath])
-
-  // Initial load
-  useEffect(() => {
-    loadData()
-  }, [loadData])
-
-  // SSE connection
-  useEffect(() => {
-    const cleanup = connectSSE()
-    return cleanup
-  }, [connectSSE])
-
-  // When selecting a group, clear file selection and vice versa
-  const handleGroupSelect = (groupId: string | null) => {
-    setSelectedGroup(groupId)
-    setSelectedFile(null)
-  }
-
-  const handleFileSelect = (file: string | null) => {
-    setSelectedFile(file)
-    setSelectedGroup(null)
-  }
-
+export default function LandingPage() {
   return (
-    <div className="h-screen flex flex-col bg-gray-950">
-      {/* Top bar */}
-      <header className="flex-shrink-0 h-12 border-b border-gray-800 flex items-center px-4 gap-4">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded flex items-center justify-center">
-            <span className="text-white text-[10px] font-bold">PW</span>
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-blue-950">
+      {/* Header */}
+      <header className="border-b border-gray-800 bg-gray-950/50 backdrop-blur">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <HiCog className="w-6 h-6 text-blue-400" />
+            <h1 className="text-xl font-bold text-white">Agent Weaver</h1>
           </div>
-          <h1 className="text-sm font-bold text-white">Project Weaver</h1>
-          <span className="text-[10px] text-gray-600 bg-gray-800 px-2 py-0.5 rounded">AI Software Agency</span>
-        </div>
-
-        <div className="flex-1" />
-
-        {/* Gemini key indicator */}
-        <GeminiKeyIndicator hasKey={geminiReady} onClick={() => setShowSettings(true)} />
-
-        {/* Project path input */}
-        <div className="flex items-center gap-2">
-          <HiFolder className="w-3.5 h-3.5 text-gray-500" />
-          <input
-            type="text"
-            value={projectPath}
-            onChange={(e) => setProjectPath(e.target.value)}
-            placeholder="Project path (or leave empty for auto-detect)"
-            className="bg-gray-900 border border-gray-800 rounded px-2 py-1 text-xs text-gray-300 w-64 focus:outline-none focus:border-gray-600"
-          />
-          <button
-            onClick={loadData}
-            className="p-1.5 hover:bg-gray-800 rounded transition-colors text-gray-400 hover:text-white"
-            title="Refresh"
+          <Link
+            href="https://github.com/yourusername/agent-weaver"
+            target="_blank"
+            className="px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-white text-sm font-medium transition-colors"
           >
-            <HiRefresh className="w-3.5 h-3.5" />
-          </button>
+            View on GitHub
+          </Link>
         </div>
       </header>
 
-      {/* Error banner */}
-      {error && (
-        <div className="flex-shrink-0 bg-red-900/20 border-b border-red-800 px-4 py-2 text-xs text-red-400">
-          {error}
+      {/* Hero Section */}
+      <section className="max-w-6xl mx-auto px-6 py-20 text-center">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-medium mb-8">
+          <HiLightningBolt className="w-3 h-3" />
+          Built for the Gemini 3 Hackathon
         </div>
-      )}
+        
+        <h2 className="text-5xl md:text-6xl font-bold text-white mb-6">
+          5 AI Agents.<br />
+          <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            One Shared Brain.
+          </span>
+        </h2>
+        
+        <p className="text-xl text-gray-400 max-w-3xl mx-auto mb-10">
+          Turn Gemini into a coordinated team of specialized AI agents with persistent memory, 
+          human-verified annotations, and git-based team collaboration. No more agent amnesia.
+        </p>
 
-      {/* Main 3-panel layout */}
-      <main className="flex-1 flex overflow-hidden">
-        {/* Left panel: Plan Navigator */}
-        <div className="w-72 flex-shrink-0 border-r border-gray-800 overflow-hidden">
-          <PlanNavigator
-            plan={plan}
-            project={project}
-            phase={phase}
-            selectedGroup={selectedGroup}
-            selectedFile={selectedFile}
-            onGroupSelect={handleGroupSelect}
-            onFileSelect={handleFileSelect}
-            agents={agents}
-            geminiReady={geminiReady}
-            projectPath={projectPath}
-            enrichmentProgress={enrichmentProgress}
-            approval={approval}
+        <div className="flex items-center justify-center gap-4">
+          <Link
+            href="/dashboard"
+            className="px-6 py-3 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold transition-colors flex items-center gap-2"
+          >
+            <HiChip className="w-5 h-5" />
+            Open Dashboard
+          </Link>
+          <a
+            href="#setup"
+            className="px-6 py-3 rounded-lg bg-gray-800 hover:bg-gray-700 text-white font-semibold transition-colors"
+          >
+            Get Started
+          </a>
+        </div>
+      </section>
+
+      {/* Features Grid */}
+      <section className="max-w-6xl mx-auto px-6 py-16">
+        <div className="grid md:grid-cols-3 gap-6">
+          <FeatureCard
+            icon={<HiChip className="w-6 h-6" />}
+            title="Shared Agent Memory"
+            description="All 5 agents read from and write to a persistent context board. No re-reading. No duplicate work."
+          />
+          <FeatureCard
+            icon={<HiUserGroup className="w-6 h-6" />}
+            title="Team Collaboration"
+            description="Git-based sharing + Hub sync. One teammate scans, the whole team benefits."
+          />
+          <FeatureCard
+            icon={<HiCheckCircle className="w-6 h-6" />}
+            title="Human Verification"
+            description="Agents write code annotations. Humans verify them. Trust builds over time."
+          />
+          <FeatureCard
+            icon={<HiCode className="w-6 h-6" />}
+            title="AST-Powered Indexing"
+            description="Tree-sitter parses your code. LLM enriches every symbol. Search by meaning."
+          />
+          <FeatureCard
+            icon={<HiLightningBolt className="w-6 h-6" />}
+            title="55 MCP Tools"
+            description="19 modules across indexing, planning, agents, team collab, and hub sync."
+          />
+          <FeatureCard
+            icon={<HiCog className="w-6 h-6" />}
+            title="Real-Time Dashboard"
+            description="Next.js dashboard with live SSE updates. See agents work in real-time."
           />
         </div>
+      </section>
 
-        {/* Center panel: Context Board / Code Intel / Plan */}
-        <div className="flex-1 overflow-hidden border-r border-gray-800 flex flex-col">
-          {/* Center panel tabs */}
-          <div className="flex-shrink-0 border-b border-gray-800 px-4 flex gap-1">
-            <button
-              onClick={() => setCenterView('context')}
-              className={`px-3 py-2 text-xs font-medium border-b-2 transition-colors ${
-                centerView === 'context'
-                  ? 'border-blue-500 text-blue-400'
-                  : 'border-transparent text-gray-500 hover:text-gray-300'
-              }`}
-            >
-              Context Board
-            </button>
-            <button
-              onClick={() => setCenterView('code-intel')}
-              className={`px-3 py-2 text-xs font-medium border-b-2 transition-colors ${
-                centerView === 'code-intel'
-                  ? 'border-blue-500 text-blue-400'
-                  : 'border-transparent text-gray-500 hover:text-gray-300'
-              }`}
-            >
-              Code Intelligence
-              {codeMaps && (
-                <span className="ml-1 text-[10px] bg-gray-800 text-gray-500 px-1 rounded">
-                  {codeMaps.classMap.classes.length + codeMaps.moduleMap.modules.length}
-                </span>
-              )}
-            </button>
-            {plan && (
-              <button
-                onClick={() => setCenterView('plan')}
-                className={`px-3 py-2 text-xs font-medium border-b-2 transition-colors ${
-                  centerView === 'plan'
-                    ? 'border-blue-500 text-blue-400'
-                    : 'border-transparent text-gray-500 hover:text-gray-300'
-                }`}
-              >
-                Plan
-              </button>
-            )}
-            {docs && docs.docs.length > 0 && (
-              <button
-                onClick={() => setCenterView('docs')}
-                className={`px-3 py-2 text-xs font-medium border-b-2 transition-colors ${
-                  centerView === 'docs'
-                    ? 'border-blue-500 text-blue-400'
-                    : 'border-transparent text-gray-500 hover:text-gray-300'
-                }`}
-              >
-                Docs
-                <span className="ml-1 text-[10px] bg-gray-800 text-gray-500 px-1 rounded">
-                  {docs.docs.length}
-                </span>
-              </button>
-            )}
+      {/* Setup Section */}
+      <section id="setup" className="max-w-4xl mx-auto px-6 py-16">
+        <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-8">
+          <h3 className="text-2xl font-bold text-white mb-6">🚀 Run Locally</h3>
+          
+          <div className="space-y-6">
+            <Step
+              number={1}
+              title="Clone & Build MCP Server"
+              code={`git clone https://github.com/yourusername/agent-weaver.git
+cd agent-weaver
+npm install
+npm run build`}
+            />
+            
+            <Step
+              number={2}
+              title="Install Dashboard"
+              code={`cd dashboard
+npm install`}
+            />
+            
+            <Step
+              number={3}
+              title="Start Hub Server (optional for team sync)"
+              code={`cd ../hub
+npm install
+npm start &  # Runs on http://localhost:4200`}
+            />
+            
+            <Step
+              number={4}
+              title="Launch Dashboard"
+              code={`cd ../dashboard
+export WEAVER_PROJECT_PATH=/path/to/your/project
+npm run dev`}
+            />
+            
+            <Step
+              number={5}
+              title="Add to Gemini CLI"
+              code={`# Add to your Gemini config:
+{
+  "mcpServers": {
+    "agent-weaver": {
+      "command": "node",
+      "args": ["/path/to/agent-weaver/dist/index.js"]
+    }
+  }
+}`}
+            />
           </div>
 
-          {/* Center panel content */}
-          <div className="flex-1 min-h-0 overflow-hidden">
-            {centerView === 'context' && (
-              <ContextBoardView
-                entries={entries}
-                widgets={widgets}
-                selectedPhase={selectedPhase}
-                onPhaseFilter={setSelectedPhase}
-                projectPath={projectPath}
-                geminiReady={geminiReady}
-                project={project}
-                phase={phase}
-                files={files}
-                plan={plan}
-              />
-            )}
-            {centerView === 'code-intel' && (
-              <CodeIntelView codeMaps={codeMaps} />
-            )}
-            {centerView === 'plan' && plan && (
-              <PlanDetailView
-                plan={plan}
-                selectedGroup={selectedGroup}
-                selectedFile={selectedFile}
-                widgets={widgets}
-              />
-            )}
-            {centerView === 'docs' && (
-              <DocsBrowser docs={docs} />
-            )}
+          <div className="mt-8 p-4 bg-blue-950/30 border border-blue-800/30 rounded-lg">
+            <p className="text-sm text-blue-300">
+              <strong>💡 Tip:</strong> Point <code className="bg-blue-900/50 px-1.5 py-0.5 rounded text-xs">WEAVER_PROJECT_PATH</code> to any 
+              git repo. The dashboard will auto-load .weaver/ data and display agent activity in real-time.
+            </p>
           </div>
         </div>
+      </section>
 
-        {/* Right panel: Activity Feed */}
-        <div className="w-80 flex-shrink-0 overflow-hidden">
-          <AgentActivityFeed
-            events={events}
-            isConnected={isConnected}
-          />
+      {/* Tech Stack */}
+      <section className="max-w-6xl mx-auto px-6 py-16">
+        <div className="text-center mb-12">
+          <h3 className="text-3xl font-bold text-white mb-4">Built With</h3>
+          <p className="text-gray-400">Powered by the latest AI and web technologies</p>
         </div>
-      </main>
+        
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <TechBadge name="Gemini 3 Pro" />
+          <TechBadge name="TypeScript" />
+          <TechBadge name="Next.js 15" />
+          <TechBadge name="React 19" />
+          <TechBadge name="MCP SDK" />
+          <TechBadge name="Express.js" />
+          <TechBadge name="Tailwind CSS 4" />
+          <TechBadge name="Tree-sitter" />
+        </div>
+      </section>
 
-      {/* Floating chat button */}
-      {geminiReady && !showChat && (
-        <button
-          onClick={() => setShowChat(true)}
-          className="fixed bottom-6 right-6 z-30 w-12 h-12 bg-blue-600 hover:bg-blue-500 rounded-full shadow-lg shadow-blue-500/30 flex items-center justify-center transition-all hover:scale-105"
-          title="Chat with codebase"
-        >
-          <HiChat className="w-5 h-5 text-white" />
-        </button>
-      )}
+      {/* Footer */}
+      <footer className="border-t border-gray-800 bg-gray-950/50">
+        <div className="max-w-6xl mx-auto px-6 py-8 text-center text-gray-500 text-sm">
+          <p>Built for the <strong className="text-white">Gemini 3 Hackathon</strong> • February 2026</p>
+          <p className="mt-2">Made with 🤖 by humans and AI agents working in sync</p>
+        </div>
+      </footer>
+    </div>
+  )
+}
 
-      {/* Chat panel */}
-      <ChatPanel
-        projectPath={projectPath}
-        isOpen={showChat}
-        onClose={() => setShowChat(false)}
-      />
+function FeatureCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
+  return (
+    <div className="p-6 bg-gray-900/50 border border-gray-800 rounded-xl hover:border-gray-700 transition-colors">
+      <div className="w-12 h-12 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 mb-4">
+        {icon}
+      </div>
+      <h4 className="text-lg font-semibold text-white mb-2">{title}</h4>
+      <p className="text-sm text-gray-400 leading-relaxed">{description}</p>
+    </div>
+  )
+}
 
-      {/* Settings modal */}
-      {showSettings && (
-        <SettingsModal
-          onClose={() => setShowSettings(false)}
-          onKeyChange={(hasKey) => setGeminiReady(hasKey)}
-        />
-      )}
+function Step({ number, title, code }: { number: number; title: string; code: string }) {
+  return (
+    <div>
+      <div className="flex items-center gap-3 mb-3">
+        <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm">
+          {number}
+        </div>
+        <h4 className="text-lg font-semibold text-white">{title}</h4>
+      </div>
+      <pre className="bg-gray-950 border border-gray-800 rounded-lg p-4 overflow-x-auto">
+        <code className="text-sm text-gray-300 font-mono">{code}</code>
+      </pre>
+    </div>
+  )
+}
+
+function TechBadge({ name }: { name: string }) {
+  return (
+    <div className="px-4 py-3 bg-gray-900/50 border border-gray-800 rounded-lg text-center">
+      <span className="text-sm font-medium text-gray-300">{name}</span>
     </div>
   )
 }

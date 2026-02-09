@@ -123,6 +123,28 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Read team.json if available
+    let team = null
+    const teamFile = path.join(weaverDir, 'team.json')
+    if (fs.existsSync(teamFile)) {
+      try {
+        team = JSON.parse(fs.readFileSync(teamFile, 'utf-8'))
+      } catch {
+        // Skip if team.json is malformed
+      }
+    }
+
+    // Read annotations.json if available
+    let annotations = null
+    const annotationsFile = path.join(weaverDir, 'annotations.json')
+    if (fs.existsSync(annotationsFile)) {
+      try {
+        annotations = JSON.parse(fs.readFileSync(annotationsFile, 'utf-8'))
+      } catch {
+        // Skip if annotations.json is malformed
+      }
+    }
+
     // Migration: if old pipeline format, convert for dashboard
     if (context.pipeline && !context.phase) {
       const currentStage = context.pipeline.currentStage
@@ -163,6 +185,8 @@ export async function GET(request: NextRequest) {
       plan,
       codeMaps,
       docs,
+      team,
+      annotations,
       approval: context.approval ?? null,
     })
   } catch (error) {

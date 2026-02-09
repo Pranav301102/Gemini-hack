@@ -1,5 +1,5 @@
 {
-  "name": "project-weaver",
+  "name": "agent-weaver",
   "version": "1.0.0",
   "description": "AI Software Agency - Gemini CLI Extension. A full dev team simulated by specialized agents.",
   "type": "module",

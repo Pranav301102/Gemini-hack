@@ -199,7 +199,7 @@ export function registerFileOps(server) {
         }
     });
     // --- list_files ---
-    server.tool('list_project_files', 'List all files tracked by Project Weaver that agents have created.', {
+    server.tool('list_project_files', 'List all files tracked by Agent Weaver that agents have created.', {
         workspacePath: z.string().describe('Absolute path to the workspace directory'),
     }, async ({ workspacePath }) => {
         const manager = new BoardManager(workspacePath);

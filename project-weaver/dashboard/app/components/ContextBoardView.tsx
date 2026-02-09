@@ -414,7 +414,14 @@ const ContextBoardView: React.FC<ContextBoardViewProps> = ({ entries, widgets, s
                   <div className="text-[10px] text-gray-500 uppercase tracking-wider mb-1">Files</div>
                   <div className="flex items-center gap-1">
                     <HiCheckCircle className="w-3 h-3 text-gray-400" />
-                    <span className="text-xs text-gray-300">{files?.length ?? 0} tracked</span>
+                    <span className="text-xs text-gray-300">
+                      {(files?.length ?? 0) > 0
+                        ? `${files!.length} tracked`
+                        : plan?.fileMap?.length
+                          ? `${plan.fileMap.length} planned`
+                          : '0 tracked'
+                      }
+                    </span>
                   </div>
                 </div>
               </div>

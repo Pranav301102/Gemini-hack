@@ -1,4 +1,4 @@
-# 🧪 Project Weaver — Benchmark Roadmap
+# 🧪 Agent Weaver — Benchmark Roadmap
 
 A hands-on test plan to verify every major feature works end-to-end.
 

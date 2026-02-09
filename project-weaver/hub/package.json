@@ -1,0 +1,24 @@
+{
+  "name": "weaver-hub",
+  "version": "1.0.0",
+  "description": "Weaver Hub — Central sync server for sharing .weaver project intelligence across teams",
+  "type": "module",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "tsc && node dist/server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "cors": "^2.8.5",
+    "multer": "^1.4.5-lts.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/cors": "^2.8.17",
+    "@types/multer": "^1.4.12",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
+  }
+}

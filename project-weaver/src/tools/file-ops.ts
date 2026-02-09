@@ -242,7 +242,7 @@ export function registerFileOps(server: McpServer): void {
   // --- list_files ---
   server.tool(
     'list_project_files',
-    'List all files tracked by Project Weaver that agents have created.',
+    'List all files tracked by Agent Weaver that agents have created.',
     {
       workspacePath: z.string().describe('Absolute path to the workspace directory'),
     },

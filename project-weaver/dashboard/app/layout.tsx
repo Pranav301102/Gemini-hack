@@ -3,8 +3,8 @@ import "./globals.css";
 import "./style.css";
 
 export const metadata: Metadata = {
-  title: "Project Weaver - AI Software Agency Dashboard",
-  description: "Observability dashboard for the Project Weaver AI Software Agency",
+  title: "Agent Weaver - AI Software Agency Dashboard",
+  description: "Observability dashboard for the Agent Weaver AI Software Agency",
 };
 
 export default function RootLayout({

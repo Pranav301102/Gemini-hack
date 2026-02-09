@@ -1,7 +1,7 @@
 description = "Architect + PM brainstorm together to create a plan with memory maps for the project"
 
 prompt = """
-The user wants to create a plan for their project using Project Weaver.
+The user wants to create a plan for their project using Agent Weaver.
 
 First, check if a .weaver/ project exists using mcp__weaver__get_project_status.
 

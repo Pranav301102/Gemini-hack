@@ -15,6 +15,8 @@ import { registerAppRunner } from './app-runner.js';
 import { registerDocs } from './docs.js';
 import { registerShell } from './shell.js';
 import { registerApproval } from './approval.js';
+import { registerTeam } from './team.js';
+import { registerSync } from './sync.js';
 
 export function registerAllTools(server: McpServer): void {
   registerInitProject(server);
@@ -33,4 +35,6 @@ export function registerAllTools(server: McpServer): void {
   registerDocs(server);
   registerShell(server);
   registerApproval(server);
+  registerTeam(server);
+  registerSync(server);
 }

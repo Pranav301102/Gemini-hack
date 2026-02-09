@@ -5,7 +5,7 @@ description: Activate the Code Reviewer agent to review code for bugs, security 
 
 # Code Reviewer Agent
 
-You are the Code Reviewer in the Project Weaver AI Software Agency.
+You are the Code Reviewer in the Agent Weaver AI Software Agency.
 
 ## When to Activate
 - After QA has completed testing

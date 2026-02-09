@@ -1,6 +1,6 @@
-# 🕸️ Project Weaver — AI Software Agency
+# 🕸️ Agent Weaver — AI-Powered Team Collaboration Platform
 
-> A Gemini CLI Extension that turns a single AI model into a **coordinated team of 5 specialized agents** with shared memory, intelligent code indexing, and a real-time observability dashboard.
+> A Gemini CLI Extension that turns AI into a **coordinated team of 5 specialized agents** with shared memory, human-verified code annotations, git-based resource sharing, and a real-time observability dashboard — built for **teams where humans and AI agents work in sync**.
 
 **Hackathon Track:** 🧠 The Marathon Agent · ☯️ Vibe Engineering
 
@@ -8,25 +8,48 @@
 
 ## The Problem
 
-When AI agents work on codebases, they suffer from **amnesia**. Every prompt starts fresh — re-reading files, re-discovering architecture, losing context from prior decisions. Multiple agents can't collaborate because they have no shared state. There's no visibility into what agents are doing, and no way to review or approve their work.
+AI coding tools today have three critical failures:
+
+1. **Agent Amnesia** — Every prompt starts fresh. Re-reads files, re-discovers architecture, loses context from prior decisions.
+2. **No Team Sharing** — When one developer scans a project with AI, that intelligence dies in their session. Teammates re-do the same work.
+3. **Unverified Intelligence** — AI generates descriptions of what code does, but there's no way for humans to verify, correct, or trust those descriptions across a team.
 
 ## The Solution
 
-Project Weaver provides three things that don't exist today:
+Agent Weaver is a **platform for AI-powered teams** where resources are shared and agent memory is verified by humans.
 
 ### 1. 🧠 Shared Agent Memory (Context Board)
-A persistent JSON-based context board that all 5 agents read from and write to. Every brainstorm observation, architectural decision, code artifact, and QA result is recorded once and accessible to all agents. The Developer reads the Architect's style guide. QA maps test cases to the PM's acceptance criteria. The Code Reviewer references the dependency graph. **No agent ever re-reads the codebase from scratch.**
+A persistent JSON-based context board that all 5 agents read from and write to. Every brainstorm observation, architectural decision, code artifact, and QA result is recorded once and accessible to all agents. The Developer reads the Architect's style guide. QA maps test cases to the PM's acceptance criteria. **No agent ever re-reads the codebase from scratch.**
 
-### 2. 🔬 Intelligent Code Indexing
-AST-powered code indexing (via `ast-grep`) that parses functions, classes, interfaces, imports/exports, and type definitions. An LLM enrichment pipeline adds natural-language descriptions to every symbol. Agents can then **search by meaning** ("find the authentication middleware") instead of by filename. Dependency graphs, class hierarchies, call graphs, and API maps are all pre-computed and queryable.
+### 2. 👥 Git-Based Team Collaboration
+The entire `.weaver/` directory is designed to be **committed to git**. When one teammate scans a project with `/read`, every other teammate who pulls gets:
+- The full AST-parsed code index (functions, classes, types, imports)
+- LLM-enriched descriptions of every symbol
+- Pre-computed dependency graphs, class hierarchies, call graphs
+- The project plan with change groups and file maps
+- All agent observations and decisions
+- **Human-verified code annotations** that the whole team can trust
 
-### 3. 📊 Real-Time Observability Dashboard
+No duplicate work. No re-scanning. One scan serves the entire team.
+
+### 3. 📝 Human-Verified Code Annotations
+Agents write detailed notes on code symbols — what functions do, how classes are used, design intent, edge cases, gotchas. These annotations are tagged as **agent-written** until a human reviews and verifies them. Verified annotations become trusted team knowledge that:
+- Survives across sessions and team members
+- Can be filtered (verified-only for production decisions, all for exploration)
+- Include tags for categorization (#auth, #critical-path, #tech-debt)
+- Track who verified what and when
+
+### 4. 🔬 Intelligent Code Indexing
+AST-powered code indexing (via `ast-grep`) that parses functions, classes, interfaces, imports/exports, and type definitions. An LLM enrichment pipeline adds natural-language descriptions to every symbol. Agents can then **search by meaning** ("find the authentication middleware") instead of by filename.
+
+### 5. 📊 Real-Time Observability Dashboard
 A Next.js dashboard connected via SSE that shows:
-- All 5 agent statuses (idle / working / thinking / done)
-- The Context Board with all entries, filterable by agent and phase
+- All 5 agent statuses with live activity
+- The Context Board with brainstorm, proposals, decisions, and artifacts
+- Implementation Checklist with progress tracking
 - Code Intelligence views (class maps, module architecture, call graphs)
+- **Team Panel** — members, code annotations, task claims, activity feed
 - The full project plan with change groups and file maps
-- A centralized documentation browser
 - Gemini-powered features: code explanation, codebase chat, AI-enriched index
 
 ---
@@ -40,8 +63,8 @@ A Next.js dashboard connected via SSE that shows:
 └─────────────────┬───────────────────────────────────────┘
                   │ MCP (stdio)
 ┌─────────────────▼───────────────────────────────────────┐
-│              Project Weaver MCP Server                   │
-│  45 tools across 16 modules                              │
+│              Agent Weaver MCP Server                     │
+│  55 tools across 19 modules                              │
 │                                                          │
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐   │
 │  │ Indexer   │ │ Planner  │ │ Agents   │ │ App      │   │
@@ -56,24 +79,46 @@ A Next.js dashboard connected via SSE that shows:
 │  │ Shared   │ │ Tracking │ │ Timeouts │ │ Versioned│   │
 │  │ Memory   │ │ Locking  │ │ 120s max │ │ Tagged   │   │
 │  └──────────┘ └──────────┘ └──────────┘ └──────────┘   │
-│                        │                                 │
-│              .weaver/  │  (persistent state)             │
-│   context.json · index.json · plan.json · code-maps.json │
-│   docs.json · logs/events.jsonl                          │
-└─────────────────┬───────────────────────────────────────┘
-                  │ File watch + SSE
-┌─────────────────▼───────────────────────────────────────┐
-│            Observability Dashboard (Next.js)             │
 │                                                          │
-│  ┌─────────┐  ┌──────────────┐  ┌──────────────────┐   │
-│  │  Plan   │  │ Context Board│  │ Agent Activity    │   │
-│  │Navigator│  │ Code Intel   │  │ Feed (real-time)  │   │
-│  │ Agents  │  │ Plan Detail  │  │ SSE events        │   │
-│  │ Status  │  │ Docs Browser │  │ Log stream        │   │
-│  └─────────┘  └──────────────┘  └──────────────────┘   │
-│                                                          │
-│  Gemini-Powered: Chat · Explain · Enrich · Summarize    │
-└─────────────────────────────────────────────────────────┘
+│  ┌──────────┐ ┌──────────┐        Sync Push/Pull       │
+│  │   Team   │ │   Sync   │ ◄────────────────────┐      │
+│  │ Git collab│ │ Hub API  │                      │      │
+│  │Annotations│ │ Branches │                      │      │
+│  └──────────┘ └──────────┘                      │      │
+│                        │                         │      │
+│              .weaver/  │  (persistent state)     │      │
+│   context.json · index.json · plan.json ·       │      │
+│   code-maps.json · docs.json · team.json ·      │      │
+│   annotations.json · logs/events.jsonl          │      │
+└─────────────────┬───────────────────────────────┼──────┘
+                  │ File watch + SSE              │
+┌─────────────────▼──────────────────────┐        │
+│   Observability Dashboard (Next.js)     │        │
+│                                         │        │
+│  ┌─────────┐  ┌──────────────┐  ┌─────▼──────┐ │
+│  │  Plan   │  │ Context Board│  │   Team     │ │
+│  │Navigator│  │ Code Intel   │  │  Members   │ │
+│  │ Agents  │  │ Plan Detail  │  │Annotations │ │
+│  │ Status  │  │ Docs Browser │  │  Activity  │ │
+│  └─────────┘  └──────────────┘  └────────────┘ │
+│                                                  │
+│  ┌──────────────────────────────────────────┐  │
+│  │  Agent Activity Feed (real-time SSE)     │  │
+│  └──────────────────────────────────────────┘  │
+│                                                  │
+│  Gemini: Chat · Explain · Enrich · Summarize    │
+└──────────────────────────────────────────────────┘
+                  │
+                  │ HTTP (port 4200)
+                  ▼
+┌─────────────────────────────────────────────────┐
+│          Weaver Hub Server (Express)            │
+│  Central sync server for team collaboration     │
+│                                                  │
+│  Storage: ~/.weaver-hub/<repo-hash>/<branch>/   │
+│  Endpoints: push · pull · branches · status     │
+│  Git-aware: tracks repo + branch for isolation  │
+└─────────────────────────────────────────────────┘
 ```
 
 ## The 5 Agents
@@ -103,7 +148,7 @@ A Next.js dashboard connected via SSE that shows:
 
 > **No sequential gates.** The user drives the workflow — call any command in any order. Agents check current project state and adapt.
 
-## 45 MCP Tools
+## 55 MCP Tools
 
 <details>
 <summary>Click to expand full tool list</summary>
@@ -132,6 +177,10 @@ A Next.js dashboard connected via SSE that shows:
 
 **Docs (4):** `add_doc` · `get_docs` · `update_doc` · `list_doc_categories`
 
+**Team Collaboration (7):** `team_status` · `record_team_activity` · `add_team_note` · `claim_task` · `annotate_code` · `verify_annotation` · `get_annotations`
+
+**Hub Sync (3):** `sync_push` · `sync_pull` · `sync_status`
+
 **Shell (1):** `run_command`
 
 **Logging (2):** `log_event` · `read_logs`
@@ -153,7 +202,7 @@ A Next.js dashboard connected via SSE that shows:
 ```bash
 # Clone the repo
 git clone <repo-url>
-cd project-weaver
+cd agent-weaver
 
 # Build the MCP server
 npm install
@@ -163,7 +212,30 @@ npm run build
 cd dashboard
 npm install
 cd ..
+
+# Install and start the Hub server (for team sync)
+cd hub
+npm install
+npm start &  # Runs on http://localhost:4200
+cd ..
 ```
+
+### Deploy to Vercel (Dashboard Only)
+
+The dashboard can be deployed to Vercel for easy access:
+
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Deploy from project root
+vercel
+
+# Or use the Vercel GitHub integration
+# Just connect your repo and deploy!
+```
+
+**Note:** The MCP server runs locally via Gemini CLI. Only the observability dashboard is hosted on Vercel.
 
 ### Use with Gemini CLI
 
@@ -200,6 +272,7 @@ npm run dev
 |-------|-----------|
 | AI Runtime | Gemini CLI + Gemini 3 Pro API |
 | MCP Server | TypeScript, `@modelcontextprotocol/sdk`, stdio transport |
+| Hub Server | Express.js, stores team sync data in `~/.weaver-hub/` |
 | AST Parsing | `ast-grep/napi` (Tree-sitter based) |
 | Schema Validation | Zod |
 | Dashboard | Next.js 15, React 19, Tailwind CSS 4 |
@@ -212,7 +285,7 @@ npm run dev
 
 ## What Makes This Different
 
-| Feature | Typical AI Coding Tool | Project Weaver |
+| Feature | Typical AI Coding Tool | Agent Weaver |
 |---------|----------------------|----------------|
 | Memory | None — re-reads everything | Persistent context board + enriched index |
 | Agents | Single persona | 5 specialized roles with shared state |
@@ -222,6 +295,8 @@ npm run dev
 | Workflow | Linear or chat-based | Agile — any command, any order |
 | Code Review | None | Structured 7-area review with revision loops |
 | Planning | Prompt-based | Architect + PM brainstorm → structured change groups |
+| Team Collab | Session-locked | Git-based sharing + Hub sync by branch |
+| Code Annotations | Not supported | Human-verified, agent-written, team-shared |
 
 ---
 

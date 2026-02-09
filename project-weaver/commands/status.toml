@@ -1,7 +1,7 @@
-description = "Show the current Project Weaver project status and plan summary"
+description = "Show the current Agent Weaver project status and plan summary"
 
 prompt = """
-Show the current Project Weaver project status.
+Show the current Agent Weaver project status.
 
 1. Call mcp__weaver__get_project_status to get the overview
 2. If a plan exists, call mcp__weaver__get_plan with view="summary"

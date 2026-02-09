@@ -20,7 +20,7 @@ export async function POST(request: Request) {
       contextSummary = contextSummary.substring(0, 30000) + '\n\n... (context truncated for token limits)';
     }
 
-    const systemInstruction = `You are a codebase expert assistant for Project Weaver. You help developers understand and navigate their codebase.
+    const systemInstruction = `You are a codebase expert assistant for Agent Weaver. You help developers understand and navigate their codebase.
 
 Use the following codebase context to answer questions accurately. Reference specific file paths and function names. If you don't know something, say so.
 

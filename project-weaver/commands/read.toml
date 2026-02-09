@@ -1,7 +1,7 @@
 description = "Scan an existing project, build code index, and generate code maps"
 
 prompt = """
-The user wants to analyze an existing codebase using Project Weaver.
+The user wants to analyze an existing codebase using Agent Weaver.
 
 1. Use mcp__weaver__read_project to scan the current workspace and detect the tech stack, file structure, and project patterns
 2. Use mcp__weaver__index_project to build the code index (function signatures, classes, imports, exports)
