@@ -1,7 +1,58 @@
 import { z } from 'zod';
 import { BoardManager } from '../context/board.js';
 export function registerApproval(server) {
-    server.tool('check_approval', 'Check the current approval gate status. Returns whether the user has approved the architecture and spec.', {
+    // --- request_plan_approval ---
+    server.tool('request_plan_approval', 'Set the plan status to "pending" so the user can review and approve it from the dashboard. Call this after the plan is finalized and ready for human review. The dashboard will show an approval gate UI.', {
+        workspacePath: z.string().describe('Absolute path to the workspace directory'),
+        summary: z.string().optional().describe('Brief summary of what the plan covers, shown to the user'),
+    }, async ({ workspacePath, summary }) => {
+        const manager = new BoardManager(workspacePath);
+        if (!manager.exists()) {
+            return {
+                content: [{ type: 'text', text: JSON.stringify({ success: false, message: 'Project not initialized. Run init_project first.' }) }],
+            };
+        }
+        const board = manager.readBoard();
+        if (!board.plan) {
+            return {
+                content: [{ type: 'text', text: JSON.stringify({ success: false, message: 'No plan exists yet. Create a plan first using the planning tools.' }) }],
+            };
+        }
+        // Set approval to pending
+        board.approval = {
+            status: 'pending',
+            reviewedBy: 'user',
+            revisionCount: board.approval?.revisionCount ?? 0,
+        };
+        manager.writeBoard(board);
+        // Add a context entry so the dashboard activity feed shows this
+        manager.addEntry({
+            agent: 'product-manager',
+            phase: board.phase,
+            type: 'question',
+            title: 'Plan Ready for Review',
+            content: summary
+                ? `The plan is ready for your review.\n\n**Summary:** ${summary}\n\nPlease review and approve from the dashboard.`
+                : 'The plan is ready for your review. Please approve or request changes from the dashboard.',
+        });
+        manager.logEvent({
+            level: 'info',
+            action: 'approval_requested',
+            message: 'Plan submitted for user approval via dashboard',
+        });
+        return {
+            content: [{
+                    type: 'text',
+                    text: JSON.stringify({
+                        success: true,
+                        message: 'Plan submitted for approval. The user will review it in the dashboard. Use check_plan_approval to poll for their decision.',
+                        status: 'pending',
+                    }),
+                }],
+        };
+    });
+    // --- check_plan_approval ---
+    server.tool('check_plan_approval', 'Check the current approval status of the plan. Use this to poll after calling request_plan_approval. Returns the status (pending, approved, changes-requested) and any user comments.', {
         workspacePath: z.string().describe('Absolute path to the workspace directory'),
     }, async ({ workspacePath }) => {
         const manager = new BoardManager(workspacePath);
@@ -12,91 +63,42 @@ export function registerApproval(server) {
         }
         const board = manager.readBoard();
         const approval = board.approval;
-        return {
-            content: [{
-                    type: 'text',
-                    text: JSON.stringify({
-                        success: true,
-                        currentStage: board.pipeline.currentStage,
-                        approval: approval ?? { status: 'pending' },
-                        message: approval?.status === 'approved'
-                            ? 'User has approved. Pipeline can proceed to implementation.'
-                            : approval?.status === 'changes-requested'
-                                ? `User requested changes: ${approval.comments ?? 'No comments'}. Reset to architecture stage.`
-                                : 'Awaiting user approval. The user must approve from the dashboard before the pipeline can continue.',
-                    }),
-                }],
-        };
-    });
-    server.tool('submit_approval', 'Submit an approval decision for the current pipeline. Used by the dashboard or when the user verbally approves. If approved, pipeline advances to implementation. If changes requested, resets to architecture.', {
-        workspacePath: z.string().describe('Absolute path to the workspace directory'),
-        status: z.enum(['approved', 'changes-requested']).describe('Approval decision'),
-        comments: z.string().optional().describe('Comments or change requests from the user'),
-        requestedChanges: z.array(z.string()).optional().describe('Specific changes requested'),
-    }, async ({ workspacePath, status, comments, requestedChanges }) => {
-        const manager = new BoardManager(workspacePath);
-        if (!manager.exists()) {
+        if (!approval) {
             return {
-                content: [{ type: 'text', text: JSON.stringify({ success: false, message: 'Project not initialized.' }) }],
+                content: [{
+                        type: 'text',
+                        text: JSON.stringify({
+                            success: true,
+                            status: 'none',
+                            message: 'No approval has been requested yet. Use request_plan_approval to submit the plan for review.',
+                        }),
+                    }],
             };
         }
-        manager.setApproval({
-            status,
-            reviewedAt: new Date().toISOString(),
-            comments,
-            requestedChanges,
-        });
-        if (status === 'approved') {
-            manager.advanceStage('approval', 'complete', 'user');
+        const response = {
+            success: true,
+            status: approval.status,
+            reviewedBy: approval.reviewedBy,
+            revisionCount: approval.revisionCount,
+        };
+        if (approval.status === 'approved') {
+            response.message = 'Plan approved! Proceed with implementation.';
+            response.phase = board.phase;
+        }
+        else if (approval.status === 'changes-requested') {
+            response.message = 'User requested changes. Review their feedback and revise the plan.';
+            response.comments = approval.comments;
         }
         else {
-            // Changes requested — reset to architecture
-            manager.resetToStage('architecture');
+            response.message = 'Still waiting for user approval. Check again shortly.';
+        }
+        if (approval.reviewedAt) {
+            response.reviewedAt = approval.reviewedAt;
         }
         return {
             content: [{
                     type: 'text',
-                    text: JSON.stringify({
-                        success: true,
-                        message: status === 'approved'
-                            ? 'Approved! Pipeline will proceed to implementation.'
-                            : 'Changes requested. Pipeline reset to architecture stage.',
-                        status,
-                        comments,
-                    }),
-                }],
-        };
-    });
-    server.tool('get_approval_summary', 'Get a summary of what the user needs to review before approving. Returns architecture document, spec, stories, and style guide from the context board.', {
-        workspacePath: z.string().describe('Absolute path to the workspace directory'),
-    }, async ({ workspacePath }) => {
-        const manager = new BoardManager(workspacePath);
-        if (!manager.exists()) {
-            return {
-                content: [{ type: 'text', text: JSON.stringify({ success: false, message: 'Project not initialized.' }) }],
-            };
-        }
-        const board = manager.readBoard();
-        // Gather artifacts from completed stages
-        const architectureArtifacts = board.entries.filter(e => e.stage === 'architecture' && (e.type === 'artifact' || e.type === 'decision'));
-        const specArtifacts = board.entries.filter(e => e.stage === 'spec' && e.type === 'artifact');
-        const storyArtifacts = board.entries.filter(e => e.stage === 'stories' && e.type === 'artifact');
-        const styleGuideEntries = board.entries.filter(e => e.type === 'decision' && e.metadata?.isStyleGuide);
-        return {
-            content: [{
-                    type: 'text',
-                    text: JSON.stringify({
-                        success: true,
-                        project: board.project,
-                        approval: board.approval ?? { status: 'pending' },
-                        summary: {
-                            architecture: architectureArtifacts.map(e => ({ title: e.title, content: e.content.substring(0, 2000) })),
-                            spec: specArtifacts.map(e => ({ title: e.title, content: e.content.substring(0, 2000) })),
-                            stories: storyArtifacts.map(e => ({ title: e.title, content: e.content.substring(0, 2000) })),
-                            styleGuide: styleGuideEntries.map(e => ({ title: e.title, content: e.content.substring(0, 2000) })),
-                        },
-                        message: 'Review the architecture, spec, and stories above. Approve from the dashboard or use submit_approval.',
-                    }),
+                    text: JSON.stringify(response),
                 }],
         };
     });

@@ -10,6 +10,10 @@ import { registerEnrichment } from './enrichment.js';
 import { registerDependencyGraph } from './dependency-graph.js';
 import { registerCodeIntel } from './code-intel.js';
 import { registerCodeMaps } from './code-maps.js';
+import { registerAppRunner } from './app-runner.js';
+import { registerDocs } from './docs.js';
+import { registerShell } from './shell.js';
+import { registerApproval } from './approval.js';
 export function registerAllTools(server) {
     registerInitProject(server);
     registerContextBoardTools(server);
@@ -23,5 +27,9 @@ export function registerAllTools(server) {
     registerDependencyGraph(server);
     registerCodeIntel(server);
     registerCodeMaps(server);
+    registerAppRunner(server);
+    registerDocs(server);
+    registerShell(server);
+    registerApproval(server);
 }
 //# sourceMappingURL=index.js.map

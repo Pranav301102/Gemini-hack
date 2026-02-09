@@ -25,19 +25,19 @@ export declare function getAgentConfig(role: AgentRole): {
 } | {
     role: AgentRole;
     displayName: string;
-    defaultStages: readonly ["implementation", "ship"];
-    outputTypes: readonly ["artifact", "question", "handoff"];
+    phases: readonly ["ready"];
+    outputTypes: readonly ["artifact", "question", "decision"];
     systemPrompt: string;
 } | {
     role: AgentRole;
     displayName: string;
-    defaultStages: readonly ["testing"];
-    outputTypes: readonly ["artifact", "feedback", "handoff"];
+    phases: readonly ["ready"];
+    outputTypes: readonly ["artifact", "proposal", "decision"];
     systemPrompt: string;
 } | {
     role: AgentRole;
     displayName: string;
-    defaultStages: readonly ["review"];
-    outputTypes: readonly ["feedback", "decision", "handoff"];
+    phases: readonly ["ready"];
+    outputTypes: readonly ["proposal", "decision"];
     systemPrompt: string;
 };

@@ -135,4 +135,96 @@ export function registerAgentRunner(server: McpServer): void {
       };
     },
   );
+
+  // --- request_revision ---
+  server.tool(
+    'request_revision',
+    'Request changes from the developer after a code review. Resets the developer agent to working status and records the feedback. Used by the Code Reviewer when issues are found.',
+    {
+      workspacePath: z.string().describe('Absolute path to the workspace directory'),
+      feedback: z.string().describe('Detailed description of all issues that need fixing'),
+      files: z.array(z.string()).describe('Array of file paths that need changes'),
+      severity: z.enum(['critical', 'major']).describe('Overall severity of issues found'),
+    },
+    async ({ workspacePath, feedback, files, severity }) => {
+      const manager = new BoardManager(workspacePath);
+      if (!manager.exists()) {
+        return {
+          content: [{ type: 'text' as const, text: JSON.stringify({ success: false, message: 'Project not initialized.' }) }],
+        };
+      }
+
+      const board = manager.readBoard();
+
+      // Check revision cycle count to prevent infinite loops
+      const revisionEntries = board.entries.filter(
+        e => e.type === 'proposal' && e.metadata?.isRevisionRequest === true
+      );
+      const revisionCount = revisionEntries.length;
+      const MAX_REVISIONS = 3;
+
+      if (revisionCount >= MAX_REVISIONS) {
+        return {
+          content: [{
+            type: 'text' as const,
+            text: JSON.stringify({
+              success: false,
+              message: `Maximum revision cycles (${MAX_REVISIONS}) reached. Approve the implementation or escalate to the user.`,
+              revisionCount,
+            }),
+          }],
+        };
+      }
+
+      // Record the revision request on the context board
+      manager.addEntry({
+        agent: 'code-reviewer',
+        phase: board.phase,
+        type: 'proposal',
+        title: `Revision Request #${revisionCount + 1}: ${severity.toUpperCase()} issues found`,
+        content: `## Revision Request\n\n**Severity:** ${severity}\n**Files affected:** ${files.join(', ')}\n\n${feedback}`,
+        metadata: {
+          isRevisionRequest: true,
+          revisionNumber: revisionCount + 1,
+          severity,
+          files,
+        },
+      });
+
+      // Reset developer agent to working status
+      manager.updateAgentState('developer', {
+        status: 'working',
+        currentTask: `Address revision request #${revisionCount + 1}: ${severity} issues in ${files.length} file(s)`,
+      });
+
+      // Set code-reviewer to done (waiting for revision)
+      manager.updateAgentState('code-reviewer', {
+        status: 'done',
+        currentTask: undefined,
+        output: `Requested revision #${revisionCount + 1} — ${severity} issues in ${files.length} file(s)`,
+      });
+
+      manager.logEvent({
+        level: severity === 'critical' ? 'error' : 'warn',
+        agent: 'code-reviewer',
+        phase: board.phase,
+        action: 'revision_requested',
+        message: `Code Reviewer requested revision #${revisionCount + 1}: ${severity} issues in ${files.join(', ')}`,
+        data: { revisionNumber: revisionCount + 1, severity, files, feedbackLength: feedback.length },
+      });
+
+      return {
+        content: [{
+          type: 'text' as const,
+          text: JSON.stringify({
+            success: true,
+            message: `Revision #${revisionCount + 1} requested. Developer re-activated.`,
+            revisionNumber: revisionCount + 1,
+            maxRevisions: MAX_REVISIONS,
+            remainingRevisions: MAX_REVISIONS - (revisionCount + 1),
+          }),
+        }],
+      };
+    },
+  );
 }

@@ -1,0 +1,67 @@
+description = "Generate comprehensive project documentation using the Product Manager agent"
+
+prompt = """
+The user wants to generate or update project documentation.
+
+## Pre-flight checks
+
+1. Use mcp__weaver__get_project_status to confirm:
+   - A project exists and has been initialized
+   - Ideally the project has been through planning and/or implementation
+
+2. Load project context:
+   - Use mcp__weaver__get_code_maps with view="summary" for the project overview
+   - Use mcp__weaver__get_code_maps with view="api" for API endpoints
+   - Use mcp__weaver__get_code_maps with view="modules" for module architecture
+   - Use mcp__weaver__get_plan with view="summary" if a plan exists
+
+3. Check existing docs:
+   - Use mcp__weaver__list_doc_categories to see what documentation already exists
+
+## Documentation Generation
+
+4. Use mcp__weaver__assign_agent with agent="product-manager" and task="Create and curate comprehensive project documentation"
+
+5. As the Product Manager, create or update docs in each category:
+
+   a. **Architecture** (category="architecture"):
+      - Project architecture overview with module structure
+      - Technology stack and design decisions
+      - Based on code maps and plan data
+
+   b. **API Documentation** (category="api"):
+      - Document each API endpoint (from API map)
+      - Include request/response formats
+      - Authentication requirements
+
+   c. **Setup & Onboarding** (category="setup"):
+      - Prerequisites and environment setup
+      - Installation steps
+      - Configuration guide
+      - How to run in development
+
+   d. **Feature Specs** (category="feature"):
+      - One doc per major feature
+      - User-facing description and behavior
+      - Based on requirements and plan
+
+   e. **Runbooks** (category="runbook"):
+      - How to run the app
+      - How to run tests
+      - How to deploy
+      - Troubleshooting common issues
+
+   f. **Changelog** (category="changelog"):
+      - What was built and when
+      - Based on tracked files and plan change groups
+
+6. For each doc, use mcp__weaver__add_doc with appropriate category, title, content (markdown), agent="product-manager", and relevant tags
+
+7. Use mcp__weaver__complete_agent_task with agent="product-manager" and a summary
+
+8. Use mcp__weaver__list_doc_categories to show the final documentation coverage
+
+9. Tell the user: "Documentation created. Run /dashboard and check the Docs tab to browse all documentation."
+
+Additional user context: {{args}}
+"""

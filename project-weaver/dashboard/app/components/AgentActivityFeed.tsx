@@ -15,7 +15,7 @@ interface WeaverEvent {
   timestamp: string
   level: 'info' | 'warn' | 'error' | 'debug'
   agent?: string
-  stage?: string
+  phase?: string
   action: string
   message: string
   data?: Record<string, unknown>
@@ -173,13 +173,13 @@ const AgentActivityFeed: React.FC<AgentActivityFeedProps> = ({ events, isConnect
           </div>
         ) : (
           <div className="divide-y divide-gray-800/50">
-            {filteredEvents.map((event) => {
+            {filteredEvents.map((event, idx) => {
               const config = LEVEL_CONFIG[event.level] ?? LEVEL_CONFIG.info
               const Icon = config.icon
               const agentColor = event.agent ? AGENT_COLORS[event.agent] ?? 'text-gray-400' : 'text-gray-500'
 
               return (
-                <div key={event.id} className="px-4 py-2.5 hover:bg-gray-900/50 transition-colors">
+                <div key={`${event.id}-${idx}`} className="px-4 py-2.5 hover:bg-gray-900/50 transition-colors">
                   <div className="flex items-start gap-2">
                     {/* Level icon */}
                     <div className={`mt-0.5 ${config.color}`}>
@@ -195,10 +195,10 @@ const AgentActivityFeed: React.FC<AgentActivityFeedProps> = ({ events, isConnect
                             [{AGENT_LABELS[event.agent] ?? event.agent}]
                           </span>
                         )}
-                        {/* Stage badge */}
-                        {event.stage && (
+                        {/* Phase badge */}
+                        {event.phase && (
                           <span className="text-[10px] text-gray-600 bg-gray-800 px-1.5 py-0.5 rounded">
-                            {event.stage}
+                            {event.phase}
                           </span>
                         )}
                         {/* Timestamp */}

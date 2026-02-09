@@ -112,6 +112,17 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Read docs.json if available
+    let docs = null
+    const docsFile = path.join(weaverDir, 'docs.json')
+    if (fs.existsSync(docsFile)) {
+      try {
+        docs = JSON.parse(fs.readFileSync(docsFile, 'utf-8'))
+      } catch {
+        // Skip if docs.json is malformed
+      }
+    }
+
     // Migration: if old pipeline format, convert for dashboard
     if (context.pipeline && !context.phase) {
       const currentStage = context.pipeline.currentStage
@@ -151,6 +162,8 @@ export async function GET(request: NextRequest) {
       enrichmentProgress,
       plan,
       codeMaps,
+      docs,
+      approval: context.approval ?? null,
     })
   } catch (error) {
     return NextResponse.json({

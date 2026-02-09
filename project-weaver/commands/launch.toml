@@ -1,0 +1,41 @@
+description = "Launch the built app, monitor its logs, and surface errors in the dashboard"
+
+prompt = """
+The user wants to launch and monitor their application.
+
+## Pre-flight checks
+
+1. Use mcp__weaver__get_project_status to confirm:
+   - A project exists and has been initialized
+   - Phase is "ready" (implementation has been done)
+   - Check if files have been tracked (files created by Developer)
+
+2. Detect the right start command:
+   - Read package.json in the workspace to find available scripts
+   - Look for these scripts in order of preference: "dev", "start", "serve"
+   - If the project has separate frontend/backend dirs, launch both (use different names)
+   - If no package.json or no matching script, ask the user what command to use
+
+## Launch
+
+3. Use mcp__weaver__launch_app with:
+   - workspacePath: the project workspace path
+   - command: the detected start command (e.g., "npm run dev")
+   - name: "app" (or "backend"/"frontend" if launching multiple)
+
+4. Wait 10 seconds, then use mcp__weaver__get_app_status to check if the app started successfully:
+   - If status is "running": the app started successfully
+   - If status is "crashed": read the recent logs to diagnose the issue
+   - Show the user any errors from the recent logs
+
+5. Use mcp__weaver__get_app_logs with lines=20 to show the user the initial startup output
+
+6. Tell the user:
+   - The app is running (or failed to start)
+   - The PID and command being used
+   - Any errors detected in the startup output
+   - "App logs are streaming to the dashboard Activity Feed. Run /dashboard to watch live."
+   - "Use /stop or mcp__weaver__stop_app to stop the process when done."
+
+Additional user context: {{args}}
+"""

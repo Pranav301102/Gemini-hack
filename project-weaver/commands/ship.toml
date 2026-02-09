@@ -1,0 +1,67 @@
+description = "Generate final summary and deployment instructions"
+
+prompt = """
+The user wants to ship the project and create a final summary.
+
+## Steps:
+
+1. Use mcp__weaver__get_agent_status to check the current state of all agents and gather project context
+
+2. Use mcp__weaver__assign_agent with:
+   - agent: "developer"
+   - task: "Create final shipping summary and deployment instructions"
+
+3. Now ACT AS the Developer to create the ship summary:
+
+   a. **Gather Project State:**
+      - Use mcp__weaver__get_code_maps with view="summary" to get project overview
+      - Use mcp__weaver__get_code_maps with view="api" to list all API endpoints
+      - Read the plan to get the list of what was implemented
+      - Check all tracked files with mcp__weaver__list_project_files
+
+   b. **Generate Shipping Report:**
+      Create a comprehensive `decision` entry via mcp__weaver__update_context_board with:
+
+      ### Project Summary
+      - What was built (features, endpoints, components)
+      - Tech stack used
+      - Files created/modified (count and summary)
+
+      ### How to Run
+      - Dependencies to install
+      - Environment variables needed
+      - Start command(s)
+
+      ### How to Deploy
+      - Build command(s)
+      - Deployment target and instructions
+      - Configuration needed for production
+
+      ### Testing
+      - How to run tests
+      - Test coverage summary (from QA results)
+
+      ### Known Limitations
+      - Any known issues or todos
+      - Future improvement suggestions
+
+   c. **Create Dashboard Widgets:**
+      - A `kpi` widget with shipping metrics (files, LOC, test count, review status)
+      - A `table` widget listing all created files with their purposes
+      - A `workflow` widget showing project activity summary
+
+   d. **Create Documentation:**
+      - Use mcp__weaver__add_doc with category="changelog" to record what was shipped
+      - Use mcp__weaver__add_doc with category="setup" for deployment/setup guide
+
+4. Use mcp__weaver__complete_agent_task with:
+   - agent: "developer"
+   - summary: "Final shipping summary created"
+
+5. Show the user:
+   - A clean, formatted shipping report
+   - Deploy commands they can run right now
+   - Any remaining action items
+
+Additional user context: {{args}}
+"""

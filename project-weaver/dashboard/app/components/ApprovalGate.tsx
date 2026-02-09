@@ -9,8 +9,8 @@ interface ContextEntry {
   id: string
   timestamp: string
   agent: string
-  stage: string
-  type: 'decision' | 'artifact' | 'question' | 'feedback' | 'handoff'
+  phase: string
+  type: 'decision' | 'artifact' | 'question' | 'proposal' | 'brainstorm' | 'memory-map'
   title: string
   content: string
   metadata?: Record<string, unknown>
@@ -30,15 +30,15 @@ const ApprovalGate: React.FC<ApprovalGateProps> = ({ entries, projectPath, onApp
   const [result, setResult] = useState<{ success: boolean; message: string } | null>(null)
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['architecture', 'spec', 'stories', 'styleGuide']))
 
-  // Gather relevant entries for review
+  // Gather relevant entries for review (phase-based)
   const architectureEntries = entries.filter(
-    e => e.stage === 'architecture' && (e.type === 'artifact' || e.type === 'decision')
+    e => e.agent === 'architect' && (e.type === 'artifact' || e.type === 'decision' || e.type === 'proposal')
   )
   const specEntries = entries.filter(
-    e => e.stage === 'spec' && e.type === 'artifact'
+    e => e.agent === 'product-manager' && (e.type === 'artifact' || e.type === 'proposal')
   )
   const storyEntries = entries.filter(
-    e => e.stage === 'stories' && e.type === 'artifact'
+    e => e.agent === 'product-manager' && e.type === 'brainstorm'
   )
   const styleGuideEntries = entries.filter(
     e => e.type === 'decision' && e.metadata?.isStyleGuide === true

@@ -16,4 +16,14 @@ export const AGENT_DISPLAY_NAMES = {
     'qa': 'QA Engineer',
     'code-reviewer': 'Code Reviewer',
 };
+export const DOC_CATEGORIES = ['api', 'architecture', 'setup', 'feature', 'decision', 'runbook', 'changelog'];
+export const DOC_CATEGORY_LABELS = {
+    api: 'API Documentation',
+    architecture: 'Architecture',
+    setup: 'Setup & Onboarding',
+    feature: 'Feature Specs',
+    decision: 'Decisions',
+    runbook: 'Runbooks',
+    changelog: 'Changelog',
+};
 //# sourceMappingURL=types.js.map

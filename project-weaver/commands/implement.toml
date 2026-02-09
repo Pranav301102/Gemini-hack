@@ -1,0 +1,65 @@
+description = "Activate the Developer agent to implement the plan, writing all code files"
+
+prompt = """
+The user wants to implement the plan created by /build.
+
+## Pre-flight checks
+
+1. Use mcp__weaver__get_project_status to confirm a .weaver project exists
+
+2. Use mcp__weaver__get_plan with view="summary" to load the plan overview (if no plan exists, inform the user they can run /build to create one, but proceed with any available context)
+
+3. Load codebase understanding via code maps:
+   - Use mcp__weaver__get_code_maps with view="summary" for the high-level overview
+   - Use mcp__weaver__get_code_maps with view="modules" to understand module boundaries
+   - Use mcp__weaver__get_code_maps with view="calls" to see the current call graph
+
+## Implementation
+
+4. Use mcp__weaver__assign_agent with agent="developer" and task="Implement the full plan, writing all files in dependency order"
+
+5. Use mcp__weaver__get_plan with view="changes" to load ALL change groups with their ordered changes
+
+6. For EACH change group (sorted by `order` field, lowest first):
+   a. Log progress: use mcp__weaver__update_context_board with agent="developer", phase="ready", type="artifact", title="Implementing: [group name]"
+   b. For each change in the group:
+      - If changeType is "modify": use mcp__weaver__get_code_maps with view="file" and file="[path]" to understand the current file, then read the actual file to get its current content
+      - If changeType is "create": check the change description and any dependencies
+      - Use mcp__weaver__get_file_change_map for the file to see all planned changes
+      - Write COMPLETE, working code — no TODO placeholders, no stub implementations
+      - Write the file to disk using your native file writing capabilities (do NOT use mcp__weaver__save_file)
+      - After writing the file, use mcp__weaver__track_file with agent="developer", phase="ready", and the filePath to record it in the Weaver context board
+   c. After completing the group, record what was built
+
+7. Implementation order rules:
+   - Types / interfaces / models FIRST
+   - Utility functions and helpers
+   - Core business logic (controllers, services)
+   - Middleware and routing
+   - Frontend state management (context, stores)
+   - Frontend components
+   - Configuration and entry points
+   - Follow the change group `order` field — it reflects dependency ordering
+
+8. Code quality rules:
+   - Write production-quality TypeScript
+   - Include proper imports — every import must resolve to a real file
+   - Handle errors at system boundaries
+   - Follow the existing code patterns (look at the code maps for conventions)
+   - Keep functions small and focused
+   - Use the same naming conventions as the existing codebase
+
+## Completion
+
+9. After ALL change groups are implemented:
+   - Use mcp__weaver__update_context_board with type="artifact" to record a summary of all files created/modified
+   - Create dashboard widgets:
+     - A "table" widget listing all files created (columns: File, Lines, Purpose)
+     - A "workflow" widget showing implementation progress (one step per change group, all completed)
+     - A "kpi" widget with implementation metrics (files created, total LOC, components built)
+   - Use mcp__weaver__complete_agent_task with agent="developer" and a summary
+
+10. Tell the user: "Implementation complete. Run /dashboard to see results, or test the app."
+
+Additional user context: {{args}}
+"""

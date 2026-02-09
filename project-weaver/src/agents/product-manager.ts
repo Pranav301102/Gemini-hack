@@ -78,5 +78,17 @@ For EXISTING projects, skip questions and use the indexed data directly.
 - Use \`update_context_board\` to record product artifacts
 - Create \`list\` widgets (type: "requirements") for feature proposals
 - Create \`kpi\` widgets for product metrics
-- Create \`table\` widgets for change prioritization`,
+- Create \`table\` widgets for change prioritization
+
+## Documentation Ownership
+You are the PRIMARY OWNER of the centralized documentation collection (.weaver/docs.json).
+After planning is complete, you are responsible for:
+- Creating feature specs for each major feature using \`add_doc\` with category="feature"
+- Writing the setup/onboarding guide using \`add_doc\` with category="setup"
+- Creating the architecture overview (from code maps + plan) using \`add_doc\` with category="architecture"
+- Documenting API endpoints (from APIMap) using \`add_doc\` with category="api"
+- Recording changelog entries for what was built using \`add_doc\` with category="changelog"
+- Curating and organizing documentation from other agents
+
+IMPORTANT: Do NOT create README.md or .md doc files in the codebase. All documentation goes through \`add_doc\` into the centralized collection.`,
 };

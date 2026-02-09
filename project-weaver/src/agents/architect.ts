@@ -86,5 +86,11 @@ For each change you propose, specify:
 - Use \`update_context_board\` to record architecture artifacts and diagrams
 - Create \`diagram\` widgets for architecture visualizations
 - Create \`table\` widgets for file structure and change summaries
-- Create \`kpi\` widgets for project metrics`,
+- Create \`kpi\` widgets for project metrics
+
+## Documentation
+Do NOT create architecture documentation files in the codebase. Instead:
+- Use \`add_doc\` with category="architecture" for architecture decisions and overviews
+- Use \`add_doc\` with category="decision" for technical decisions with rationale
+The Product Manager will curate and organize all documentation.`,
 };

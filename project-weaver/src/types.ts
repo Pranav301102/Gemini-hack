@@ -459,6 +459,7 @@ export interface ContextBoard {
   widgets: DashboardWidget[];
   phase: ProjectPhase;
   plan?: ProjectPlan;
+  approval?: ApprovalState;
   createdAt: string;
   updatedAt: string;
 }
@@ -496,3 +497,69 @@ export const AGENT_DISPLAY_NAMES: Record<AgentRole, string> = {
   'qa': 'QA Engineer',
   'code-reviewer': 'Code Reviewer',
 };
+
+// ─── App Runner Types (process monitoring) ───
+
+export interface ProcessInfo {
+  pid: number;
+  name: string;
+  command: string;
+  workspacePath: string;
+  startedAt: string;
+  status: 'running' | 'stopped' | 'crashed';
+  exitCode?: number;
+  recentLogs: AppLogLine[];
+}
+
+export interface AppLogLine {
+  timestamp: string;
+  level: 'info' | 'warn' | 'error' | 'debug';
+  source: 'stdout' | 'stderr';
+  message: string;
+  raw: string;
+}
+
+// ─── Documentation Collection Types ───
+
+export type DocCategory = 'api' | 'architecture' | 'setup' | 'feature' | 'decision' | 'runbook' | 'changelog';
+
+export const DOC_CATEGORIES: DocCategory[] = ['api', 'architecture', 'setup', 'feature', 'decision', 'runbook', 'changelog'];
+
+export const DOC_CATEGORY_LABELS: Record<DocCategory, string> = {
+  api: 'API Documentation',
+  architecture: 'Architecture',
+  setup: 'Setup & Onboarding',
+  feature: 'Feature Specs',
+  decision: 'Decisions',
+  runbook: 'Runbooks',
+  changelog: 'Changelog',
+};
+
+export interface DocEntry {
+  id: string;
+  category: DocCategory;
+  title: string;
+  content: string;
+  agent: AgentRole;
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+  revisions: { timestamp: string; agent: AgentRole }[];
+}
+
+export interface DocsCollection {
+  version: string;
+  docs: DocEntry[];
+}
+
+// ─── Approval Types ───
+
+export type ApprovalStatus = 'pending' | 'approved' | 'changes-requested';
+
+export interface ApprovalState {
+  status: ApprovalStatus;
+  reviewedAt?: string;
+  reviewedBy: 'user' | AgentRole;
+  comments?: string;
+  revisionCount: number;
+}

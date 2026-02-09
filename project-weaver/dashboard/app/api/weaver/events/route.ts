@@ -33,6 +33,7 @@ export async function GET(request: NextRequest) {
     start(controller) {
       let lastEventCount = 0
       let lastContextModified = 0
+      let lastDocsModified = 0
 
       const sendEvent = (type: string, data: unknown) => {
         controller.enqueue(encoder.encode(`event: ${type}\ndata: ${JSON.stringify(data)}\n\n`))
@@ -62,6 +63,21 @@ export async function GET(request: NextRequest) {
                 }
               }
               sendEvent('context', context)
+            }
+          }
+
+          // Check docs.json for changes
+          const docsFile = path.join(weaverDir, 'docs.json')
+          if (fs.existsSync(docsFile)) {
+            const docsStat = fs.statSync(docsFile)
+            if (docsStat.mtimeMs > lastDocsModified) {
+              lastDocsModified = docsStat.mtimeMs
+              try {
+                const docs = JSON.parse(fs.readFileSync(docsFile, 'utf-8'))
+                sendEvent('docs', docs)
+              } catch {
+                // Skip malformed
+              }
             }
           }
 

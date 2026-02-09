@@ -1,4 +1,4 @@
-import { ContextBoard, ContextEntry, AgentRole, AgentState, ProjectPhase, WeaverEvent, EntryType, TrackedFile, DashboardWidget, ProjectContext, RequirementsQuestion, ProjectIndex, ProjectPlan, ProposedChange, BrainstormEntry } from '../types.js';
+import { ContextBoard, ContextEntry, AgentRole, AgentState, ProjectPhase, WeaverEvent, EntryType, TrackedFile, DashboardWidget, ProjectContext, RequirementsQuestion, ProjectIndex, ProjectPlan, ProposedChange, BrainstormEntry, DocEntry, DocCategory, DocsCollection } from '../types.js';
 export declare class BoardManager {
     private workspacePath;
     constructor(workspacePath: string);
@@ -8,6 +8,7 @@ export declare class BoardManager {
     private get planFilePath();
     private get logsDir();
     private get artifactsDir();
+    private get docsFilePath();
     private generateId;
     /** Check if a .weaver/ project exists in the workspace */
     exists(): boolean;
@@ -15,8 +16,12 @@ export declare class BoardManager {
     initProject(projectName: string, description: string, requirements?: string[], techStack?: string[]): ContextBoard;
     /** Read the context board from disk (with migration from old format) */
     readBoard(): ContextBoard;
-    /** Write the context board to disk */
+    /** Write the context board to disk (with backup) */
     writeBoard(board: ContextBoard): void;
+    /** Get the lock key for this workspace */
+    private get lockKey();
+    /** Execute a read-modify-write operation with file locking */
+    withBoardLock<T>(fn: (board: ContextBoard) => T): Promise<T>;
     /** Set the current project phase */
     setPhase(phase: ProjectPhase): void;
     /** Add an entry to the context board */
@@ -58,4 +63,23 @@ export declare class BoardManager {
     logEvent(event: Omit<WeaverEvent, 'id' | 'timestamp'>): void;
     /** Read log events from a specific date */
     readLogs(date?: string): WeaverEvent[];
+    /** Read the docs collection from .weaver/docs.json */
+    readDocs(): DocsCollection;
+    /** Write the docs collection to .weaver/docs.json */
+    writeDocs(collection: DocsCollection): void;
+    /** Add a new document to the collection */
+    addDoc(entry: Omit<DocEntry, 'id' | 'createdAt' | 'updatedAt' | 'revisions'>): DocEntry;
+    /** Update an existing document in the collection */
+    updateDoc(id: string, updates: {
+        title?: string;
+        content?: string;
+        tags?: string[];
+    }, agent: AgentRole): DocEntry | null;
+    /** Query docs with filters */
+    getDocs(filters?: {
+        category?: DocCategory;
+        tag?: string;
+        search?: string;
+        id?: string;
+    }): DocEntry[];
 }

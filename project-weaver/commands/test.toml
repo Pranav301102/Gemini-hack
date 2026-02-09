@@ -1,0 +1,42 @@
+description = "Activate QA Engineer to test the implementation"
+
+prompt = """
+The user wants to run QA testing for the current project.
+
+## Steps:
+
+1. Use mcp__weaver__get_agent_status to check the current state of all agents and understand the project context
+
+2. Use mcp__weaver__assign_agent with:
+   - agent: "qa"
+   - task: "Test the implementation against the plan and acceptance criteria"
+   - context: "Review the plan and all artifact entries from the developer to understand what was built"
+
+3. Now ACT AS the QA Engineer. Follow the QA agent's role context:
+
+   a. Use mcp__weaver__get_code_maps with view="summary" to understand the project structure
+   b. Use mcp__weaver__get_code_maps with view="api" to identify API endpoints needing integration tests
+   c. Use mcp__weaver__read_file to inspect implementation files
+   d. Write comprehensive test files covering:
+      - Unit tests for core business logic
+      - Integration tests for API endpoints
+      - Edge case and error handling tests
+   e. After writing each test file, use mcp__weaver__track_file with agent="qa" and phase="ready"
+   f. Use mcp__weaver__run_command to execute the test suite (e.g., "npm test", "npx jest", "pytest")
+   g. Record test results:
+      - Use mcp__weaver__update_context_board to record a test summary artifact
+      - Create a `table` widget with test results
+      - Create a `kpi` widget with testing metrics
+
+4. Use mcp__weaver__complete_agent_task with:
+   - agent: "qa"
+   - summary: Brief summary of test results (tests written, passed, failed, coverage)
+
+5. Show the user a summary of:
+   - Total tests written and their locations
+   - Test execution results (pass/fail counts)
+   - Any bugs or issues found
+   - Suggestions for next steps based on results
+
+Additional user context: {{args}}
+"""

@@ -1,0 +1,57 @@
+description = "Activate Code Reviewer to review the implementation"
+
+prompt = """
+The user wants to run a code review for the current project.
+
+## Steps:
+
+1. Use mcp__weaver__get_agent_status to check the current state of all agents and understand the project context
+
+2. Use mcp__weaver__assign_agent with:
+   - agent: "code-reviewer"
+   - task: "Review the implementation for correctness, security, performance, and code quality"
+   - context: "Review all artifact and decision entries to understand the plan and what was built"
+
+3. Now ACT AS the Code Reviewer. Follow the Code Reviewer's role context:
+
+   a. **Structural Review** — Use code maps first:
+      - mcp__weaver__get_code_maps with view="modules" to verify module boundaries
+      - mcp__weaver__get_code_maps with view="calls" to trace function call chains
+      - mcp__weaver__get_code_maps with view="classes" to check class hierarchies
+
+   b. **Detailed Review** — Read implementation files:
+      - Use mcp__weaver__read_file to read each implemented file
+      - Check for: correctness, security, performance, error handling, code quality
+
+   c. **Style Guide Check** — Find the Architect's style guide:
+      - Look for `decision` entries with `metadata.isStyleGuide: true` on the context board
+      - Verify naming conventions, import organization, patterns
+
+   d. **Test Review** — Check QA's test coverage:
+      - Read test files to verify coverage of critical paths
+      - Verify edge cases and error paths are tested
+
+   e. **Record Findings**:
+      - Use mcp__weaver__update_context_board to record a review findings `proposal` entry
+      - Create a `table` widget with the review checklist (Area, Rating, Notes)
+      - Create a `kpi` widget with review metrics
+
+   f. **Make Verdict**:
+      - If APPROVED: Record a `decision` entry with the approval verdict
+      - If CHANGES REQUESTED: Use mcp__weaver__request_revision with:
+        - feedback: detailed issues
+        - files: affected file paths
+        - severity: "critical" or "major"
+
+4. Use mcp__weaver__complete_agent_task with:
+   - agent: "code-reviewer"
+   - summary: Brief verdict summary
+
+5. Show the user:
+   - The review checklist with ratings for each area
+   - Any issues found (categorized by severity)
+   - The final verdict (APPROVED or CHANGES REQUESTED)
+   - Suggestions for next steps based on verdict
+
+Additional user context: {{args}}
+"""

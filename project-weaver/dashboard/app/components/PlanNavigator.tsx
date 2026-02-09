@@ -62,6 +62,14 @@ interface ProjectData {
   techStack?: string[]
 }
 
+interface ApprovalData {
+  status: string
+  reviewedAt?: string
+  reviewedBy: string
+  comments?: string
+  revisionCount: number
+}
+
 interface PlanNavigatorProps {
   plan: PlanData | null
   project: ProjectData | null
@@ -74,6 +82,7 @@ interface PlanNavigatorProps {
   geminiReady: boolean
   projectPath: string
   enrichmentProgress: { totalItems: number; enrichedItems: number } | null
+  approval?: ApprovalData | null
 }
 
 const CHANGE_TYPE_CONFIG: Record<string, { icon: React.ElementType; color: string }> = {
@@ -90,17 +99,25 @@ const PRIORITY_COLORS: Record<string, string> = {
   'nice-to-have': 'bg-gray-500/20 text-gray-400',
 }
 
-const PHASE_STEPS = [
-  { key: 'read', label: 'Read' },
-  { key: 'plan', label: 'Plan' },
-  { key: 'ready', label: 'Ready' },
-]
+const AGENT_CONFIG: Record<string, { label: string; fullName: string; color: string }> = {
+  'product-manager': { label: 'PM', fullName: 'Product Manager', color: 'bg-purple-500' },
+  'architect': { label: 'ARCH', fullName: 'Architect', color: 'bg-blue-500' },
+  'developer': { label: 'DEV', fullName: 'Developer', color: 'bg-green-500' },
+  'qa': { label: 'QA', fullName: 'QA Engineer', color: 'bg-yellow-500' },
+  'code-reviewer': { label: 'CR', fullName: 'Code Reviewer', color: 'bg-red-500' },
+}
 
 const AGENT_STATUS_COLORS: Record<string, string> = {
   idle: 'bg-gray-600',
   thinking: 'bg-yellow-500 animate-pulse',
   working: 'bg-blue-500 animate-pulse',
   done: 'bg-green-500',
+}
+
+const APPROVAL_STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
+  pending: { label: 'Awaiting Approval', color: 'text-orange-400', bg: 'bg-orange-500/10 border-orange-500/30' },
+  approved: { label: 'Approved', color: 'text-green-400', bg: 'bg-green-500/10 border-green-500/30' },
+  'changes-requested': { label: 'Changes Requested', color: 'text-red-400', bg: 'bg-red-500/10 border-red-500/30' },
 }
 
 const PlanNavigator: React.FC<PlanNavigatorProps> = ({
@@ -115,6 +132,7 @@ const PlanNavigator: React.FC<PlanNavigatorProps> = ({
   geminiReady,
   projectPath,
   enrichmentProgress,
+  approval,
 }) => {
   const [showFiles, setShowFiles] = useState(false)
   const [showEnrichment, setShowEnrichment] = useState(false)
@@ -141,38 +159,51 @@ const PlanNavigator: React.FC<PlanNavigatorProps> = ({
         )}
       </div>
 
-      {/* Phase indicator */}
+      {/* Current phase badge (non-sequential) */}
       <div className="px-4 py-3 border-b border-gray-800">
-        <div className="flex items-center gap-1">
-          {PHASE_STEPS.map((step, i) => {
-            const isActive = step.key === phase
-            const isPast = PHASE_STEPS.findIndex(s => s.key === phase) > i
-            return (
-              <React.Fragment key={step.key}>
-                {i > 0 && (
-                  <div className={`flex-1 h-px ${isPast ? 'bg-green-500' : 'bg-gray-700'}`} />
-                )}
-                <div className="flex flex-col items-center">
-                  <div
-                    className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold ${
-                      isActive
-                        ? 'bg-blue-500 text-white'
-                        : isPast
-                        ? 'bg-green-500/20 text-green-400 border border-green-500'
-                        : 'bg-gray-800 text-gray-500'
-                    }`}
-                  >
-                    {isPast ? '\u2713' : i + 1}
-                  </div>
-                  <span className={`text-[9px] mt-1 ${isActive ? 'text-blue-400' : isPast ? 'text-green-400' : 'text-gray-600'}`}>
-                    {step.label}
-                  </span>
-                </div>
-              </React.Fragment>
-            )
-          })}
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] text-gray-500 uppercase tracking-wider">Phase</span>
+          <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-blue-500/10 text-blue-400">
+            {phase}
+          </span>
+          {agents && (() => {
+            const active = Object.values(agents).filter(a => a.status === 'working' || a.status === 'thinking').length
+            return active > 0 ? (
+              <span className="text-[10px] text-gray-500 ml-auto flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+                {active} active
+              </span>
+            ) : null
+          })()}
         </div>
       </div>
+
+      {/* Approval status */}
+      {approval && (
+        <div className="px-4 py-3 border-b border-gray-800">
+          {(() => {
+            const config = APPROVAL_STATUS_CONFIG[approval.status] ?? APPROVAL_STATUS_CONFIG.pending
+            return (
+              <div className={`rounded-lg border p-3 ${config.bg}`}>
+                <div className="flex items-center justify-between">
+                  <span className={`text-xs font-semibold ${config.color}`}>{config.label}</span>
+                  {approval.revisionCount > 0 && (
+                    <span className="text-[9px] text-gray-500">Rev #{approval.revisionCount}</span>
+                  )}
+                </div>
+                {approval.comments && (
+                  <p className="text-[10px] text-gray-400 mt-1.5 line-clamp-3">{approval.comments}</p>
+                )}
+                {approval.reviewedAt && (
+                  <p className="text-[9px] text-gray-600 mt-1">
+                    {approval.reviewedBy} &middot; {new Date(approval.reviewedAt).toLocaleTimeString()}
+                  </p>
+                )}
+              </div>
+            )
+          })()}
+        </div>
+      )}
 
       {/* Plan overview */}
       {plan && (
@@ -273,15 +304,14 @@ const PlanNavigator: React.FC<PlanNavigatorProps> = ({
         <div className="px-4 py-3 border-b border-gray-800">
           <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Agents</h3>
           <div className="space-y-1.5">
-            {['architect', 'product-manager'].map((role) => {
+            {Object.entries(AGENT_CONFIG).map(([role, config]) => {
               const agent = agents[role]
               if (!agent) return null
+              const isActive = agent.status === 'working' || agent.status === 'thinking'
               return (
-                <div key={role} className="flex items-center gap-2">
+                <div key={role} className={`flex items-center gap-2 px-2 py-1.5 rounded ${isActive ? 'bg-gray-800/50' : ''}`}>
                   <div className={`w-1.5 h-1.5 rounded-full ${AGENT_STATUS_COLORS[agent.status] ?? 'bg-gray-600'}`} />
-                  <span className="text-[10px] text-gray-300">
-                    {role === 'architect' ? 'Architect' : 'Product Manager'}
-                  </span>
+                  <span className="text-[10px] text-gray-300">{config.fullName}</span>
                   <span className="text-[9px] text-gray-600 ml-auto">{agent.status}</span>
                 </div>
               )

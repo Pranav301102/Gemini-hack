@@ -7,6 +7,8 @@ import AgentActivityFeed from './components/AgentActivityFeed'
 import ContextBoardView from './components/ContextBoardView'
 import CodeIntelView from './components/CodeIntelView'
 import type { CodeMaps } from './components/CodeIntelView'
+import DocsBrowser from './components/DocsBrowser'
+import type { DocsCollection } from './components/DocsBrowser'
 import SettingsModal from './components/SettingsModal'
 import GeminiKeyIndicator from './components/GeminiKeyIndicator'
 import ChatPanel from './components/ChatPanel'
@@ -91,7 +93,8 @@ export default function Dashboard() {
   const [selectedFile, setSelectedFile] = useState<string | null>(null)
   const [selectedPhase, setSelectedPhase] = useState<string | null>(null)
   const [codeMaps, setCodeMaps] = useState<CodeMaps | null>(null)
-  const [centerView, setCenterView] = useState<'context' | 'code-intel' | 'plan'>('context')
+  const [docs, setDocs] = useState<DocsCollection | null>(null)
+  const [centerView, setCenterView] = useState<'context' | 'code-intel' | 'plan' | 'docs'>('context')
   const [error, setError] = useState<string | null>(null)
   const eventSourceRef = useRef<EventSource | null>(null)
 
@@ -100,6 +103,7 @@ export default function Dashboard() {
   const [showChat, setShowChat] = useState(false)
   const [geminiReady, setGeminiReady] = useState(false)
   const [enrichmentProgress, setEnrichmentProgress] = useState<{ totalItems: number; enrichedItems: number } | null>(null)
+  const [approval, setApproval] = useState<any>(null)
 
   // Check for Gemini key on mount
   useEffect(() => {
@@ -126,6 +130,8 @@ export default function Dashboard() {
         setEvents(data.events ?? [])
         if (data.enrichmentProgress) setEnrichmentProgress(data.enrichmentProgress)
         if (data.codeMaps) setCodeMaps(data.codeMaps)
+        if (data.docs) setDocs(data.docs)
+        if (data.approval) setApproval(data.approval)
         setError(null)
       } else {
         setError(data.message)
@@ -163,6 +169,7 @@ export default function Dashboard() {
         setEntries(context.entries ?? [])
         setWidgets(context.widgets ?? [])
         setFiles(context.files ?? [])
+        if (context.approval !== undefined) setApproval(context.approval ?? null)
       } catch {
         // Skip malformed events
       }
@@ -171,7 +178,20 @@ export default function Dashboard() {
     es.addEventListener('log', (event) => {
       try {
         const logEvent = JSON.parse(event.data) as WeaverEvent
-        setEvents(prev => [...prev, logEvent])
+        setEvents(prev => {
+          // Deduplicate by event ID
+          if (prev.some(e => e.id === logEvent.id)) return prev
+          return [...prev, logEvent]
+        })
+      } catch {
+        // Skip malformed events
+      }
+    })
+
+    es.addEventListener('docs', (event) => {
+      try {
+        const docsData = JSON.parse(event.data) as DocsCollection
+        setDocs(docsData)
       } catch {
         // Skip malformed events
       }
@@ -265,6 +285,7 @@ export default function Dashboard() {
             geminiReady={geminiReady}
             projectPath={projectPath}
             enrichmentProgress={enrichmentProgress}
+            approval={approval}
           />
         </div>
 
@@ -309,6 +330,21 @@ export default function Dashboard() {
                 Plan
               </button>
             )}
+            {docs && docs.docs.length > 0 && (
+              <button
+                onClick={() => setCenterView('docs')}
+                className={`px-3 py-2 text-xs font-medium border-b-2 transition-colors ${
+                  centerView === 'docs'
+                    ? 'border-blue-500 text-blue-400'
+                    : 'border-transparent text-gray-500 hover:text-gray-300'
+                }`}
+              >
+                Docs
+                <span className="ml-1 text-[10px] bg-gray-800 text-gray-500 px-1 rounded">
+                  {docs.docs.length}
+                </span>
+              </button>
+            )}
           </div>
 
           {/* Center panel content */}
@@ -324,6 +360,7 @@ export default function Dashboard() {
                 project={project}
                 phase={phase}
                 files={files}
+                plan={plan}
               />
             )}
             {centerView === 'code-intel' && (
@@ -336,6 +373,9 @@ export default function Dashboard() {
                 selectedFile={selectedFile}
                 widgets={widgets}
               />
+            )}
+            {centerView === 'docs' && (
+              <DocsBrowser docs={docs} />
             )}
           </div>
         </div>

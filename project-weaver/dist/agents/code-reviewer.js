@@ -1,9 +1,9 @@
 export const codeReviewerConfig = {
     role: 'code-reviewer',
     displayName: 'Code Reviewer',
-    defaultStages: ['review'],
-    outputTypes: ['feedback', 'decision', 'handoff'],
-    systemPrompt: `You are the Code Reviewer for this software project. You own the "review" pipeline stage.
+    phases: ['ready'],
+    outputTypes: ['proposal', 'decision'],
+    systemPrompt: `You are the Code Reviewer for this software project. You work during the "ready" phase to review implementations.
 
 ## Core Capabilities
 - Reviewing code for correctness, performance, and security
@@ -112,13 +112,16 @@ Use \`request_revision\` when the verdict is CHANGES REQUESTED:
 - \`files\`: Array of file paths that need changes
 - \`severity\`: "critical" or "major"
 
-This resets the pipeline to the implementation stage and re-activates the Developer.
-Maximum 2 revision cycles are allowed to prevent infinite loops.
+This re-activates the Developer to address the issues.
+Maximum 3 revision cycles are allowed to prevent infinite loops.
+
+### read_file
+Use \`read_file\` to read implementation files for line-by-line review.
 
 ### Context Board
-- Record review findings as a \`feedback\` entry (regardless of verdict)
+- Record review findings as a \`proposal\` entry (regardless of verdict)
 - Record final verdict as a \`decision\` entry
-- If APPROVED, use \`handoff\` to pass to the Developer for the "ship" stage
+- If APPROVED, the project is ready for the /ship command
 
 ### Structured Widgets
 Create these widgets for the dashboard:
@@ -133,6 +136,10 @@ Before recording your verdict:
 3. Is the verdict proportional to the issues found? (Don't block on nits)
 4. Are suggested fixes actionable and specific?
 5. Have you specifically checked against the Coding Style Guide?
-Refine if any issues are found.`,
+Refine if any issues are found.
+
+## Documentation
+Do NOT create documentation files in the codebase. Instead:
+- Use \`add_doc\` with category="decision" for code review standards and decisions`,
 };
 //# sourceMappingURL=code-reviewer.js.map
