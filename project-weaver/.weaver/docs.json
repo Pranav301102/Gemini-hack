@@ -1,0 +1,46 @@
+{
+  "version": "1.0.0",
+  "generatedAt": "2026-02-09T14:30:00.000Z",
+  "docs": [
+    {
+      "id": "doc-1",
+      "title": "Agent Weaver Architecture Overview",
+      "category": "Architecture",
+      "content": "# Agent Weaver Architecture\n\nAgent Weaver implements a multi-agent system where 5 specialized AI agents (Product Manager, Architect, Developer, QA, Code Reviewer) collaborate through a shared context board.\n\n## Core Components\n\n### 1. Context Board (.weaver/context.json)\nThe persistent memory store that all agents read from and write to. Eliminates agent amnesia and duplicate work.\n\n### 2. MCP Server (55 Tools)\nProvides 19 modules across:\n- **Indexing**: Tree-sitter AST parsing, code maps generation\n- **Planning**: Multi-agent planning, approval gates\n- **Context**: Shared memory read/write\n- **Team**: Git-based sharing, hub sync\n- **Hub**: Central team repository\n\n### 3. Next.js Dashboard\nReal-time visualization of agent activity with:\n- Context board view\n- Code intelligence (class/module maps)\n- Plan navigator\n- Team collaboration view\n- Live SSE updates\n\n## Data Flow\n\n```mermaid\ngraph LR\n  A[Gemini CLI] --> B[MCP Server]\n  B --> C[Context Board]\n  B --> D[Code Index]\n  C --> E[Dashboard]\n  D --> E\n  F[Hub Server] --> C\n  G[Team Members] --> F\n```",
+      "tags": ["architecture", "overview", "system-design"],
+      "createdBy": "architect",
+      "createdAt": "2026-02-09T10:16:30.000Z",
+      "updatedAt": "2026-02-09T13:45:00.000Z"
+    },
+    {
+      "id": "doc-2",
+      "title": "MCP Tool Reference",
+      "category": "Reference",
+      "content": "# MCP Tools Reference\n\n## Indexing Tools (5 tools)\n\n### read_project\nScans the codebase and detects project structure, tech stack, and dependencies.\n\n**Usage:**\n```typescript\nawait mcp.call('read_project', { path: '/path/to/project' })\n```\n\n### enrich_symbols\nUses LLM to add semantic descriptions to code symbols.\n\n### search_code\nSemantic search across indexed code using AI embeddings.\n\n## Planning Tools (8 tools)\n\n### generate_plan\nCreates a structured implementation plan with change groups and file maps.\n\n### approve_plan\nHuman-in-the-loop approval gate for plans.\n\n### write_diagram\nGenerates Mermaid diagrams for architecture visualization.\n\n## Context Tools (6 tools)\n\n### write_context_entry\nWrites to the shared context board.\n\n### read_context\nReads the current context board state.\n\n### filter_context\nQueries context entries by agent, phase, or type.\n\n## Team Tools (4 tools)\n\n### sync_to_hub\nPushes local annotations to the central hub.\n\n### pull_from_hub\nDownloads team annotations from the hub.\n\n### verify_annotation\nMarks an AI-generated annotation as human-verified.",
+      "tags": ["mcp", "tools", "reference", "api"],
+      "createdBy": "developer",
+      "createdAt": "2026-02-09T11:00:00.000Z",
+      "updatedAt": "2026-02-09T14:15:00.000Z"
+    },
+    {
+      "id": "doc-3",
+      "title": "Getting Started Guide",
+      "category": "Tutorial",
+      "content": "# Getting Started with Agent Weaver\n\n## Installation\n\n1. **Clone and build the MCP server:**\n```bash\ngit clone https://github.com/yourusername/agent-weaver.git\ncd agent-weaver\nnpm install\nnpm run build\n```\n\n2. **Configure Gemini CLI:**\nAdd to your Gemini config:\n```json\n{\n  \"mcpServers\": {\n    \"agent-weaver\": {\n      \"command\": \"node\",\n      \"args\": [\"/path/to/agent-weaver/dist/index.js\"]\n    }\n  }\n}\n```\n\n3. **Start the dashboard:**\n```bash\ncd dashboard\nexport WEAVER_PROJECT_PATH=/path/to/your/project\nnpm install\nnpm run dev\n```\n\n## First Steps\n\n### 1. Index Your Project\n```\nUser: @agent-weaver read and index this codebase\n```\n\nThe agents will scan your project and build a code map.\n\n### 2. Create a Plan\n```\nUser: @agent-weaver create a plan to add user authentication\n```\n\nThe Product Manager and Architect will collaborate to generate a detailed plan.\n\n### 3. Review in Dashboard\nOpen http://localhost:3000 to see:\n- Agent discussions\n- Generated plan\n- Code intelligence maps\n- Architecture diagrams",
+      "tags": ["tutorial", "getting-started", "setup"],
+      "createdBy": "product-manager",
+      "createdAt": "2026-02-09T09:30:00.000Z",
+      "updatedAt": "2026-02-09T12:00:00.000Z"
+    },
+    {
+      "id": "doc-4",
+      "title": "Team Collaboration Workflow",
+      "category": "Guide",
+      "content": "# Team Collaboration with Hub Sync\n\n## Overview\n\nAgent Weaver enables git-based team sharing. When one teammate indexes a codebase, all team members benefit from the shared annotations.\n\n## Setup Hub Server\n\n1. **Start the hub:**\n```bash\ncd hub\nnpm install\nnpm start\n```\n\nHub runs on http://localhost:4200\n\n2. **Configure team members:**\nEach developer sets their WEAVER_HUB_URL:\n```bash\nexport WEAVER_HUB_URL=http://your-hub.com\n```\n\n## Sync Workflow\n\n### Push Annotations\n```\nUser: @agent-weaver sync my annotations to the team\n```\n\nThis uploads your verified annotations to the hub.\n\n### Pull Team Annotations\n```\nUser: @agent-weaver pull latest team annotations\n```\n\nDownloads annotations from teammates.\n\n## Verification Process\n\n1. **AI generates annotations** (confidence score)\n2. **Human verifies** (marks as verified)\n3. **Verified annotations sync** to team\n4. **Trust builds over time** (accuracy tracking)\n\n## Benefits\n\n- **No redundant indexing**: One scan benefits the whole team\n- **Shared knowledge**: Team annotations improve over time\n- **Human-verified**: Trust through verification\n- **Git-based**: Works with your existing workflow",
+      "tags": ["team", "collaboration", "hub", "sync", "workflow"],
+      "createdBy": "product-manager",
+      "createdAt": "2026-02-09T10:45:00.000Z",
+      "updatedAt": "2026-02-09T13:30:00.000Z"
+    }
+  ]
+}

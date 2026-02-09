@@ -45,8 +45,15 @@ export default function LandingPage() {
 
         <div className="flex items-center justify-center gap-4">
           <Link
-            href="/dashboard"
+            href="/dashboard?demo=true"
             className="px-6 py-3 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold transition-colors flex items-center gap-2"
+          >
+            <HiChip className="w-5 h-5" />
+            See Demo
+          </Link>
+          <Link
+            href="/dashboard"
+            className="px-6 py-3 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-semibold transition-colors flex items-center gap-2"
           >
             <HiChip className="w-5 h-5" />
             Open Dashboard

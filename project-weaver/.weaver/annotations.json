@@ -1,0 +1,118 @@
+{
+  "version": "1.0.0",
+  "generatedAt": "2026-02-09T14:30:00.000Z",
+  "annotations": [
+    {
+      "id": "ann-1",
+      "symbolPath": "dashboard/app/components/PlanNavigator.tsx:PlanNavigator",
+      "type": "component",
+      "description": "Main navigation component for the planning phase. Displays change groups, files, and approval status. Handles user interactions for group/file selection.",
+      "tags": ["UI", "Navigation", "Planning"],
+      "createdBy": "agent",
+      "createdAt": "2026-02-09T10:07:30.000Z",
+      "verifiedBy": "dev-1",
+      "verifiedAt": "2026-02-09T11:15:00.000Z",
+      "status": "verified",
+      "confidence": 0.92
+    },
+    {
+      "id": "ann-2",
+      "symbolPath": "src/tools/planning/planner.ts:generatePlan",
+      "type": "function",
+      "description": "Core planning function that analyzes project requirements and generates a structured implementation plan with change groups, file maps, and architectural diagrams.",
+      "tags": ["Planning", "Core Logic", "AI Agent"],
+      "createdBy": "agent",
+      "createdAt": "2026-02-09T10:15:45.000Z",
+      "verifiedBy": "dev-2",
+      "verifiedAt": "2026-02-09T13:45:00.000Z",
+      "status": "verified",
+      "confidence": 0.95
+    },
+    {
+      "id": "ann-3",
+      "symbolPath": "dashboard/app/components/TeamView.tsx:TeamView",
+      "type": "component",
+      "description": "Displays team collaboration information including members, sync history, and annotation statistics. Shows git-based team sharing status.",
+      "tags": ["UI", "Team Collaboration", "Dashboard"],
+      "createdBy": "agent",
+      "createdAt": "2026-02-09T12:30:00.000Z",
+      "status": "pending",
+      "confidence": 0.88
+    },
+    {
+      "id": "ann-4",
+      "symbolPath": "src/tools/context/writer.ts:writeContextEntry",
+      "type": "function",
+      "description": "Writes entries to the shared context board. Used by all agents to persist their thoughts, decisions, and artifacts to the .weaver/context.json file.",
+      "tags": ["Context Management", "Persistence", "Core"],
+      "createdBy": "agent",
+      "createdAt": "2026-02-09T10:20:15.000Z",
+      "verifiedBy": "dev-2",
+      "verifiedAt": "2026-02-09T13:50:00.000Z",
+      "status": "verified",
+      "confidence": 0.97
+    },
+    {
+      "id": "ann-5",
+      "symbolPath": "hub/src/routes/sync.ts:handlePush",
+      "type": "function",
+      "description": "Handles push synchronization from team members. Validates incoming annotations and merges them into the central hub repository.",
+      "tags": ["Hub", "Sync", "Team Collaboration"],
+      "createdBy": "agent",
+      "createdAt": "2026-02-09T11:45:00.000Z",
+      "verifiedBy": "dev-3",
+      "verifiedAt": "2026-02-09T14:30:00.000Z",
+      "status": "verified",
+      "confidence": 0.90
+    },
+    {
+      "id": "ann-6",
+      "symbolPath": "src/tools/indexing/ast-parser.ts:parseCodebase",
+      "type": "function",
+      "description": "Uses tree-sitter to parse source files and extract AST information including functions, classes, variables, and dependencies. Foundation for code intelligence features.",
+      "tags": ["Indexing", "AST", "Tree-sitter"],
+      "createdBy": "agent",
+      "createdAt": "2026-02-09T10:08:00.000Z",
+      "status": "pending",
+      "confidence": 0.85
+    },
+    {
+      "id": "ann-7",
+      "symbolPath": "dashboard/app/components/CodeIntelView.tsx:ClassMapView",
+      "type": "component",
+      "description": "Renders the class/interface hierarchy with relationship diagrams. Allows developers to explore code structure visually.",
+      "tags": ["UI", "Code Intelligence", "Visualization"],
+      "createdBy": "agent",
+      "createdAt": "2026-02-09T12:15:30.000Z",
+      "verifiedBy": "dev-1",
+      "verifiedAt": "2026-02-09T14:00:00.000Z",
+      "status": "verified",
+      "confidence": 0.91
+    },
+    {
+      "id": "ann-8",
+      "symbolPath": "src/agents/architect/index.ts:analyzeArchitecture",
+      "type": "function",
+      "description": "Architect agent's main analysis function. Examines codebase structure, identifies patterns, and proposes architectural improvements.",
+      "tags": ["Agent", "Architecture", "Analysis"],
+      "createdBy": "agent",
+      "createdAt": "2026-02-09T10:52:40.000Z",
+      "status": "pending",
+      "confidence": 0.87
+    }
+  ],
+  "stats": {
+    "total": 156,
+    "verified": 89,
+    "pending": 34,
+    "flagged": 33,
+    "byType": {
+      "function": 78,
+      "class": 23,
+      "component": 31,
+      "module": 12,
+      "interface": 12
+    },
+    "avgConfidence": 0.89
+  }
+}

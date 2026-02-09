@@ -1,0 +1,769 @@
+{
+  "version": "1.0.0",
+  "generatedAt": "2026-02-09T10:07:33.394Z",
+  "classMap": {
+    "classes": [],
+    "interfaces": [
+      {
+        "id": "i:AuthRequest",
+        "name": "AuthRequest",
+        "file": "backend/src/middleware/authMiddleware.ts",
+        "line": 0,
+        "exported": true,
+        "fields": [
+          {
+            "name": "user",
+            "type": "{\n    id: string;\n    email: string;\n  }",
+            "optional": true
+          }
+        ]
+      },
+      {
+        "id": "i:GroupMember",
+        "name": "GroupMember",
+        "file": "backend/src/models/groupModel.ts",
+        "line": 0,
+        "exported": true,
+        "fields": [
+          {
+            "name": "userId",
+            "type": "string"
+          },
+          {
+            "name": "role",
+            "type": "GroupRole"
+          }
+        ]
+      },
+      {
+        "id": "i:Group",
+        "name": "Group",
+        "file": "backend/src/models/groupModel.ts",
+        "line": 0,
+        "exported": true,
+        "fields": [
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "inviteCode",
+            "type": "string"
+          },
+          {
+            "name": "members",
+            "type": "GroupMember[]"
+          }
+        ]
+      },
+      {
+        "id": "i:Todo",
+        "name": "Todo",
+        "file": "backend/src/models/todoModel.ts",
+        "line": 0,
+        "exported": true,
+        "fields": [
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "title",
+            "type": "string"
+          },
+          {
+            "name": "completed",
+            "type": "boolean"
+          },
+          {
+            "name": "createdAt",
+            "type": "string"
+          },
+          {
+            "name": "ownerId",
+            "type": "string"
+          },
+          {
+            "name": "groupId",
+            "type": "string",
+            "optional": true
+          }
+        ]
+      },
+      {
+        "id": "i:User",
+        "name": "User",
+        "file": "backend/src/models/userModel.ts",
+        "line": 0,
+        "exported": true,
+        "fields": [
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "email",
+            "type": "string"
+          },
+          {
+            "name": "passwordHash",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          }
+        ]
+      },
+      {
+        "id": "i:FiltersProps",
+        "name": "FiltersProps",
+        "file": "frontend/src/components/Filters.tsx",
+        "line": 0,
+        "exported": true,
+        "fields": [
+          {
+            "name": "currentFilter",
+            "type": "FilterType"
+          },
+          {
+            "name": "onFilterChange",
+            "type": "(filter: FilterType) => void"
+          }
+        ]
+      },
+      {
+        "id": "i:TodoFormProps",
+        "name": "TodoFormProps",
+        "file": "frontend/src/components/TodoForm.tsx",
+        "line": 0,
+        "exported": true,
+        "fields": [
+          {
+            "name": "onAdd",
+            "type": "(title: string) => void"
+          }
+        ]
+      },
+      {
+        "id": "i:TodoItemProps",
+        "name": "TodoItemProps",
+        "file": "frontend/src/components/TodoItem.tsx",
+        "line": 0,
+        "exported": true,
+        "fields": [
+          {
+            "name": "todo",
+            "type": "Todo"
+          },
+          {
+            "name": "onToggle",
+            "type": "(id: string, completed: boolean) => void"
+          },
+          {
+            "name": "onDelete",
+            "type": "(id: string) => void"
+          },
+          {
+            "name": "onUpdate",
+            "type": "(id: string, title: string) => void"
+          }
+        ]
+      },
+      {
+        "id": "i:TodoListProps",
+        "name": "TodoListProps",
+        "file": "frontend/src/components/TodoList.tsx",
+        "line": 0,
+        "exported": true,
+        "fields": [
+          {
+            "name": "todos",
+            "type": "Todo[]"
+          },
+          {
+            "name": "onToggle",
+            "type": "(id: string, completed: boolean) => void"
+          },
+          {
+            "name": "onDelete",
+            "type": "(id: string) => void"
+          },
+          {
+            "name": "onUpdate",
+            "type": "(id: string, title: string) => void"
+          }
+        ]
+      },
+      {
+        "id": "i:AuthContextType",
+        "name": "AuthContextType",
+        "file": "frontend/src/context/AuthContext.tsx",
+        "line": 0,
+        "exported": true,
+        "fields": [
+          {
+            "name": "user",
+            "type": "User | null"
+          },
+          {
+            "name": "token",
+            "type": "string | null"
+          },
+          {
+            "name": "login",
+            "type": "(token: string, user: User) => void"
+          },
+          {
+            "name": "logout",
+            "type": "() => void"
+          },
+          {
+            "name": "isAuthenticated",
+            "type": "boolean"
+          }
+        ]
+      }
+    ],
+    "relationships": []
+  },
+  "moduleMap": {
+    "modules": [
+      {
+        "id": "mod:backend/src/controllers",
+        "path": "backend/src/controllers",
+        "fileCount": 3,
+        "exports": [
+          "register",
+          "login",
+          "createGroup",
+          "getGroups",
+          "joinGroup",
+          "getGroupMembers",
+          "getTodos",
+          "createTodo",
+          "updateTodo",
+          "deleteTodo"
+        ],
+        "publicAPI": [
+          "register",
+          "login",
+          "createGroup",
+          "getGroups",
+          "joinGroup",
+          "getGroupMembers",
+          "getTodos",
+          "createTodo",
+          "updateTodo",
+          "deleteTodo"
+        ]
+      },
+      {
+        "id": "mod:backend/src/middleware",
+        "path": "backend/src/middleware",
+        "fileCount": 1,
+        "exports": [
+          "AuthRequest",
+          "authMiddleware"
+        ],
+        "publicAPI": [
+          "authMiddleware"
+        ]
+      },
+      {
+        "id": "mod:backend/src/models",
+        "path": "backend/src/models",
+        "fileCount": 3,
+        "exports": [
+          "GroupRole",
+          "GroupMember",
+          "Group",
+          "Todo",
+          "User"
+        ],
+        "publicAPI": []
+      },
+      {
+        "id": "mod:backend/src/routes",
+        "path": "backend/src/routes",
+        "fileCount": 3,
+        "exports": [
+          "router"
+        ],
+        "publicAPI": []
+      },
+      {
+        "id": "mod:backend/src",
+        "path": "backend/src",
+        "fileCount": 1,
+        "exports": [],
+        "publicAPI": []
+      },
+      {
+        "id": "mod:backend/tests",
+        "path": "backend/tests",
+        "fileCount": 1,
+        "exports": [],
+        "publicAPI": []
+      },
+      {
+        "id": "mod:frontend/src",
+        "path": "frontend/src",
+        "fileCount": 2,
+        "exports": [
+          "App"
+        ],
+        "publicAPI": []
+      },
+      {
+        "id": "mod:frontend/src/__tests__",
+        "path": "frontend/src/__tests__",
+        "fileCount": 1,
+        "exports": [],
+        "publicAPI": []
+      },
+      {
+        "id": "mod:frontend/src/api",
+        "path": "frontend/src/api",
+        "fileCount": 3,
+        "exports": [
+          "register",
+          "login",
+          "GroupMember",
+          "Group",
+          "getGroups",
+          "createGroup",
+          "joinGroup",
+          "getGroupMembers",
+          "getTodos",
+          "createTodo",
+          "updateTodo",
+          "deleteTodo"
+        ],
+        "publicAPI": [
+          "register",
+          "login",
+          "getGroups",
+          "createGroup",
+          "joinGroup",
+          "getGroupMembers",
+          "getTodos",
+          "createTodo",
+          "updateTodo",
+          "deleteTodo"
+        ]
+      },
+      {
+        "id": "mod:frontend/src/components",
+        "path": "frontend/src/components",
+        "fileCount": 4,
+        "exports": [
+          "FilterType",
+          "Filters",
+          "TodoForm",
+          "TodoItem",
+          "TodoList"
+        ],
+        "publicAPI": []
+      },
+      {
+        "id": "mod:frontend/src/context",
+        "path": "frontend/src/context",
+        "fileCount": 1,
+        "exports": [
+          "AuthProvider",
+          "useAuth"
+        ],
+        "publicAPI": [
+          "AuthProvider",
+          "useAuth"
+        ]
+      },
+      {
+        "id": "mod:frontend/src/types",
+        "path": "frontend/src/types",
+        "fileCount": 1,
+        "exports": [
+          "Todo"
+        ],
+        "publicAPI": []
+      },
+      {
+        "id": "mod:frontend",
+        "path": "frontend",
+        "fileCount": 1,
+        "exports": [],
+        "publicAPI": []
+      }
+    ],
+    "connections": [
+      {
+        "from": "mod:backend/src/controllers",
+        "to": "mod:backend/src/models",
+        "imports": 3,
+        "exportsUsed": [
+          "User",
+          "Group",
+          "GroupMember",
+          "Todo"
+        ]
+      },
+      {
+        "from": "mod:backend/src/controllers",
+        "to": "mod:backend/src/middleware",
+        "imports": 2,
+        "exportsUsed": [
+          "AuthRequest"
+        ]
+      },
+      {
+        "from": "mod:backend/src/routes",
+        "to": "mod:backend/src/controllers",
+        "imports": 3,
+        "exportsUsed": [
+          "* as authController",
+          "* as groupController",
+          "* as todoController"
+        ]
+      },
+      {
+        "from": "mod:backend/src/routes",
+        "to": "mod:backend/src/middleware",
+        "imports": 2,
+        "exportsUsed": [
+          "authMiddleware"
+        ]
+      },
+      {
+        "from": "mod:backend/src",
+        "to": "mod:backend/src/routes",
+        "imports": 3,
+        "exportsUsed": [
+          "todoRoutes",
+          "authRoutes",
+          "groupRoutes"
+        ]
+      },
+      {
+        "from": "mod:backend/tests",
+        "to": "mod:backend/src/routes",
+        "imports": 1,
+        "exportsUsed": [
+          "todoRoutes"
+        ]
+      },
+      {
+        "from": "mod:frontend/src",
+        "to": "mod:frontend/src/api",
+        "imports": 1,
+        "exportsUsed": [
+          "* as api"
+        ]
+      },
+      {
+        "from": "mod:frontend/src",
+        "to": "mod:frontend/src/types",
+        "imports": 1,
+        "exportsUsed": [
+          "Todo"
+        ]
+      },
+      {
+        "from": "mod:frontend/src",
+        "to": "mod:frontend/src/components",
+        "imports": 3,
+        "exportsUsed": [
+          "TodoForm",
+          "TodoList",
+          "Filters",
+          "FilterType"
+        ]
+      },
+      {
+        "from": "mod:frontend/src/__tests__",
+        "to": "mod:frontend/src",
+        "imports": 1,
+        "exportsUsed": [
+          "App"
+        ]
+      },
+      {
+        "from": "mod:frontend/src/__tests__",
+        "to": "mod:frontend/src/api",
+        "imports": 1,
+        "exportsUsed": [
+          "* as api"
+        ]
+      },
+      {
+        "from": "mod:frontend/src/api",
+        "to": "mod:frontend/src/types",
+        "imports": 1,
+        "exportsUsed": [
+          "Todo"
+        ]
+      },
+      {
+        "from": "mod:frontend/src/components",
+        "to": "mod:frontend/src/types",
+        "imports": 2,
+        "exportsUsed": [
+          "Todo"
+        ]
+      }
+    ],
+    "layers": [
+      {
+        "name": "Entry Points",
+        "modules": [
+          "mod:backend/src",
+          "mod:backend/tests",
+          "mod:frontend/src/__tests__"
+        ]
+      },
+      {
+        "name": "Core",
+        "modules": [
+          "mod:backend/src/controllers",
+          "mod:backend/src/middleware",
+          "mod:backend/src/models",
+          "mod:backend/src/routes",
+          "mod:frontend/src",
+          "mod:frontend/src/api",
+          "mod:frontend/src/components"
+        ]
+      },
+      {
+        "name": "Shared / Utilities",
+        "modules": [
+          "mod:frontend/src/types"
+        ]
+      },
+      {
+        "name": "Standalone",
+        "modules": [
+          "mod:frontend/src/context",
+          "mod:frontend"
+        ]
+      }
+    ]
+  },
+  "callGraph": {
+    "functions": [
+      {
+        "id": "f:backend/src/controllers/authController.ts:register",
+        "name": "register",
+        "file": "backend/src/controllers/authController.ts",
+        "line": 34,
+        "exported": true,
+        "calls": [],
+        "calledBy": []
+      },
+      {
+        "id": "f:backend/src/controllers/authController.ts:login",
+        "name": "login",
+        "file": "backend/src/controllers/authController.ts",
+        "line": 60,
+        "exported": true,
+        "calls": [],
+        "calledBy": []
+      },
+      {
+        "id": "f:backend/src/controllers/groupController.ts:createGroup",
+        "name": "createGroup",
+        "file": "backend/src/controllers/groupController.ts",
+        "line": 30,
+        "exported": true,
+        "calls": [],
+        "calledBy": []
+      },
+      {
+        "id": "f:backend/src/controllers/groupController.ts:getGroups",
+        "name": "getGroups",
+        "file": "backend/src/controllers/groupController.ts",
+        "line": 52,
+        "exported": true,
+        "calls": [],
+        "calledBy": []
+      },
+      {
+        "id": "f:backend/src/controllers/groupController.ts:joinGroup",
+        "name": "joinGroup",
+        "file": "backend/src/controllers/groupController.ts",
+        "line": 61,
+        "exported": true,
+        "calls": [],
+        "calledBy": []
+      },
+      {
+        "id": "f:backend/src/controllers/groupController.ts:getGroupMembers",
+        "name": "getGroupMembers",
+        "file": "backend/src/controllers/groupController.ts",
+        "line": 86,
+        "exported": true,
+        "calls": [],
+        "calledBy": []
+      },
+      {
+        "id": "f:backend/src/controllers/todoController.ts:getTodos",
+        "name": "getTodos",
+        "file": "backend/src/controllers/todoController.ts",
+        "line": 26,
+        "exported": true,
+        "calls": [],
+        "calledBy": []
+      },
+      {
+        "id": "f:backend/src/controllers/todoController.ts:createTodo",
+        "name": "createTodo",
+        "file": "backend/src/controllers/todoController.ts",
+        "line": 43,
+        "exported": true,
+        "calls": [],
+        "calledBy": []
+      },
+      {
+        "id": "f:backend/src/controllers/todoController.ts:updateTodo",
+        "name": "updateTodo",
+        "file": "backend/src/controllers/todoController.ts",
+        "line": 67,
+        "exported": true,
+        "calls": [],
+        "calledBy": []
+      },
+      {
+        "id": "f:backend/src/controllers/todoController.ts:deleteTodo",
+        "name": "deleteTodo",
+        "file": "backend/src/controllers/todoController.ts",
+        "line": 91,
+        "exported": true,
+        "calls": [],
+        "calledBy": []
+      },
+      {
+        "id": "f:backend/src/middleware/authMiddleware.ts:authMiddleware",
+        "name": "authMiddleware",
+        "file": "backend/src/middleware/authMiddleware.ts",
+        "line": 13,
+        "exported": true,
+        "calls": [],
+        "calledBy": []
+      },
+      {
+        "id": "f:frontend/src/api/authApi.ts:register",
+        "name": "register",
+        "file": "frontend/src/api/authApi.ts",
+        "line": 5,
+        "exported": true,
+        "calls": [],
+        "calledBy": []
+      },
+      {
+        "id": "f:frontend/src/api/authApi.ts:login",
+        "name": "login",
+        "file": "frontend/src/api/authApi.ts",
+        "line": 10,
+        "exported": true,
+        "calls": [],
+        "calledBy": []
+      },
+      {
+        "id": "f:frontend/src/api/groupApi.ts:getGroups",
+        "name": "getGroups",
+        "file": "frontend/src/api/groupApi.ts",
+        "line": 22,
+        "exported": true,
+        "calls": [],
+        "calledBy": []
+      },
+      {
+        "id": "f:frontend/src/api/groupApi.ts:createGroup",
+        "name": "createGroup",
+        "file": "frontend/src/api/groupApi.ts",
+        "line": 29,
+        "exported": true,
+        "calls": [],
+        "calledBy": []
+      },
+      {
+        "id": "f:frontend/src/api/groupApi.ts:joinGroup",
+        "name": "joinGroup",
+        "file": "frontend/src/api/groupApi.ts",
+        "line": 36,
+        "exported": true,
+        "calls": [],
+        "calledBy": []
+      },
+      {
+        "id": "f:frontend/src/api/groupApi.ts:getGroupMembers",
+        "name": "getGroupMembers",
+        "file": "frontend/src/api/groupApi.ts",
+        "line": 43,
+        "exported": true,
+        "calls": [],
+        "calledBy": []
+      },
+      {
+        "id": "f:frontend/src/api/todoApi.ts:getTodos",
+        "name": "getTodos",
+        "file": "frontend/src/api/todoApi.ts",
+        "line": 11,
+        "exported": true,
+        "calls": [],
+        "calledBy": []
+      },
+      {
+        "id": "f:frontend/src/api/todoApi.ts:createTodo",
+        "name": "createTodo",
+        "file": "frontend/src/api/todoApi.ts",
+        "line": 19,
+        "exported": true,
+        "calls": [],
+        "calledBy": []
+      },
+      {
+        "id": "f:frontend/src/api/todoApi.ts:updateTodo",
+        "name": "updateTodo",
+        "file": "frontend/src/api/todoApi.ts",
+        "line": 27,
+        "exported": true,
+        "calls": [],
+        "calledBy": []
+      },
+      {
+        "id": "f:frontend/src/api/todoApi.ts:deleteTodo",
+        "name": "deleteTodo",
+        "file": "frontend/src/api/todoApi.ts",
+        "line": 34,
+        "exported": true,
+        "calls": [],
+        "calledBy": []
+      },
+      {
+        "id": "f:frontend/src/context/AuthContext.tsx:AuthProvider",
+        "name": "AuthProvider",
+        "file": "frontend/src/context/AuthContext.tsx",
+        "line": 19,
+        "exported": true,
+        "calls": [],
+        "calledBy": []
+      },
+      {
+        "id": "f:frontend/src/context/AuthContext.tsx:useAuth",
+        "name": "useAuth",
+        "file": "frontend/src/context/AuthContext.tsx",
+        "line": 53,
+        "exported": true,
+        "calls": [],
+        "calledBy": []
+      }
+    ]
+  },
+  "apiMap": {
+    "endpoints": []
+  }
+}

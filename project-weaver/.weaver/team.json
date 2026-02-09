@@ -1,0 +1,140 @@
+{
+  "version": "1.0.0",
+  "members": [
+    {
+      "id": "dev-1",
+      "name": "Sarah Chen",
+      "email": "sarah@example.com",
+      "firstSeen": "2026-02-01T09:00:00.000Z",
+      "lastActive": "2026-02-09T14:15:00.000Z",
+      "contributions": {
+        "scans": 8,
+        "annotations": 45,
+        "reviews": 12,
+        "builds": 23
+      }
+    },
+    {
+      "id": "dev-2",
+      "name": "Marcus Rodriguez",
+      "email": "marcus@example.com",
+      "firstSeen": "2026-02-01T09:00:00.000Z",
+      "lastActive": "2026-02-09T13:45:00.000Z",
+      "contributions": {
+        "scans": 12,
+        "annotations": 38,
+        "reviews": 15,
+        "builds": 27
+      }
+    },
+    {
+      "id": "dev-3",
+      "name": "Aisha Patel",
+      "email": "aisha@example.com",
+      "firstSeen": "2026-02-02T10:30:00.000Z",
+      "lastActive": "2026-02-09T14:30:00.000Z",
+      "contributions": {
+        "scans": 5,
+        "annotations": 28,
+        "reviews": 34,
+        "builds": 11
+      }
+    },
+    {
+      "id": "dev-4",
+      "name": "Jordan Kim",
+      "email": "jordan@example.com",
+      "firstSeen": "2026-02-01T09:00:00.000Z",
+      "lastActive": "2026-02-09T12:20:00.000Z",
+      "contributions": {
+        "scans": 6,
+        "annotations": 45,
+        "reviews": 8,
+        "builds": 19
+      }
+    }
+  ],
+  "sharedNotes": [
+    {
+      "id": "note-1",
+      "author": "Marcus Rodriguez",
+      "authorEmail": "marcus@example.com",
+      "timestamp": "2026-02-09T13:45:00.000Z",
+      "content": "Updated the architecture to use WatermelonDB for offline-first sync. Please review the proposed changes in the planning phase.",
+      "category": "decision",
+      "resolved": false
+    },
+    {
+      "id": "note-2",
+      "author": "Aisha Patel",
+      "authorEmail": "aisha@example.com",
+      "timestamp": "2026-02-09T14:30:00.000Z",
+      "content": "Found a bug in the todo update endpoint - missing validation for groupId. Adding to test cases.",
+      "category": "blocker",
+      "resolved": false
+    },
+    {
+      "id": "note-3",
+      "author": "Sarah Chen",
+      "authorEmail": "sarah@example.com",
+      "timestamp": "2026-02-09T10:15:00.000Z",
+      "content": "Completed the React components for todo management. All tests passing. Ready for code review.",
+      "category": "handoff",
+      "resolved": true
+    }
+  ],
+  "taskClaims": [
+    {
+      "changeId": "backend-schema-overhaul",
+      "changeTitle": "Advanced Data Model & Database Migration",
+      "claimedBy": "Marcus Rodriguez",
+      "claimedAt": "2026-02-09T10:00:00.000Z",
+      "status": "in-progress"
+    },
+    {
+      "changeId": "natural-language-capture",
+      "changeTitle": "Natural Language Task Parser",
+      "claimedBy": "Sarah Chen",
+      "claimedAt": "2026-02-09T11:30:00.000Z",
+      "status": "claimed"
+    }
+  ],
+  "syncHistory": [
+    {
+      "timestamp": "2026-02-09T14:30:00.000Z",
+      "member": "Aisha Patel",
+      "action": "review",
+      "details": "Reviewed and verified 5 code annotations for backend controllers"
+    },
+    {
+      "timestamp": "2026-02-09T13:45:00.000Z",
+      "member": "Marcus Rodriguez",
+      "action": "annotate",
+      "details": "Added architectural notes and diagrams to context board"
+    },
+    {
+      "timestamp": "2026-02-09T12:20:00.000Z",
+      "member": "Jordan Kim",
+      "action": "scan",
+      "details": "Scanned codebase and generated project structure index"
+    },
+    {
+      "timestamp": "2026-02-09T10:15:00.000Z",
+      "member": "Sarah Chen",
+      "action": "implement",
+      "details": "Implemented React components for todo list features"
+    },
+    {
+      "timestamp": "2026-02-09T09:30:00.000Z",
+      "member": "Marcus Rodriguez",
+      "action": "build",
+      "details": "Built MCP server and configured dashboard integration"
+    },
+    {
+      "timestamp": "2026-02-08T16:45:00.000Z",
+      "member": "Aisha Patel",
+      "action": "review",
+      "details": "Code review for authentication middleware implementation"
+    }
+  ]
+}

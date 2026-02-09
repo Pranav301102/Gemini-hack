@@ -100,6 +100,7 @@ export default function Dashboard() {
   const [annotations, setAnnotations] = useState<AnnotationsData | null>(null)
   const [centerView, setCenterView] = useState<'context' | 'code-intel' | 'plan' | 'docs' | 'team'>('context')
   const [error, setError] = useState<string | null>(null)
+  const [isDemoMode, setIsDemoMode] = useState(false)
   const eventSourceRef = useRef<EventSource | null>(null)
 
   // Gemini state
@@ -109,9 +110,235 @@ export default function Dashboard() {
   const [enrichmentProgress, setEnrichmentProgress] = useState<{ totalItems: number; enrichedItems: number } | null>(null)
   const [approval, setApproval] = useState<any>(null)
 
-  // Check for Gemini key on mount
+  // Check for Gemini key and demo mode on mount
   useEffect(() => {
     setGeminiReady(!!getGeminiKey())
+    // Check if demo mode is enabled
+    const params = new URLSearchParams(window.location.search)
+    const demo = params.get('demo') === 'true'
+    setIsDemoMode(demo)
+
+    // Load demo data for team if in demo mode
+    if (demo) {
+      setTeam({
+        version: '1.0.0',
+        members: [
+          {
+            id: 'dev-1',
+            name: 'Sarah Chen',
+            email: 'sarah@example.com',
+            firstSeen: '2026-02-01T09:00:00.000Z',
+            lastActive: new Date(Date.now() - 15 * 60000).toISOString(),
+            contributions: { scans: 8, annotations: 45, reviews: 12, builds: 23 }
+          },
+          {
+            id: 'dev-2',
+            name: 'Marcus Rodriguez',
+            email: 'marcus@example.com',
+            firstSeen: '2026-02-01T09:00:00.000Z',
+            lastActive: new Date(Date.now() - 45 * 60000).toISOString(),
+            contributions: { scans: 12, annotations: 38, reviews: 15, builds: 27 }
+          },
+          {
+            id: 'dev-3',
+            name: 'Aisha Patel',
+            email: 'aisha@example.com',
+            firstSeen: '2026-02-02T10:30:00.000Z',
+            lastActive: new Date(Date.now() - 10 * 60000).toISOString(),
+            contributions: { scans: 5, annotations: 28, reviews: 34, builds: 11 }
+          },
+          {
+            id: 'dev-4',
+            name: 'Jordan Kim',
+            email: 'jordan@example.com',
+            firstSeen: '2026-02-01T09:00:00.000Z',
+            lastActive: new Date(Date.now() - 100 * 60000).toISOString(),
+            contributions: { scans: 6, annotations: 45, reviews: 8, builds: 19 }
+          }
+        ],
+        sharedNotes: [
+          {
+            id: 'note-1',
+            author: 'Marcus Rodriguez',
+            authorEmail: 'marcus@example.com',
+            timestamp: new Date(Date.now() - 45 * 60000).toISOString(),
+            content: 'Updated the architecture to use WatermelonDB for offline-first sync. Please review the proposed changes in the planning phase.',
+            category: 'decision',
+            resolved: false
+          },
+          {
+            id: 'note-2',
+            author: 'Aisha Patel',
+            authorEmail: 'aisha@example.com',
+            timestamp: new Date(Date.now() - 10 * 60000).toISOString(),
+            content: 'Found a bug in the todo update endpoint - missing validation for groupId. Adding to test cases.',
+            category: 'blocker',
+            resolved: false
+          }
+        ],
+        taskClaims: [
+          {
+            changeId: 'backend-schema-overhaul',
+            changeTitle: 'Advanced Data Model & Database Migration',
+            claimedBy: 'Marcus Rodriguez',
+            claimedAt: new Date(Date.now() - 120 * 60000).toISOString(),
+            status: 'in-progress'
+          },
+          {
+            changeId: 'natural-language-capture',
+            changeTitle: 'Natural Language Task Parser',
+            claimedBy: 'Sarah Chen',
+            claimedAt: new Date(Date.now() - 90 * 60000).toISOString(),
+            status: 'claimed'
+          }
+        ],
+        syncHistory: [
+          {
+            timestamp: new Date(Date.now() - 10 * 60000).toISOString(),
+            member: 'Aisha Patel',
+            action: 'review',
+            details: 'Reviewed and verified 5 code annotations for backend controllers'
+          },
+          {
+            timestamp: new Date(Date.now() - 45 * 60000).toISOString(),
+            member: 'Marcus Rodriguez',
+            action: 'annotate',
+            details: 'Added architectural notes and diagrams to context board'
+          },
+          {
+            timestamp: new Date(Date.now() - 100 * 60000).toISOString(),
+            member: 'Jordan Kim',
+            action: 'scan',
+            details: 'Scanned codebase and generated project structure index'
+          },
+          {
+            timestamp: new Date(Date.now() - 240 * 60000).toISOString(),
+            member: 'Sarah Chen',
+            action: 'implement',
+            details: 'Implemented React components for todo list features'
+          }
+        ]
+      })
+
+      setAnnotations({
+        version: '1.0.0',
+        generatedAt: new Date().toISOString(),
+        annotations: [
+          {
+            id: 'ann-1',
+            symbolPath: 'dashboard/app/components/PlanNavigator.tsx:PlanNavigator',
+            type: 'component',
+            description: 'Main navigation component for the planning phase. Displays change groups, files, and approval status. Handles user interactions for group/file selection.',
+            tags: ['UI', 'Navigation', 'Planning'],
+            createdBy: 'agent',
+            createdAt: new Date(Date.now() - 300 * 60000).toISOString(),
+            verifiedBy: 'Sarah Chen',
+            verifiedAt: new Date(Date.now() - 200 * 60000).toISOString(),
+            status: 'verified',
+            confidence: 0.92
+          },
+          {
+            id: 'ann-2',
+            symbolPath: 'src/tools/planning/planner.ts:generatePlan',
+            type: 'function',
+            description: 'Core planning function that analyzes project requirements and generates a structured implementation plan with change groups, file maps, and architectural diagrams.',
+            tags: ['Planning', 'Core Logic', 'AI Agent'],
+            createdBy: 'agent',
+            createdAt: new Date(Date.now() - 280 * 60000).toISOString(),
+            verifiedBy: 'Marcus Rodriguez',
+            verifiedAt: new Date(Date.now() - 45 * 60000).toISOString(),
+            status: 'verified',
+            confidence: 0.95
+          },
+          {
+            id: 'ann-3',
+            symbolPath: 'dashboard/app/components/TeamView.tsx:TeamView',
+            type: 'component',
+            description: 'Displays team collaboration information including members, sync history, and annotation statistics. Shows git-based team sharing status.',
+            tags: ['UI', 'Team Collaboration', 'Dashboard'],
+            createdBy: 'agent',
+            createdAt: new Date(Date.now() - 150 * 60000).toISOString(),
+            status: 'pending',
+            confidence: 0.88
+          },
+          {
+            id: 'ann-4',
+            symbolPath: 'src/tools/context/writer.ts:writeContextEntry',
+            type: 'function',
+            description: 'Writes entries to the shared context board. Used by all agents to persist their thoughts, decisions, and artifacts to the .weaver/context.json file.',
+            tags: ['Context Management', 'Persistence', 'Core'],
+            createdBy: 'agent',
+            createdAt: new Date(Date.now() - 270 * 60000).toISOString(),
+            verifiedBy: 'Marcus Rodriguez',
+            verifiedAt: new Date(Date.now() - 40 * 60000).toISOString(),
+            status: 'verified',
+            confidence: 0.97
+          },
+          {
+            id: 'ann-5',
+            symbolPath: 'hub/src/routes/sync.ts:handlePush',
+            type: 'function',
+            description: 'Handles push synchronization from team members. Validates incoming annotations and merges them into the central hub repository.',
+            tags: ['Hub', 'Sync', 'Team Collaboration'],
+            createdBy: 'agent',
+            createdAt: new Date(Date.now() - 220 * 60000).toISOString(),
+            verifiedBy: 'Aisha Patel',
+            verifiedAt: new Date(Date.now() - 10 * 60000).toISOString(),
+            status: 'verified',
+            confidence: 0.90
+          },
+          {
+            id: 'ann-6',
+            symbolPath: 'src/tools/indexing/ast-parser.ts:parseCodebase',
+            type: 'function',
+            description: 'Uses tree-sitter to parse source files and extract AST information including functions, classes, variables, and dependencies. Foundation for code intelligence features.',
+            tags: ['Indexing', 'AST', 'Tree-sitter'],
+            createdBy: 'agent',
+            createdAt: new Date(Date.now() - 290 * 60000).toISOString(),
+            status: 'pending',
+            confidence: 0.85
+          },
+          {
+            id: 'ann-7',
+            symbolPath: 'dashboard/app/components/CodeIntelView.tsx:ClassMapView',
+            type: 'component',
+            description: 'Renders the class/interface hierarchy with relationship diagrams. Allows developers to explore code structure visually.',
+            tags: ['UI', 'Code Intelligence', 'Visualization'],
+            createdBy: 'agent',
+            createdAt: new Date(Date.now() - 140 * 60000).toISOString(),
+            verifiedBy: 'Sarah Chen',
+            verifiedAt: new Date(Date.now() - 30 * 60000).toISOString(),
+            status: 'verified',
+            confidence: 0.91
+          },
+          {
+            id: 'ann-8',
+            symbolPath: 'src/agents/architect/index.ts:analyzeArchitecture',
+            type: 'function',
+            description: 'Architect agent\'s main analysis function. Examines codebase structure, identifies patterns, and proposes architectural improvements.',
+            tags: ['Agent', 'Architecture', 'Analysis'],
+            createdBy: 'agent',
+            createdAt: new Date(Date.now() - 200 * 60000).toISOString(),
+            status: 'pending',
+            confidence: 0.87
+          }
+        ],
+        stats: {
+          total: 156,
+          verified: 89,
+          pending: 34,
+          flagged: 33,
+          byType: {
+            function: 78,
+            class: 23,
+            component: 31,
+            module: 12,
+            interface: 12
+          },
+          avgConfidence: 0.89
+        }
+      })
+    }
   }, [])
 
   // Load initial data

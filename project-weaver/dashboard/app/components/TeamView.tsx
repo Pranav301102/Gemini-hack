@@ -70,23 +70,38 @@ export interface TeamData {
 
 export interface AnnotationData {
   id: string
-  file: string
-  symbol: string
-  symbolType: 'function' | 'class' | 'type' | 'variable' | 'module'
+  file?: string
+  symbolPath?: string
+  symbol?: string
+  symbolType?: 'function' | 'class' | 'type' | 'variable' | 'module' | 'component'
+  type?: string
   line?: number
-  annotation: string
+  annotation?: string
+  description?: string
   tags: string[]
-  author: string
-  authorType: 'agent' | 'human'
-  verified: boolean
+  author?: string
+  authorType?: 'agent' | 'human'
+  createdBy?: string
+  verified?: boolean
   verifiedBy?: string
+  status?: string
   createdAt: string
-  updatedAt: string
+  updatedAt?: string
+  verifiedAt?: string
+  confidence?: number
 }
 
 export interface AnnotationsData {
   version: string
   annotations: AnnotationData[]
+  stats?: {
+    total: number
+    verified: number
+    pending: number
+    flagged: number
+    byType: Record<string, number>
+    avgConfidence: number
+  }
 }
 
 interface TeamViewProps {
@@ -206,14 +221,16 @@ const TeamView: React.FC<TeamViewProps> = ({ team, annotations, projectPath }) =
 
   const allAnnotations = annotations?.annotations ?? []
   const filteredAnnotations = allAnnotations.filter(a => {
-    if (annotationFilter === 'verified' && !a.verified) return false
-    if (annotationFilter === 'unverified' && a.verified) return false
-    if (annotationFileFilter && a.file !== annotationFileFilter) return false
+    const isVerified = a.verified || a.status === 'verified'
+    if (annotationFilter === 'verified' && !isVerified) return false
+    if (annotationFilter === 'unverified' && isVerified) return false
+    const file = a.file || a.symbolPath?.split(':')[0] || ''
+    if (annotationFileFilter && file !== annotationFileFilter) return false
     return true
   })
 
-  const annotationFiles = [...new Set(allAnnotations.map(a => a.file))]
-  const verifiedCount = allAnnotations.filter(a => a.verified).length
+  const annotationFiles = [...new Set(allAnnotations.map(a => a.file || a.symbolPath?.split(':')[0] || 'unknown'))]
+  const verifiedCount = allAnnotations.filter(a => a.verified || a.status === 'verified').length
 
   if (!team && !annotations) {
     return (
@@ -364,9 +381,71 @@ const TeamView: React.FC<TeamViewProps> = ({ team, annotations, projectPath }) =
               </div>
             </div>
 
-            {/* Member list */}
+            {/* Featured Team Members Card */}
+            <div className="bg-gradient-to-br from-gray-900 to-gray-800/50 border border-gray-700 rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-4">
+                <HiUserGroup className="w-5 h-5 text-blue-400" />
+                <h3 className="text-sm font-bold text-white">Active Team Members</h3>
+                <span className="ml-auto text-xs text-gray-500">{team?.members.length ?? 0} members</span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                {(team?.members ?? []).map((member, i) => {
+                  const isRecent = (Date.now() - new Date(member.lastActive).getTime()) < 3600000 // Active in last hour
+                  return (
+                    <div key={member.id} className="flex items-start gap-2 bg-gray-900/80 border border-gray-700/50 rounded-lg p-3 hover:border-gray-600 transition-colors">
+                      <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${AVATAR_COLORS[i % AVATAR_COLORS.length]} flex items-center justify-center text-white text-sm font-bold flex-shrink-0 relative`}>
+                        {getInitials(member.name)}
+                        <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-gray-900 ${isRecent ? 'bg-green-500' : 'bg-gray-500'}`} title={isRecent ? 'Active' : 'Idle'} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-semibold text-white truncate mb-0.5">{member.name}</div>
+                        <div className="text-[10px] text-gray-500 truncate mb-1.5">{member.email}</div>
+                        <div className="flex flex-wrap gap-1">
+                          {member.contributions.annotations > 0 && (
+                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-purple-400/10 text-purple-400 font-medium">
+                              {member.contributions.annotations} notes
+                            </span>
+                          )}
+                          {member.contributions.builds > 0 && (
+                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-400/10 text-blue-400 font-medium">
+                              {member.contributions.builds} builds
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+
+              <div className="mt-4 pt-4 border-t border-gray-700">
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <div>
+                    <div className="text-lg font-bold text-white">
+                      {(team?.members ?? []).reduce((sum, m) => sum + m.contributions.annotations, 0)}
+                    </div>
+                    <div className="text-[9px] text-gray-500 uppercase tracking-wider">Total Annotations</div>
+                  </div>
+                  <div>
+                    <div className="text-lg font-bold text-blue-400">
+                      {(team?.members ?? []).reduce((sum, m) => sum + m.contributions.builds, 0)}
+                    </div>
+                    <div className="text-[9px] text-gray-500 uppercase tracking-wider">Builds</div>
+                  </div>
+                  <div>
+                    <div className="text-lg font-bold text-green-400">
+                      {(team?.members ?? []).reduce((sum, m) => sum + m.contributions.reviews, 0)}
+                    </div>
+                    <div className="text-[9px] text-gray-500 uppercase tracking-wider">Reviews</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Detailed Member list */}
             <div>
-              <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Team Members</h3>
+              <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Contribution Details</h3>
               <div className="space-y-2">
                 {(team?.members ?? []).map((member, i) => (
                   <div key={member.id} className="flex items-center gap-3 bg-gray-900/50 border border-gray-800 rounded-lg p-3">
@@ -379,15 +458,12 @@ const TeamView: React.FC<TeamViewProps> = ({ team, annotations, projectPath }) =
                     </div>
                     <div className="text-right">
                       <div className="text-[9px] text-gray-600">{timeAgo(member.lastActive)}</div>
-                      <div className="flex gap-1.5 mt-1">
+                      <div className="flex gap-1.5 mt-1 justify-end">
                         {member.contributions.scans > 0 && (
                           <span className="text-[8px] px-1 py-0.5 rounded bg-cyan-400/10 text-cyan-400">{member.contributions.scans} scans</span>
                         )}
-                        {member.contributions.builds > 0 && (
-                          <span className="text-[8px] px-1 py-0.5 rounded bg-blue-400/10 text-blue-400">{member.contributions.builds} builds</span>
-                        )}
-                        {member.contributions.annotations > 0 && (
-                          <span className="text-[8px] px-1 py-0.5 rounded bg-purple-400/10 text-purple-400">{member.contributions.annotations} notes</span>
+                        {member.contributions.reviews > 0 && (
+                          <span className="text-[8px] px-1 py-0.5 rounded bg-green-400/10 text-green-400">{member.contributions.reviews} reviews</span>
                         )}
                       </div>
                     </div>
@@ -506,39 +582,57 @@ const TeamView: React.FC<TeamViewProps> = ({ team, annotations, projectPath }) =
               </div>
             ) : (
               <div className="space-y-2">
-                {filteredAnnotations.map(a => (
+                {filteredAnnotations.map(a => {
+                  const symbol = a.symbol || a.symbolPath?.split(':').pop() || 'Unknown'
+                  const file = a.file || a.symbolPath?.split(':')[0] || ''
+                  const symbolType = a.symbolType || a.type || 'unknown'
+                  const isVerified = a.verified || a.status === 'verified'
+                  const author = a.author || (a.createdBy === 'agent' ? 'AI Agent' : a.createdBy || 'Unknown')
+                  const authorType = a.authorType || (a.createdBy === 'agent' ? 'agent' : 'human')
+                  const annotation = a.annotation || a.description || ''
+
+                  return (
                   <div key={a.id} className="bg-gray-900/50 border border-gray-800 rounded-lg overflow-hidden">
                     <div className="px-3 py-2 border-b border-gray-800/50">
                       <div className="flex items-center gap-2">
                         <HiCode className={`w-3.5 h-3.5 flex-shrink-0 ${
-                          a.symbolType === 'function' ? 'text-blue-400'
-                          : a.symbolType === 'class' ? 'text-purple-400'
-                          : a.symbolType === 'type' ? 'text-green-400'
+                          symbolType === 'function' ? 'text-blue-400'
+                          : symbolType === 'class' ? 'text-purple-400'
+                          : symbolType === 'component' ? 'text-green-400'
+                          : symbolType === 'type' ? 'text-cyan-400'
                           : 'text-gray-400'
                         }`} />
-                        <span className="text-xs font-medium text-white font-mono">{a.symbol}</span>
-                        <span className="text-[8px] px-1 py-0.5 rounded bg-gray-800 text-gray-500">{a.symbolType}</span>
-                        {a.verified ? (
+                        <span className="text-xs font-medium text-white font-mono">{symbol}</span>
+                        <span className="text-[8px] px-1 py-0.5 rounded bg-gray-800 text-gray-500">{symbolType}</span>
+                        {isVerified ? (
                           <span className="text-[8px] px-1 py-0.5 rounded bg-green-500/10 text-green-400 flex items-center gap-0.5 ml-auto">
                             <HiShieldCheck className="w-2.5 h-2.5" />
                             Verified{a.verifiedBy ? ` by ${a.verifiedBy}` : ''}
                           </span>
                         ) : (
                           <span className="text-[8px] px-1 py-0.5 rounded bg-yellow-500/10 text-yellow-400 ml-auto">
-                            Unverified
+                            Pending
                           </span>
                         )}
                       </div>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="text-[9px] text-gray-600 font-mono">{a.file}{a.line ? `:${a.line}` : ''}</span>
+                        <span className="text-[9px] text-gray-600 font-mono">{file}{a.line ? `:${a.line}` : ''}</span>
                         <span className="text-[9px] text-gray-700">·</span>
                         <span className="text-[9px] text-gray-600">
-                          {a.authorType === 'agent' ? '🤖' : '👤'} {a.author}
+                          {authorType === 'agent' ? '🤖' : '👤'} {author}
                         </span>
+                        {a.confidence && (
+                          <>
+                            <span className="text-[9px] text-gray-700">·</span>
+                            <span className="text-[9px] text-gray-600">
+                              {Math.round(a.confidence * 100)}% confidence
+                            </span>
+                          </>
+                        )}
                       </div>
                     </div>
                     <div className="px-3 py-2">
-                      <p className="text-[11px] text-gray-300 leading-relaxed whitespace-pre-wrap">{a.annotation}</p>
+                      <p className="text-[11px] text-gray-300 leading-relaxed whitespace-pre-wrap">{annotation}</p>
                       {a.tags.length > 0 && (
                         <div className="flex gap-1 mt-2 flex-wrap">
                           {a.tags.map(tag => (
@@ -548,7 +642,8 @@ const TeamView: React.FC<TeamViewProps> = ({ team, annotations, projectPath }) =
                       )}
                     </div>
                   </div>
-                ))}
+                )
+                })}
               </div>
             )}
           </div>

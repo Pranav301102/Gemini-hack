@@ -1,0 +1,3123 @@
+{
+  "version": "2.0.0",
+  "indexedAt": "2026-02-09T10:07:28.092Z",
+  "rootPath": "/Users/spartan/Projects/Gemini-hack/test-weaver-project",
+  "techStack": [
+    "TypeScript"
+  ],
+  "fileTree": [
+    {
+      "path": "backend/src/controllers/authController.ts",
+      "size": 2265,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/controllers/groupController.ts",
+      "size": 2874,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/controllers/todoController.ts",
+      "size": 2810,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/middleware/authMiddleware.ts",
+      "size": 771,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/models/groupModel.ts",
+      "size": 221,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/models/todoModel.ts",
+      "size": 139,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/models/userModel.ts",
+      "size": 97,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/routes/auth.ts",
+      "size": 246,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/routes/groups.ts",
+      "size": 445,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/routes/todos.ts",
+      "size": 426,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/server.ts",
+      "size": 528,
+      "type": "file"
+    },
+    {
+      "path": "backend/tests/todo.test.ts",
+      "size": 2047,
+      "type": "file"
+    },
+    {
+      "path": "frontend/src/App.tsx",
+      "size": 2810,
+      "type": "file"
+    },
+    {
+      "path": "frontend/src/__tests__/App.test.tsx",
+      "size": 2785,
+      "type": "file"
+    },
+    {
+      "path": "frontend/src/api/authApi.ts",
+      "size": 448,
+      "type": "file"
+    },
+    {
+      "path": "frontend/src/api/groupApi.ts",
+      "size": 1188,
+      "type": "file"
+    },
+    {
+      "path": "frontend/src/api/todoApi.ts",
+      "size": 1065,
+      "type": "file"
+    },
+    {
+      "path": "frontend/src/components/Filters.tsx",
+      "size": 691,
+      "type": "file"
+    },
+    {
+      "path": "frontend/src/components/TodoForm.tsx",
+      "size": 759,
+      "type": "file"
+    },
+    {
+      "path": "frontend/src/components/TodoItem.tsx",
+      "size": 1928,
+      "type": "file"
+    },
+    {
+      "path": "frontend/src/components/TodoList.tsx",
+      "size": 773,
+      "type": "file"
+    },
+    {
+      "path": "frontend/src/context/AuthContext.tsx",
+      "size": 1554,
+      "type": "file"
+    },
+    {
+      "path": "frontend/src/main.tsx",
+      "size": 214,
+      "type": "file"
+    },
+    {
+      "path": "frontend/src/types/todo.ts",
+      "size": 100,
+      "type": "file"
+    },
+    {
+      "path": "frontend/vite.config.ts",
+      "size": 169,
+      "type": "file"
+    }
+  ],
+  "files": [
+    {
+      "path": "backend/src/controllers/authController.ts",
+      "size": 2265,
+      "language": "TypeScript",
+      "functions": [
+        {
+          "name": "readUsers",
+          "params": [],
+          "returnType": "User[]",
+          "exported": false,
+          "line": 18,
+          "isAsync": false
+        },
+        {
+          "name": "writeUsers",
+          "params": [
+            {
+              "name": "users",
+              "type": "User[]"
+            }
+          ],
+          "exported": false,
+          "line": 30,
+          "isAsync": false
+        },
+        {
+          "name": "register",
+          "params": [
+            {
+              "name": "req",
+              "type": "Request"
+            },
+            {
+              "name": "res",
+              "type": "Response"
+            }
+          ],
+          "exported": true,
+          "line": 34,
+          "isAsync": true
+        },
+        {
+          "name": "login",
+          "params": [
+            {
+              "name": "req",
+              "type": "Request"
+            },
+            {
+              "name": "res",
+              "type": "Response"
+            }
+          ],
+          "exported": true,
+          "line": 60,
+          "isAsync": true
+        }
+      ],
+      "classes": [],
+      "variables": [
+        {
+          "name": "DATA_FILE",
+          "value": "path.join(__dirname, '../data/users.json')",
+          "kind": "const",
+          "exported": false,
+          "line": 9
+        },
+        {
+          "name": "JWT_SECRET",
+          "value": "process.env.JWT_SECRET || 'your-secret-key'",
+          "kind": "const",
+          "exported": false,
+          "line": 10
+        },
+        {
+          "name": "dataDir",
+          "value": "path.join(__dirname, '../data')",
+          "kind": "const",
+          "exported": false,
+          "line": 13
+        }
+      ],
+      "exports": [
+        "register",
+        "login"
+      ],
+      "imports": [
+        {
+          "source": "express",
+          "names": [
+            "Request",
+            "Response"
+          ]
+        },
+        {
+          "source": "fs",
+          "names": [
+            "fs"
+          ]
+        },
+        {
+          "source": "path",
+          "names": [
+            "path"
+          ]
+        },
+        {
+          "source": "uuid",
+          "names": [
+            "uuidv4"
+          ]
+        },
+        {
+          "source": "jsonwebtoken",
+          "names": [
+            "jwt"
+          ]
+        },
+        {
+          "source": "bcryptjs",
+          "names": [
+            "bcrypt"
+          ]
+        },
+        {
+          "source": "../models/userModel",
+          "names": [
+            "User"
+          ]
+        }
+      ],
+      "types": []
+    },
+    {
+      "path": "backend/src/controllers/groupController.ts",
+      "size": 2874,
+      "language": "TypeScript",
+      "functions": [
+        {
+          "name": "readGroups",
+          "params": [],
+          "returnType": "Group[]",
+          "exported": false,
+          "line": 10,
+          "isAsync": false
+        },
+        {
+          "name": "writeGroups",
+          "params": [
+            {
+              "name": "groups",
+              "type": "Group[]"
+            }
+          ],
+          "exported": false,
+          "line": 22,
+          "isAsync": false
+        },
+        {
+          "name": "generateInviteCode",
+          "params": [],
+          "exported": false,
+          "line": 26,
+          "isAsync": false
+        },
+        {
+          "name": "createGroup",
+          "params": [
+            {
+              "name": "req",
+              "type": "AuthRequest"
+            },
+            {
+              "name": "res",
+              "type": "Response"
+            }
+          ],
+          "exported": true,
+          "line": 30,
+          "isAsync": false
+        },
+        {
+          "name": "getGroups",
+          "params": [
+            {
+              "name": "req",
+              "type": "AuthRequest"
+            },
+            {
+              "name": "res",
+              "type": "Response"
+            }
+          ],
+          "exported": true,
+          "line": 52,
+          "isAsync": false
+        },
+        {
+          "name": "joinGroup",
+          "params": [
+            {
+              "name": "req",
+              "type": "AuthRequest"
+            },
+            {
+              "name": "res",
+              "type": "Response"
+            }
+          ],
+          "exported": true,
+          "line": 61,
+          "isAsync": false
+        },
+        {
+          "name": "getGroupMembers",
+          "params": [
+            {
+              "name": "req",
+              "type": "AuthRequest"
+            },
+            {
+              "name": "res",
+              "type": "Response"
+            }
+          ],
+          "exported": true,
+          "line": 86,
+          "isAsync": false
+        }
+      ],
+      "classes": [],
+      "variables": [
+        {
+          "name": "DATA_FILE",
+          "value": "path.join(__dirname, '../data/groups.json')",
+          "kind": "const",
+          "exported": false,
+          "line": 8
+        }
+      ],
+      "exports": [
+        "createGroup",
+        "getGroups",
+        "joinGroup",
+        "getGroupMembers"
+      ],
+      "imports": [
+        {
+          "source": "express",
+          "names": [
+            "Response"
+          ]
+        },
+        {
+          "source": "fs",
+          "names": [
+            "fs"
+          ]
+        },
+        {
+          "source": "path",
+          "names": [
+            "path"
+          ]
+        },
+        {
+          "source": "uuid",
+          "names": [
+            "uuidv4"
+          ]
+        },
+        {
+          "source": "../models/groupModel",
+          "names": [
+            "Group",
+            "GroupMember"
+          ]
+        },
+        {
+          "source": "../middleware/authMiddleware",
+          "names": [
+            "AuthRequest"
+          ]
+        }
+      ],
+      "types": []
+    },
+    {
+      "path": "backend/src/controllers/todoController.ts",
+      "size": 2810,
+      "language": "TypeScript",
+      "functions": [
+        {
+          "name": "readTodos",
+          "params": [],
+          "returnType": "Todo[]",
+          "exported": false,
+          "line": 10,
+          "isAsync": false
+        },
+        {
+          "name": "writeTodos",
+          "params": [
+            {
+              "name": "todos",
+              "type": "Todo[]"
+            }
+          ],
+          "exported": false,
+          "line": 22,
+          "isAsync": false
+        },
+        {
+          "name": "getTodos",
+          "params": [
+            {
+              "name": "req",
+              "type": "AuthRequest"
+            },
+            {
+              "name": "res",
+              "type": "Response"
+            }
+          ],
+          "exported": true,
+          "line": 26,
+          "isAsync": false
+        },
+        {
+          "name": "createTodo",
+          "params": [
+            {
+              "name": "req",
+              "type": "AuthRequest"
+            },
+            {
+              "name": "res",
+              "type": "Response"
+            }
+          ],
+          "exported": true,
+          "line": 43,
+          "isAsync": false
+        },
+        {
+          "name": "updateTodo",
+          "params": [
+            {
+              "name": "req",
+              "type": "AuthRequest"
+            },
+            {
+              "name": "res",
+              "type": "Response"
+            }
+          ],
+          "exported": true,
+          "line": 67,
+          "isAsync": false
+        },
+        {
+          "name": "deleteTodo",
+          "params": [
+            {
+              "name": "req",
+              "type": "AuthRequest"
+            },
+            {
+              "name": "res",
+              "type": "Response"
+            }
+          ],
+          "exported": true,
+          "line": 91,
+          "isAsync": false
+        }
+      ],
+      "classes": [],
+      "variables": [
+        {
+          "name": "DATA_FILE",
+          "value": "path.join(__dirname, '../data/todos.json')",
+          "kind": "const",
+          "exported": false,
+          "line": 8
+        }
+      ],
+      "exports": [
+        "getTodos",
+        "createTodo",
+        "updateTodo",
+        "deleteTodo"
+      ],
+      "imports": [
+        {
+          "source": "express",
+          "names": [
+            "Response"
+          ]
+        },
+        {
+          "source": "fs",
+          "names": [
+            "fs"
+          ]
+        },
+        {
+          "source": "path",
+          "names": [
+            "path"
+          ]
+        },
+        {
+          "source": "uuid",
+          "names": [
+            "uuidv4"
+          ]
+        },
+        {
+          "source": "../models/todoModel",
+          "names": [
+            "Todo"
+          ]
+        },
+        {
+          "source": "../middleware/authMiddleware",
+          "names": [
+            "AuthRequest"
+          ]
+        }
+      ],
+      "types": []
+    },
+    {
+      "path": "backend/src/middleware/authMiddleware.ts",
+      "size": 771,
+      "language": "TypeScript",
+      "functions": [
+        {
+          "name": "authMiddleware",
+          "params": [
+            {
+              "name": "req",
+              "type": "AuthRequest"
+            },
+            {
+              "name": "res",
+              "type": "Response"
+            },
+            {
+              "name": "next",
+              "type": "NextFunction"
+            }
+          ],
+          "exported": true,
+          "line": 13,
+          "isAsync": false
+        }
+      ],
+      "classes": [],
+      "variables": [
+        {
+          "name": "JWT_SECRET",
+          "value": "process.env.JWT_SECRET || 'your-secret-key'",
+          "kind": "const",
+          "exported": false,
+          "line": 4
+        }
+      ],
+      "exports": [
+        "AuthRequest",
+        "authMiddleware"
+      ],
+      "imports": [
+        {
+          "source": "express",
+          "names": [
+            "Request",
+            "Response",
+            "NextFunction"
+          ]
+        },
+        {
+          "source": "jsonwebtoken",
+          "names": [
+            "jwt"
+          ]
+        }
+      ],
+      "types": [
+        {
+          "name": "AuthRequest",
+          "kind": "interface",
+          "fields": [
+            {
+              "name": "user",
+              "type": "{\n    id: string;\n    email: string;\n  }",
+              "optional": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "backend/src/models/groupModel.ts",
+      "size": 221,
+      "language": "TypeScript",
+      "functions": [],
+      "classes": [],
+      "variables": [],
+      "exports": [
+        "GroupRole",
+        "GroupMember",
+        "Group"
+      ],
+      "imports": [],
+      "types": [
+        {
+          "name": "GroupRole",
+          "kind": "type",
+          "values": [
+            "admin",
+            "member"
+          ]
+        },
+        {
+          "name": "GroupMember",
+          "kind": "interface",
+          "fields": [
+            {
+              "name": "userId",
+              "type": "string"
+            },
+            {
+              "name": "role",
+              "type": "GroupRole"
+            }
+          ]
+        },
+        {
+          "name": "Group",
+          "kind": "interface",
+          "fields": [
+            {
+              "name": "id",
+              "type": "string"
+            },
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "inviteCode",
+              "type": "string"
+            },
+            {
+              "name": "members",
+              "type": "GroupMember[]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "backend/src/models/todoModel.ts",
+      "size": 139,
+      "language": "TypeScript",
+      "functions": [],
+      "classes": [],
+      "variables": [],
+      "exports": [
+        "Todo"
+      ],
+      "imports": [],
+      "types": [
+        {
+          "name": "Todo",
+          "kind": "interface",
+          "fields": [
+            {
+              "name": "id",
+              "type": "string"
+            },
+            {
+              "name": "title",
+              "type": "string"
+            },
+            {
+              "name": "completed",
+              "type": "boolean"
+            },
+            {
+              "name": "createdAt",
+              "type": "string"
+            },
+            {
+              "name": "ownerId",
+              "type": "string"
+            },
+            {
+              "name": "groupId",
+              "type": "string",
+              "optional": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "backend/src/models/userModel.ts",
+      "size": 97,
+      "language": "TypeScript",
+      "functions": [],
+      "classes": [],
+      "variables": [],
+      "exports": [
+        "User"
+      ],
+      "imports": [],
+      "types": [
+        {
+          "name": "User",
+          "kind": "interface",
+          "fields": [
+            {
+              "name": "id",
+              "type": "string"
+            },
+            {
+              "name": "email",
+              "type": "string"
+            },
+            {
+              "name": "passwordHash",
+              "type": "string"
+            },
+            {
+              "name": "name",
+              "type": "string"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "backend/src/routes/auth.ts",
+      "size": 246,
+      "language": "TypeScript",
+      "functions": [],
+      "classes": [],
+      "variables": [
+        {
+          "name": "router",
+          "value": "Router()",
+          "kind": "const",
+          "exported": false,
+          "line": 4
+        }
+      ],
+      "exports": [
+        "router"
+      ],
+      "imports": [
+        {
+          "source": "express",
+          "names": [
+            "Router"
+          ]
+        },
+        {
+          "source": "../controllers/authController",
+          "names": [
+            "* as authController"
+          ]
+        }
+      ],
+      "types": []
+    },
+    {
+      "path": "backend/src/routes/groups.ts",
+      "size": 445,
+      "language": "TypeScript",
+      "functions": [],
+      "classes": [],
+      "variables": [
+        {
+          "name": "router",
+          "value": "Router()",
+          "kind": "const",
+          "exported": false,
+          "line": 5
+        }
+      ],
+      "exports": [
+        "router"
+      ],
+      "imports": [
+        {
+          "source": "express",
+          "names": [
+            "Router"
+          ]
+        },
+        {
+          "source": "../controllers/groupController",
+          "names": [
+            "* as groupController"
+          ]
+        },
+        {
+          "source": "../middleware/authMiddleware",
+          "names": [
+            "authMiddleware"
+          ]
+        }
+      ],
+      "types": []
+    },
+    {
+      "path": "backend/src/routes/todos.ts",
+      "size": 426,
+      "language": "TypeScript",
+      "functions": [],
+      "classes": [],
+      "variables": [
+        {
+          "name": "router",
+          "value": "Router()",
+          "kind": "const",
+          "exported": false,
+          "line": 5
+        }
+      ],
+      "exports": [
+        "router"
+      ],
+      "imports": [
+        {
+          "source": "express",
+          "names": [
+            "Router"
+          ]
+        },
+        {
+          "source": "../controllers/todoController",
+          "names": [
+            "* as todoController"
+          ]
+        },
+        {
+          "source": "../middleware/authMiddleware",
+          "names": [
+            "authMiddleware"
+          ]
+        }
+      ],
+      "types": []
+    },
+    {
+      "path": "backend/src/server.ts",
+      "size": 528,
+      "language": "TypeScript",
+      "functions": [],
+      "classes": [],
+      "variables": [
+        {
+          "name": "app",
+          "value": "express()",
+          "kind": "const",
+          "exported": false,
+          "line": 8
+        },
+        {
+          "name": "PORT",
+          "value": "process.env.PORT || 5001",
+          "kind": "const",
+          "exported": false,
+          "line": 9
+        }
+      ],
+      "exports": [],
+      "imports": [
+        {
+          "source": "express",
+          "names": [
+            "express"
+          ]
+        },
+        {
+          "source": "cors",
+          "names": [
+            "cors"
+          ]
+        },
+        {
+          "source": "body-parser",
+          "names": [
+            "bodyParser"
+          ]
+        },
+        {
+          "source": "./routes/todos",
+          "names": [
+            "todoRoutes"
+          ]
+        },
+        {
+          "source": "./routes/auth",
+          "names": [
+            "authRoutes"
+          ]
+        },
+        {
+          "source": "./routes/groups",
+          "names": [
+            "groupRoutes"
+          ]
+        }
+      ],
+      "types": []
+    },
+    {
+      "path": "backend/tests/todo.test.ts",
+      "size": 2047,
+      "language": "TypeScript",
+      "functions": [],
+      "classes": [],
+      "variables": [
+        {
+          "name": "app",
+          "value": "express()",
+          "kind": "const",
+          "exported": false,
+          "line": 10
+        },
+        {
+          "name": "DATA_FILE",
+          "value": "path.join(__dirname, '../src/data/todos.json')",
+          "kind": "const",
+          "exported": false,
+          "line": 15
+        }
+      ],
+      "exports": [],
+      "imports": [
+        {
+          "source": "supertest",
+          "names": [
+            "request"
+          ]
+        },
+        {
+          "source": "express",
+          "names": [
+            "express"
+          ]
+        },
+        {
+          "source": "body-parser",
+          "names": [
+            "bodyParser"
+          ]
+        },
+        {
+          "source": "cors",
+          "names": [
+            "cors"
+          ]
+        },
+        {
+          "source": "../src/routes/todos",
+          "names": [
+            "todoRoutes"
+          ]
+        },
+        {
+          "source": "fs",
+          "names": [
+            "fs"
+          ]
+        },
+        {
+          "source": "path",
+          "names": [
+            "path"
+          ]
+        }
+      ],
+      "types": []
+    },
+    {
+      "path": "frontend/src/App.tsx",
+      "size": 2810,
+      "language": "TypeScript",
+      "functions": [
+        {
+          "name": "App",
+          "params": [],
+          "exported": false,
+          "line": 9,
+          "isAsync": false,
+          "isComponent": true
+        },
+        {
+          "name": "App.fetchTodos",
+          "params": [],
+          "exported": false,
+          "line": 18,
+          "isAsync": true
+        },
+        {
+          "name": "App.handleAddTodo",
+          "params": [
+            {
+              "name": "title",
+              "type": "string"
+            }
+          ],
+          "exported": false,
+          "line": 29,
+          "isAsync": true
+        },
+        {
+          "name": "App.handleToggleTodo",
+          "params": [
+            {
+              "name": "id",
+              "type": "string"
+            },
+            {
+              "name": "completed",
+              "type": "boolean"
+            }
+          ],
+          "exported": false,
+          "line": 38,
+          "isAsync": true
+        },
+        {
+          "name": "App.handleDeleteTodo",
+          "params": [
+            {
+              "name": "id",
+              "type": "string"
+            }
+          ],
+          "exported": false,
+          "line": 47,
+          "isAsync": true
+        },
+        {
+          "name": "App.handleUpdateTodo",
+          "params": [
+            {
+              "name": "id",
+              "type": "string"
+            },
+            {
+              "name": "title",
+              "type": "string"
+            }
+          ],
+          "exported": false,
+          "line": 56,
+          "isAsync": true
+        }
+      ],
+      "classes": [],
+      "variables": [],
+      "exports": [
+        "App"
+      ],
+      "imports": [
+        {
+          "source": "react",
+          "names": [
+            "React",
+            "useState",
+            "useEffect"
+          ]
+        },
+        {
+          "source": "./api/todoApi",
+          "names": [
+            "* as api"
+          ]
+        },
+        {
+          "source": "./types/todo",
+          "names": [
+            "Todo"
+          ]
+        },
+        {
+          "source": "./components/TodoForm",
+          "names": [
+            "TodoForm"
+          ]
+        },
+        {
+          "source": "./components/TodoList",
+          "names": [
+            "TodoList"
+          ]
+        },
+        {
+          "source": "./components/Filters",
+          "names": [
+            "Filters",
+            "FilterType"
+          ]
+        }
+      ],
+      "types": []
+    },
+    {
+      "path": "frontend/src/__tests__/App.test.tsx",
+      "size": 2785,
+      "language": "TypeScript",
+      "functions": [],
+      "classes": [],
+      "variables": [],
+      "exports": [],
+      "imports": [
+        {
+          "source": "vitest",
+          "names": [
+            "describe",
+            "it",
+            "expect",
+            "vi"
+          ]
+        },
+        {
+          "source": "@testing-library/react",
+          "names": [
+            "render",
+            "screen",
+            "fireEvent",
+            "waitFor"
+          ]
+        },
+        {
+          "source": "../App",
+          "names": [
+            "App"
+          ]
+        },
+        {
+          "source": "../api/todoApi",
+          "names": [
+            "* as api"
+          ]
+        }
+      ],
+      "types": []
+    },
+    {
+      "path": "frontend/src/api/authApi.ts",
+      "size": 448,
+      "language": "TypeScript",
+      "functions": [
+        {
+          "name": "register",
+          "params": [
+            {
+              "name": "email",
+              "type": "string"
+            },
+            {
+              "name": "password",
+              "type": "string"
+            },
+            {
+              "name": "name",
+              "type": "string"
+            }
+          ],
+          "exported": true,
+          "line": 5,
+          "isAsync": true
+        },
+        {
+          "name": "login",
+          "params": [
+            {
+              "name": "email",
+              "type": "string"
+            },
+            {
+              "name": "password",
+              "type": "string"
+            }
+          ],
+          "exported": true,
+          "line": 10,
+          "isAsync": true
+        }
+      ],
+      "classes": [],
+      "variables": [
+        {
+          "name": "API_URL",
+          "value": "'http://localhost:5001/api/auth'",
+          "kind": "const",
+          "exported": false,
+          "line": 3
+        }
+      ],
+      "exports": [
+        "register",
+        "login"
+      ],
+      "imports": [
+        {
+          "source": "axios",
+          "names": [
+            "axios"
+          ]
+        }
+      ],
+      "types": []
+    },
+    {
+      "path": "frontend/src/api/groupApi.ts",
+      "size": 1188,
+      "language": "TypeScript",
+      "functions": [
+        {
+          "name": "getAuthHeader",
+          "params": [],
+          "exported": false,
+          "line": 5,
+          "isAsync": false
+        },
+        {
+          "name": "getGroups",
+          "params": [],
+          "returnType": "Promise<Group[]>",
+          "exported": true,
+          "line": 22,
+          "isAsync": true
+        },
+        {
+          "name": "createGroup",
+          "params": [
+            {
+              "name": "name",
+              "type": "string"
+            }
+          ],
+          "returnType": "Promise<Group>",
+          "exported": true,
+          "line": 29,
+          "isAsync": true
+        },
+        {
+          "name": "joinGroup",
+          "params": [
+            {
+              "name": "inviteCode",
+              "type": "string"
+            }
+          ],
+          "returnType": "Promise<Group>",
+          "exported": true,
+          "line": 36,
+          "isAsync": true
+        },
+        {
+          "name": "getGroupMembers",
+          "params": [
+            {
+              "name": "groupId",
+              "type": "string"
+            }
+          ],
+          "returnType": "Promise<GroupMember[]>",
+          "exported": true,
+          "line": 43,
+          "isAsync": true
+        }
+      ],
+      "classes": [],
+      "variables": [
+        {
+          "name": "API_URL",
+          "value": "'http://localhost:5001/api/groups'",
+          "kind": "const",
+          "exported": false,
+          "line": 3
+        }
+      ],
+      "exports": [
+        "GroupMember",
+        "Group",
+        "getGroups",
+        "createGroup",
+        "joinGroup",
+        "getGroupMembers"
+      ],
+      "imports": [
+        {
+          "source": "axios",
+          "names": [
+            "axios"
+          ]
+        }
+      ],
+      "types": [
+        {
+          "name": "GroupMember",
+          "kind": "interface",
+          "fields": [
+            {
+              "name": "userId",
+              "type": "string"
+            },
+            {
+              "name": "role",
+              "type": "'admin' | 'member'"
+            }
+          ]
+        },
+        {
+          "name": "Group",
+          "kind": "interface",
+          "fields": [
+            {
+              "name": "id",
+              "type": "string"
+            },
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "inviteCode",
+              "type": "string"
+            },
+            {
+              "name": "members",
+              "type": "GroupMember[]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "frontend/src/api/todoApi.ts",
+      "size": 1065,
+      "language": "TypeScript",
+      "functions": [
+        {
+          "name": "getAuthHeader",
+          "params": [],
+          "exported": false,
+          "line": 6,
+          "isAsync": false
+        },
+        {
+          "name": "getTodos",
+          "params": [
+            {
+              "name": "groupId",
+              "type": "string"
+            }
+          ],
+          "returnType": "Promise<Todo[]>",
+          "exported": true,
+          "line": 11,
+          "isAsync": true
+        },
+        {
+          "name": "createTodo",
+          "params": [
+            {
+              "name": "title",
+              "type": "string"
+            },
+            {
+              "name": "groupId",
+              "type": "string"
+            }
+          ],
+          "returnType": "Promise<Todo>",
+          "exported": true,
+          "line": 19,
+          "isAsync": true
+        },
+        {
+          "name": "updateTodo",
+          "params": [
+            {
+              "name": "id",
+              "type": "string"
+            },
+            {
+              "name": "updates",
+              "type": "Partial<Todo>"
+            }
+          ],
+          "returnType": "Promise<Todo>",
+          "exported": true,
+          "line": 27,
+          "isAsync": true
+        },
+        {
+          "name": "deleteTodo",
+          "params": [
+            {
+              "name": "id",
+              "type": "string"
+            }
+          ],
+          "returnType": "Promise<void>",
+          "exported": true,
+          "line": 34,
+          "isAsync": true
+        }
+      ],
+      "classes": [],
+      "variables": [
+        {
+          "name": "API_URL",
+          "value": "'http://localhost:5001/api/todos'",
+          "kind": "const",
+          "exported": false,
+          "line": 4
+        }
+      ],
+      "exports": [
+        "getTodos",
+        "createTodo",
+        "updateTodo",
+        "deleteTodo"
+      ],
+      "imports": [
+        {
+          "source": "axios",
+          "names": [
+            "axios"
+          ]
+        },
+        {
+          "source": "../types/todo",
+          "names": [
+            "Todo"
+          ]
+        }
+      ],
+      "types": []
+    },
+    {
+      "path": "frontend/src/components/Filters.tsx",
+      "size": 691,
+      "language": "TypeScript",
+      "functions": [
+        {
+          "name": "Filters",
+          "params": [
+            {
+              "name": "{ currentFilter, onFilterChange }"
+            }
+          ],
+          "exported": false,
+          "line": 10,
+          "isAsync": false,
+          "isComponent": true
+        }
+      ],
+      "classes": [],
+      "variables": [],
+      "exports": [
+        "FilterType",
+        "Filters"
+      ],
+      "imports": [
+        {
+          "source": "react",
+          "names": [
+            "React"
+          ]
+        }
+      ],
+      "types": [
+        {
+          "name": "FilterType",
+          "kind": "type",
+          "values": [
+            "all",
+            "active",
+            "completed"
+          ]
+        },
+        {
+          "name": "FiltersProps",
+          "kind": "interface",
+          "fields": [
+            {
+              "name": "currentFilter",
+              "type": "FilterType"
+            },
+            {
+              "name": "onFilterChange",
+              "type": "(filter: FilterType) => void"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "frontend/src/components/TodoForm.tsx",
+      "size": 759,
+      "language": "TypeScript",
+      "functions": [
+        {
+          "name": "TodoForm",
+          "params": [
+            {
+              "name": "{ onAdd }"
+            }
+          ],
+          "exported": false,
+          "line": 8,
+          "isAsync": false,
+          "isComponent": true
+        },
+        {
+          "name": "TodoForm.handleSubmit",
+          "params": [
+            {
+              "name": "e",
+              "type": "React.FormEvent"
+            }
+          ],
+          "exported": false,
+          "line": 11,
+          "isAsync": false
+        }
+      ],
+      "classes": [],
+      "variables": [],
+      "exports": [
+        "TodoForm"
+      ],
+      "imports": [
+        {
+          "source": "react",
+          "names": [
+            "React",
+            "useState"
+          ]
+        },
+        {
+          "source": "lucide-react",
+          "names": [
+            "Plus"
+          ]
+        }
+      ],
+      "types": [
+        {
+          "name": "TodoFormProps",
+          "kind": "interface",
+          "fields": [
+            {
+              "name": "onAdd",
+              "type": "(title: string) => void"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "frontend/src/components/TodoItem.tsx",
+      "size": 1928,
+      "language": "TypeScript",
+      "functions": [
+        {
+          "name": "TodoItem",
+          "params": [
+            {
+              "name": "{ todo, onToggle, onDelete, onUpdate }"
+            }
+          ],
+          "exported": false,
+          "line": 12,
+          "isAsync": false,
+          "isComponent": true
+        },
+        {
+          "name": "TodoItem.handleUpdate",
+          "params": [],
+          "exported": false,
+          "line": 16,
+          "isAsync": false
+        }
+      ],
+      "classes": [],
+      "variables": [],
+      "exports": [
+        "TodoItem"
+      ],
+      "imports": [
+        {
+          "source": "react",
+          "names": [
+            "React",
+            "useState"
+          ]
+        },
+        {
+          "source": "../types/todo",
+          "names": [
+            "Todo"
+          ]
+        },
+        {
+          "source": "lucide-react",
+          "names": [
+            "Check",
+            "Trash2",
+            "Edit2",
+            "X",
+            "Save"
+          ]
+        }
+      ],
+      "types": [
+        {
+          "name": "TodoItemProps",
+          "kind": "interface",
+          "fields": [
+            {
+              "name": "todo",
+              "type": "Todo"
+            },
+            {
+              "name": "onToggle",
+              "type": "(id: string, completed: boolean) => void"
+            },
+            {
+              "name": "onDelete",
+              "type": "(id: string) => void"
+            },
+            {
+              "name": "onUpdate",
+              "type": "(id: string, title: string) => void"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "frontend/src/components/TodoList.tsx",
+      "size": 773,
+      "language": "TypeScript",
+      "functions": [
+        {
+          "name": "TodoList",
+          "params": [
+            {
+              "name": "{ todos, onToggle, onDelete, onUpdate }"
+            }
+          ],
+          "exported": false,
+          "line": 12,
+          "isAsync": false,
+          "isComponent": true
+        }
+      ],
+      "classes": [],
+      "variables": [],
+      "exports": [
+        "TodoList"
+      ],
+      "imports": [
+        {
+          "source": "react",
+          "names": [
+            "React"
+          ]
+        },
+        {
+          "source": "../types/todo",
+          "names": [
+            "Todo"
+          ]
+        },
+        {
+          "source": "./TodoItem",
+          "names": [
+            "TodoItem"
+          ]
+        }
+      ],
+      "types": [
+        {
+          "name": "TodoListProps",
+          "kind": "interface",
+          "fields": [
+            {
+              "name": "todos",
+              "type": "Todo[]"
+            },
+            {
+              "name": "onToggle",
+              "type": "(id: string, completed: boolean) => void"
+            },
+            {
+              "name": "onDelete",
+              "type": "(id: string) => void"
+            },
+            {
+              "name": "onUpdate",
+              "type": "(id: string, title: string) => void"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "frontend/src/context/AuthContext.tsx",
+      "size": 1554,
+      "language": "TypeScript",
+      "functions": [
+        {
+          "name": "AuthProvider",
+          "params": [
+            {
+              "name": "{ children }"
+            }
+          ],
+          "exported": true,
+          "line": 19,
+          "isAsync": false,
+          "isComponent": true
+        },
+        {
+          "name": "AuthProvider.login",
+          "params": [
+            {
+              "name": "newToken",
+              "type": "string"
+            },
+            {
+              "name": "newUser",
+              "type": "User"
+            }
+          ],
+          "exported": false,
+          "line": 32,
+          "isAsync": false
+        },
+        {
+          "name": "AuthProvider.logout",
+          "params": [],
+          "exported": false,
+          "line": 39,
+          "isAsync": false
+        },
+        {
+          "name": "useAuth",
+          "params": [],
+          "exported": true,
+          "line": 53,
+          "isAsync": false
+        }
+      ],
+      "classes": [],
+      "variables": [
+        {
+          "name": "AuthContext",
+          "value": "createContext<AuthContextType | undefined>(undefined)",
+          "kind": "const",
+          "exported": false,
+          "line": 17
+        }
+      ],
+      "exports": [
+        "AuthProvider",
+        "useAuth"
+      ],
+      "imports": [
+        {
+          "source": "react",
+          "names": [
+            "React",
+            "createContext",
+            "useContext",
+            "useState",
+            "useEffect"
+          ]
+        }
+      ],
+      "types": [
+        {
+          "name": "User",
+          "kind": "interface",
+          "fields": [
+            {
+              "name": "id",
+              "type": "string"
+            },
+            {
+              "name": "email",
+              "type": "string"
+            },
+            {
+              "name": "name",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "AuthContextType",
+          "kind": "interface",
+          "fields": [
+            {
+              "name": "user",
+              "type": "User | null"
+            },
+            {
+              "name": "token",
+              "type": "string | null"
+            },
+            {
+              "name": "login",
+              "type": "(token: string, user: User) => void"
+            },
+            {
+              "name": "logout",
+              "type": "() => void"
+            },
+            {
+              "name": "isAuthenticated",
+              "type": "boolean"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "frontend/src/main.tsx",
+      "size": 214,
+      "language": "TypeScript",
+      "functions": [],
+      "classes": [],
+      "variables": [],
+      "exports": [],
+      "imports": [
+        {
+          "source": "react",
+          "names": [
+            "React"
+          ]
+        },
+        {
+          "source": "react-dom/client",
+          "names": [
+            "ReactDOM"
+          ]
+        },
+        {
+          "source": "./App",
+          "names": [
+            "App"
+          ]
+        }
+      ],
+      "types": []
+    },
+    {
+      "path": "frontend/src/types/todo.ts",
+      "size": 100,
+      "language": "TypeScript",
+      "functions": [],
+      "classes": [],
+      "variables": [],
+      "exports": [
+        "Todo"
+      ],
+      "imports": [],
+      "types": [
+        {
+          "name": "Todo",
+          "kind": "interface",
+          "fields": [
+            {
+              "name": "id",
+              "type": "string"
+            },
+            {
+              "name": "title",
+              "type": "string"
+            },
+            {
+              "name": "completed",
+              "type": "boolean"
+            },
+            {
+              "name": "createdAt",
+              "type": "string"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "frontend/vite.config.ts",
+      "size": 169,
+      "language": "TypeScript",
+      "functions": [],
+      "classes": [],
+      "variables": [],
+      "exports": [],
+      "imports": [
+        {
+          "source": "vite",
+          "names": [
+            "defineConfig"
+          ]
+        },
+        {
+          "source": "@vitejs/plugin-react",
+          "names": [
+            "react"
+          ]
+        }
+      ],
+      "types": []
+    }
+  ],
+  "totalFiles": 25,
+  "totalFunctions": 46,
+  "totalClasses": 0,
+  "totalVariables": 17,
+  "totalTypes": 16,
+  "dependencyGraph": {
+    "edges": [
+      {
+        "from": "backend/src/controllers/authController.ts",
+        "to": "backend/src/models/userModel.ts",
+        "imports": [
+          "User"
+        ]
+      },
+      {
+        "from": "backend/src/controllers/groupController.ts",
+        "to": "backend/src/models/groupModel.ts",
+        "imports": [
+          "Group",
+          "GroupMember"
+        ]
+      },
+      {
+        "from": "backend/src/controllers/groupController.ts",
+        "to": "backend/src/middleware/authMiddleware.ts",
+        "imports": [
+          "AuthRequest"
+        ]
+      },
+      {
+        "from": "backend/src/controllers/todoController.ts",
+        "to": "backend/src/models/todoModel.ts",
+        "imports": [
+          "Todo"
+        ]
+      },
+      {
+        "from": "backend/src/controllers/todoController.ts",
+        "to": "backend/src/middleware/authMiddleware.ts",
+        "imports": [
+          "AuthRequest"
+        ]
+      },
+      {
+        "from": "backend/src/routes/auth.ts",
+        "to": "backend/src/controllers/authController.ts",
+        "imports": [
+          "* as authController"
+        ]
+      },
+      {
+        "from": "backend/src/routes/groups.ts",
+        "to": "backend/src/controllers/groupController.ts",
+        "imports": [
+          "* as groupController"
+        ]
+      },
+      {
+        "from": "backend/src/routes/groups.ts",
+        "to": "backend/src/middleware/authMiddleware.ts",
+        "imports": [
+          "authMiddleware"
+        ]
+      },
+      {
+        "from": "backend/src/routes/todos.ts",
+        "to": "backend/src/controllers/todoController.ts",
+        "imports": [
+          "* as todoController"
+        ]
+      },
+      {
+        "from": "backend/src/routes/todos.ts",
+        "to": "backend/src/middleware/authMiddleware.ts",
+        "imports": [
+          "authMiddleware"
+        ]
+      },
+      {
+        "from": "backend/src/server.ts",
+        "to": "backend/src/routes/todos.ts",
+        "imports": [
+          "todoRoutes"
+        ]
+      },
+      {
+        "from": "backend/src/server.ts",
+        "to": "backend/src/routes/auth.ts",
+        "imports": [
+          "authRoutes"
+        ]
+      },
+      {
+        "from": "backend/src/server.ts",
+        "to": "backend/src/routes/groups.ts",
+        "imports": [
+          "groupRoutes"
+        ]
+      },
+      {
+        "from": "backend/tests/todo.test.ts",
+        "to": "backend/src/routes/todos.ts",
+        "imports": [
+          "todoRoutes"
+        ]
+      },
+      {
+        "from": "frontend/src/App.tsx",
+        "to": "frontend/src/api/todoApi.ts",
+        "imports": [
+          "* as api"
+        ]
+      },
+      {
+        "from": "frontend/src/App.tsx",
+        "to": "frontend/src/types/todo.ts",
+        "imports": [
+          "Todo"
+        ]
+      },
+      {
+        "from": "frontend/src/App.tsx",
+        "to": "frontend/src/components/TodoForm.tsx",
+        "imports": [
+          "TodoForm"
+        ]
+      },
+      {
+        "from": "frontend/src/App.tsx",
+        "to": "frontend/src/components/TodoList.tsx",
+        "imports": [
+          "TodoList"
+        ]
+      },
+      {
+        "from": "frontend/src/App.tsx",
+        "to": "frontend/src/components/Filters.tsx",
+        "imports": [
+          "Filters",
+          "FilterType"
+        ]
+      },
+      {
+        "from": "frontend/src/__tests__/App.test.tsx",
+        "to": "frontend/src/App.tsx",
+        "imports": [
+          "App"
+        ]
+      },
+      {
+        "from": "frontend/src/__tests__/App.test.tsx",
+        "to": "frontend/src/api/todoApi.ts",
+        "imports": [
+          "* as api"
+        ]
+      },
+      {
+        "from": "frontend/src/api/todoApi.ts",
+        "to": "frontend/src/types/todo.ts",
+        "imports": [
+          "Todo"
+        ]
+      },
+      {
+        "from": "frontend/src/components/TodoItem.tsx",
+        "to": "frontend/src/types/todo.ts",
+        "imports": [
+          "Todo"
+        ]
+      },
+      {
+        "from": "frontend/src/components/TodoList.tsx",
+        "to": "frontend/src/types/todo.ts",
+        "imports": [
+          "Todo"
+        ]
+      },
+      {
+        "from": "frontend/src/components/TodoList.tsx",
+        "to": "frontend/src/components/TodoItem.tsx",
+        "imports": [
+          "TodoItem"
+        ]
+      },
+      {
+        "from": "frontend/src/main.tsx",
+        "to": "frontend/src/App.tsx",
+        "imports": [
+          "App"
+        ]
+      }
+    ],
+    "entryPoints": [
+      "backend/src/server.ts",
+      "backend/tests/todo.test.ts",
+      "frontend/src/__tests__/App.test.tsx",
+      "frontend/src/api/authApi.ts",
+      "frontend/src/api/groupApi.ts",
+      "frontend/src/context/AuthContext.tsx",
+      "frontend/src/main.tsx",
+      "frontend/vite.config.ts"
+    ],
+    "sharedModules": [
+      {
+        "file": "backend/src/middleware/authMiddleware.ts",
+        "importedBy": 4
+      },
+      {
+        "file": "frontend/src/types/todo.ts",
+        "importedBy": 4
+      },
+      {
+        "file": "backend/src/routes/todos.ts",
+        "importedBy": 2
+      },
+      {
+        "file": "frontend/src/App.tsx",
+        "importedBy": 2
+      },
+      {
+        "file": "frontend/src/api/todoApi.ts",
+        "importedBy": 2
+      },
+      {
+        "file": "backend/src/controllers/authController.ts",
+        "importedBy": 1
+      },
+      {
+        "file": "backend/src/controllers/groupController.ts",
+        "importedBy": 1
+      },
+      {
+        "file": "backend/src/controllers/todoController.ts",
+        "importedBy": 1
+      },
+      {
+        "file": "backend/src/models/groupModel.ts",
+        "importedBy": 1
+      },
+      {
+        "file": "backend/src/models/todoModel.ts",
+        "importedBy": 1
+      },
+      {
+        "file": "backend/src/models/userModel.ts",
+        "importedBy": 1
+      },
+      {
+        "file": "backend/src/routes/auth.ts",
+        "importedBy": 1
+      },
+      {
+        "file": "backend/src/routes/groups.ts",
+        "importedBy": 1
+      },
+      {
+        "file": "frontend/src/components/Filters.tsx",
+        "importedBy": 1
+      },
+      {
+        "file": "frontend/src/components/TodoForm.tsx",
+        "importedBy": 1
+      }
+    ],
+    "clusters": [
+      {
+        "directory": "frontend/src/components",
+        "files": [
+          "frontend/src/components/Filters.tsx",
+          "frontend/src/components/TodoForm.tsx",
+          "frontend/src/components/TodoItem.tsx",
+          "frontend/src/components/TodoList.tsx"
+        ],
+        "internalEdges": 1,
+        "externalEdges": 5
+      },
+      {
+        "directory": "backend/src/controllers",
+        "files": [
+          "backend/src/controllers/authController.ts",
+          "backend/src/controllers/groupController.ts",
+          "backend/src/controllers/todoController.ts"
+        ],
+        "internalEdges": 0,
+        "externalEdges": 8
+      },
+      {
+        "directory": "backend/src/models",
+        "files": [
+          "backend/src/models/groupModel.ts",
+          "backend/src/models/todoModel.ts",
+          "backend/src/models/userModel.ts"
+        ],
+        "internalEdges": 0,
+        "externalEdges": 3
+      },
+      {
+        "directory": "backend/src/routes",
+        "files": [
+          "backend/src/routes/auth.ts",
+          "backend/src/routes/groups.ts",
+          "backend/src/routes/todos.ts"
+        ],
+        "internalEdges": 0,
+        "externalEdges": 9
+      },
+      {
+        "directory": "frontend/src/api",
+        "files": [
+          "frontend/src/api/authApi.ts",
+          "frontend/src/api/groupApi.ts",
+          "frontend/src/api/todoApi.ts"
+        ],
+        "internalEdges": 0,
+        "externalEdges": 3
+      },
+      {
+        "directory": "frontend/src",
+        "files": [
+          "frontend/src/App.tsx",
+          "frontend/src/main.tsx"
+        ],
+        "internalEdges": 1,
+        "externalEdges": 6
+      },
+      {
+        "directory": "backend/src/middleware",
+        "files": [
+          "backend/src/middleware/authMiddleware.ts"
+        ],
+        "internalEdges": 0,
+        "externalEdges": 4
+      },
+      {
+        "directory": "backend/src",
+        "files": [
+          "backend/src/server.ts"
+        ],
+        "internalEdges": 0,
+        "externalEdges": 3
+      },
+      {
+        "directory": "backend/tests",
+        "files": [
+          "backend/tests/todo.test.ts"
+        ],
+        "internalEdges": 0,
+        "externalEdges": 1
+      },
+      {
+        "directory": "frontend/src/__tests__",
+        "files": [
+          "frontend/src/__tests__/App.test.tsx"
+        ],
+        "internalEdges": 0,
+        "externalEdges": 2
+      },
+      {
+        "directory": "frontend/src/context",
+        "files": [
+          "frontend/src/context/AuthContext.tsx"
+        ],
+        "internalEdges": 0,
+        "externalEdges": 0
+      },
+      {
+        "directory": "frontend/src/types",
+        "files": [
+          "frontend/src/types/todo.ts"
+        ],
+        "internalEdges": 0,
+        "externalEdges": 4
+      },
+      {
+        "directory": "frontend",
+        "files": [
+          "frontend/vite.config.ts"
+        ],
+        "internalEdges": 0,
+        "externalEdges": 0
+      }
+    ],
+    "circularDeps": []
+  },
+  "codeMaps": {
+    "version": "1.0.0",
+    "generatedAt": "2026-02-09T10:07:33.394Z",
+    "classMap": {
+      "classes": [],
+      "interfaces": [
+        {
+          "id": "i:AuthRequest",
+          "name": "AuthRequest",
+          "file": "backend/src/middleware/authMiddleware.ts",
+          "line": 0,
+          "exported": true,
+          "fields": [
+            {
+              "name": "user",
+              "type": "{\n    id: string;\n    email: string;\n  }",
+              "optional": true
+            }
+          ]
+        },
+        {
+          "id": "i:GroupMember",
+          "name": "GroupMember",
+          "file": "backend/src/models/groupModel.ts",
+          "line": 0,
+          "exported": true,
+          "fields": [
+            {
+              "name": "userId",
+              "type": "string"
+            },
+            {
+              "name": "role",
+              "type": "GroupRole"
+            }
+          ]
+        },
+        {
+          "id": "i:Group",
+          "name": "Group",
+          "file": "backend/src/models/groupModel.ts",
+          "line": 0,
+          "exported": true,
+          "fields": [
+            {
+              "name": "id",
+              "type": "string"
+            },
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "inviteCode",
+              "type": "string"
+            },
+            {
+              "name": "members",
+              "type": "GroupMember[]"
+            }
+          ]
+        },
+        {
+          "id": "i:Todo",
+          "name": "Todo",
+          "file": "backend/src/models/todoModel.ts",
+          "line": 0,
+          "exported": true,
+          "fields": [
+            {
+              "name": "id",
+              "type": "string"
+            },
+            {
+              "name": "title",
+              "type": "string"
+            },
+            {
+              "name": "completed",
+              "type": "boolean"
+            },
+            {
+              "name": "createdAt",
+              "type": "string"
+            },
+            {
+              "name": "ownerId",
+              "type": "string"
+            },
+            {
+              "name": "groupId",
+              "type": "string",
+              "optional": true
+            }
+          ]
+        },
+        {
+          "id": "i:User",
+          "name": "User",
+          "file": "backend/src/models/userModel.ts",
+          "line": 0,
+          "exported": true,
+          "fields": [
+            {
+              "name": "id",
+              "type": "string"
+            },
+            {
+              "name": "email",
+              "type": "string"
+            },
+            {
+              "name": "passwordHash",
+              "type": "string"
+            },
+            {
+              "name": "name",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "id": "i:FiltersProps",
+          "name": "FiltersProps",
+          "file": "frontend/src/components/Filters.tsx",
+          "line": 0,
+          "exported": true,
+          "fields": [
+            {
+              "name": "currentFilter",
+              "type": "FilterType"
+            },
+            {
+              "name": "onFilterChange",
+              "type": "(filter: FilterType) => void"
+            }
+          ]
+        },
+        {
+          "id": "i:TodoFormProps",
+          "name": "TodoFormProps",
+          "file": "frontend/src/components/TodoForm.tsx",
+          "line": 0,
+          "exported": true,
+          "fields": [
+            {
+              "name": "onAdd",
+              "type": "(title: string) => void"
+            }
+          ]
+        },
+        {
+          "id": "i:TodoItemProps",
+          "name": "TodoItemProps",
+          "file": "frontend/src/components/TodoItem.tsx",
+          "line": 0,
+          "exported": true,
+          "fields": [
+            {
+              "name": "todo",
+              "type": "Todo"
+            },
+            {
+              "name": "onToggle",
+              "type": "(id: string, completed: boolean) => void"
+            },
+            {
+              "name": "onDelete",
+              "type": "(id: string) => void"
+            },
+            {
+              "name": "onUpdate",
+              "type": "(id: string, title: string) => void"
+            }
+          ]
+        },
+        {
+          "id": "i:TodoListProps",
+          "name": "TodoListProps",
+          "file": "frontend/src/components/TodoList.tsx",
+          "line": 0,
+          "exported": true,
+          "fields": [
+            {
+              "name": "todos",
+              "type": "Todo[]"
+            },
+            {
+              "name": "onToggle",
+              "type": "(id: string, completed: boolean) => void"
+            },
+            {
+              "name": "onDelete",
+              "type": "(id: string) => void"
+            },
+            {
+              "name": "onUpdate",
+              "type": "(id: string, title: string) => void"
+            }
+          ]
+        },
+        {
+          "id": "i:AuthContextType",
+          "name": "AuthContextType",
+          "file": "frontend/src/context/AuthContext.tsx",
+          "line": 0,
+          "exported": true,
+          "fields": [
+            {
+              "name": "user",
+              "type": "User | null"
+            },
+            {
+              "name": "token",
+              "type": "string | null"
+            },
+            {
+              "name": "login",
+              "type": "(token: string, user: User) => void"
+            },
+            {
+              "name": "logout",
+              "type": "() => void"
+            },
+            {
+              "name": "isAuthenticated",
+              "type": "boolean"
+            }
+          ]
+        }
+      ],
+      "relationships": []
+    },
+    "moduleMap": {
+      "modules": [
+        {
+          "id": "mod:backend/src/controllers",
+          "path": "backend/src/controllers",
+          "fileCount": 3,
+          "exports": [
+            "register",
+            "login",
+            "createGroup",
+            "getGroups",
+            "joinGroup",
+            "getGroupMembers",
+            "getTodos",
+            "createTodo",
+            "updateTodo",
+            "deleteTodo"
+          ],
+          "publicAPI": [
+            "register",
+            "login",
+            "createGroup",
+            "getGroups",
+            "joinGroup",
+            "getGroupMembers",
+            "getTodos",
+            "createTodo",
+            "updateTodo",
+            "deleteTodo"
+          ]
+        },
+        {
+          "id": "mod:backend/src/middleware",
+          "path": "backend/src/middleware",
+          "fileCount": 1,
+          "exports": [
+            "AuthRequest",
+            "authMiddleware"
+          ],
+          "publicAPI": [
+            "authMiddleware"
+          ]
+        },
+        {
+          "id": "mod:backend/src/models",
+          "path": "backend/src/models",
+          "fileCount": 3,
+          "exports": [
+            "GroupRole",
+            "GroupMember",
+            "Group",
+            "Todo",
+            "User"
+          ],
+          "publicAPI": []
+        },
+        {
+          "id": "mod:backend/src/routes",
+          "path": "backend/src/routes",
+          "fileCount": 3,
+          "exports": [
+            "router"
+          ],
+          "publicAPI": []
+        },
+        {
+          "id": "mod:backend/src",
+          "path": "backend/src",
+          "fileCount": 1,
+          "exports": [],
+          "publicAPI": []
+        },
+        {
+          "id": "mod:backend/tests",
+          "path": "backend/tests",
+          "fileCount": 1,
+          "exports": [],
+          "publicAPI": []
+        },
+        {
+          "id": "mod:frontend/src",
+          "path": "frontend/src",
+          "fileCount": 2,
+          "exports": [
+            "App"
+          ],
+          "publicAPI": []
+        },
+        {
+          "id": "mod:frontend/src/__tests__",
+          "path": "frontend/src/__tests__",
+          "fileCount": 1,
+          "exports": [],
+          "publicAPI": []
+        },
+        {
+          "id": "mod:frontend/src/api",
+          "path": "frontend/src/api",
+          "fileCount": 3,
+          "exports": [
+            "register",
+            "login",
+            "GroupMember",
+            "Group",
+            "getGroups",
+            "createGroup",
+            "joinGroup",
+            "getGroupMembers",
+            "getTodos",
+            "createTodo",
+            "updateTodo",
+            "deleteTodo"
+          ],
+          "publicAPI": [
+            "register",
+            "login",
+            "getGroups",
+            "createGroup",
+            "joinGroup",
+            "getGroupMembers",
+            "getTodos",
+            "createTodo",
+            "updateTodo",
+            "deleteTodo"
+          ]
+        },
+        {
+          "id": "mod:frontend/src/components",
+          "path": "frontend/src/components",
+          "fileCount": 4,
+          "exports": [
+            "FilterType",
+            "Filters",
+            "TodoForm",
+            "TodoItem",
+            "TodoList"
+          ],
+          "publicAPI": []
+        },
+        {
+          "id": "mod:frontend/src/context",
+          "path": "frontend/src/context",
+          "fileCount": 1,
+          "exports": [
+            "AuthProvider",
+            "useAuth"
+          ],
+          "publicAPI": [
+            "AuthProvider",
+            "useAuth"
+          ]
+        },
+        {
+          "id": "mod:frontend/src/types",
+          "path": "frontend/src/types",
+          "fileCount": 1,
+          "exports": [
+            "Todo"
+          ],
+          "publicAPI": []
+        },
+        {
+          "id": "mod:frontend",
+          "path": "frontend",
+          "fileCount": 1,
+          "exports": [],
+          "publicAPI": []
+        }
+      ],
+      "connections": [
+        {
+          "from": "mod:backend/src/controllers",
+          "to": "mod:backend/src/models",
+          "imports": 3,
+          "exportsUsed": [
+            "User",
+            "Group",
+            "GroupMember",
+            "Todo"
+          ]
+        },
+        {
+          "from": "mod:backend/src/controllers",
+          "to": "mod:backend/src/middleware",
+          "imports": 2,
+          "exportsUsed": [
+            "AuthRequest"
+          ]
+        },
+        {
+          "from": "mod:backend/src/routes",
+          "to": "mod:backend/src/controllers",
+          "imports": 3,
+          "exportsUsed": [
+            "* as authController",
+            "* as groupController",
+            "* as todoController"
+          ]
+        },
+        {
+          "from": "mod:backend/src/routes",
+          "to": "mod:backend/src/middleware",
+          "imports": 2,
+          "exportsUsed": [
+            "authMiddleware"
+          ]
+        },
+        {
+          "from": "mod:backend/src",
+          "to": "mod:backend/src/routes",
+          "imports": 3,
+          "exportsUsed": [
+            "todoRoutes",
+            "authRoutes",
+            "groupRoutes"
+          ]
+        },
+        {
+          "from": "mod:backend/tests",
+          "to": "mod:backend/src/routes",
+          "imports": 1,
+          "exportsUsed": [
+            "todoRoutes"
+          ]
+        },
+        {
+          "from": "mod:frontend/src",
+          "to": "mod:frontend/src/api",
+          "imports": 1,
+          "exportsUsed": [
+            "* as api"
+          ]
+        },
+        {
+          "from": "mod:frontend/src",
+          "to": "mod:frontend/src/types",
+          "imports": 1,
+          "exportsUsed": [
+            "Todo"
+          ]
+        },
+        {
+          "from": "mod:frontend/src",
+          "to": "mod:frontend/src/components",
+          "imports": 3,
+          "exportsUsed": [
+            "TodoForm",
+            "TodoList",
+            "Filters",
+            "FilterType"
+          ]
+        },
+        {
+          "from": "mod:frontend/src/__tests__",
+          "to": "mod:frontend/src",
+          "imports": 1,
+          "exportsUsed": [
+            "App"
+          ]
+        },
+        {
+          "from": "mod:frontend/src/__tests__",
+          "to": "mod:frontend/src/api",
+          "imports": 1,
+          "exportsUsed": [
+            "* as api"
+          ]
+        },
+        {
+          "from": "mod:frontend/src/api",
+          "to": "mod:frontend/src/types",
+          "imports": 1,
+          "exportsUsed": [
+            "Todo"
+          ]
+        },
+        {
+          "from": "mod:frontend/src/components",
+          "to": "mod:frontend/src/types",
+          "imports": 2,
+          "exportsUsed": [
+            "Todo"
+          ]
+        }
+      ],
+      "layers": [
+        {
+          "name": "Entry Points",
+          "modules": [
+            "mod:backend/src",
+            "mod:backend/tests",
+            "mod:frontend/src/__tests__"
+          ]
+        },
+        {
+          "name": "Core",
+          "modules": [
+            "mod:backend/src/controllers",
+            "mod:backend/src/middleware",
+            "mod:backend/src/models",
+            "mod:backend/src/routes",
+            "mod:frontend/src",
+            "mod:frontend/src/api",
+            "mod:frontend/src/components"
+          ]
+        },
+        {
+          "name": "Shared / Utilities",
+          "modules": [
+            "mod:frontend/src/types"
+          ]
+        },
+        {
+          "name": "Standalone",
+          "modules": [
+            "mod:frontend/src/context",
+            "mod:frontend"
+          ]
+        }
+      ]
+    },
+    "callGraph": {
+      "functions": [
+        {
+          "id": "f:backend/src/controllers/authController.ts:register",
+          "name": "register",
+          "file": "backend/src/controllers/authController.ts",
+          "line": 34,
+          "exported": true,
+          "calls": [],
+          "calledBy": []
+        },
+        {
+          "id": "f:backend/src/controllers/authController.ts:login",
+          "name": "login",
+          "file": "backend/src/controllers/authController.ts",
+          "line": 60,
+          "exported": true,
+          "calls": [],
+          "calledBy": []
+        },
+        {
+          "id": "f:backend/src/controllers/groupController.ts:createGroup",
+          "name": "createGroup",
+          "file": "backend/src/controllers/groupController.ts",
+          "line": 30,
+          "exported": true,
+          "calls": [],
+          "calledBy": []
+        },
+        {
+          "id": "f:backend/src/controllers/groupController.ts:getGroups",
+          "name": "getGroups",
+          "file": "backend/src/controllers/groupController.ts",
+          "line": 52,
+          "exported": true,
+          "calls": [],
+          "calledBy": []
+        },
+        {
+          "id": "f:backend/src/controllers/groupController.ts:joinGroup",
+          "name": "joinGroup",
+          "file": "backend/src/controllers/groupController.ts",
+          "line": 61,
+          "exported": true,
+          "calls": [],
+          "calledBy": []
+        },
+        {
+          "id": "f:backend/src/controllers/groupController.ts:getGroupMembers",
+          "name": "getGroupMembers",
+          "file": "backend/src/controllers/groupController.ts",
+          "line": 86,
+          "exported": true,
+          "calls": [],
+          "calledBy": []
+        },
+        {
+          "id": "f:backend/src/controllers/todoController.ts:getTodos",
+          "name": "getTodos",
+          "file": "backend/src/controllers/todoController.ts",
+          "line": 26,
+          "exported": true,
+          "calls": [],
+          "calledBy": []
+        },
+        {
+          "id": "f:backend/src/controllers/todoController.ts:createTodo",
+          "name": "createTodo",
+          "file": "backend/src/controllers/todoController.ts",
+          "line": 43,
+          "exported": true,
+          "calls": [],
+          "calledBy": []
+        },
+        {
+          "id": "f:backend/src/controllers/todoController.ts:updateTodo",
+          "name": "updateTodo",
+          "file": "backend/src/controllers/todoController.ts",
+          "line": 67,
+          "exported": true,
+          "calls": [],
+          "calledBy": []
+        },
+        {
+          "id": "f:backend/src/controllers/todoController.ts:deleteTodo",
+          "name": "deleteTodo",
+          "file": "backend/src/controllers/todoController.ts",
+          "line": 91,
+          "exported": true,
+          "calls": [],
+          "calledBy": []
+        },
+        {
+          "id": "f:backend/src/middleware/authMiddleware.ts:authMiddleware",
+          "name": "authMiddleware",
+          "file": "backend/src/middleware/authMiddleware.ts",
+          "line": 13,
+          "exported": true,
+          "calls": [],
+          "calledBy": []
+        },
+        {
+          "id": "f:frontend/src/api/authApi.ts:register",
+          "name": "register",
+          "file": "frontend/src/api/authApi.ts",
+          "line": 5,
+          "exported": true,
+          "calls": [],
+          "calledBy": []
+        },
+        {
+          "id": "f:frontend/src/api/authApi.ts:login",
+          "name": "login",
+          "file": "frontend/src/api/authApi.ts",
+          "line": 10,
+          "exported": true,
+          "calls": [],
+          "calledBy": []
+        },
+        {
+          "id": "f:frontend/src/api/groupApi.ts:getGroups",
+          "name": "getGroups",
+          "file": "frontend/src/api/groupApi.ts",
+          "line": 22,
+          "exported": true,
+          "calls": [],
+          "calledBy": []
+        },
+        {
+          "id": "f:frontend/src/api/groupApi.ts:createGroup",
+          "name": "createGroup",
+          "file": "frontend/src/api/groupApi.ts",
+          "line": 29,
+          "exported": true,
+          "calls": [],
+          "calledBy": []
+        },
+        {
+          "id": "f:frontend/src/api/groupApi.ts:joinGroup",
+          "name": "joinGroup",
+          "file": "frontend/src/api/groupApi.ts",
+          "line": 36,
+          "exported": true,
+          "calls": [],
+          "calledBy": []
+        },
+        {
+          "id": "f:frontend/src/api/groupApi.ts:getGroupMembers",
+          "name": "getGroupMembers",
+          "file": "frontend/src/api/groupApi.ts",
+          "line": 43,
+          "exported": true,
+          "calls": [],
+          "calledBy": []
+        },
+        {
+          "id": "f:frontend/src/api/todoApi.ts:getTodos",
+          "name": "getTodos",
+          "file": "frontend/src/api/todoApi.ts",
+          "line": 11,
+          "exported": true,
+          "calls": [],
+          "calledBy": []
+        },
+        {
+          "id": "f:frontend/src/api/todoApi.ts:createTodo",
+          "name": "createTodo",
+          "file": "frontend/src/api/todoApi.ts",
+          "line": 19,
+          "exported": true,
+          "calls": [],
+          "calledBy": []
+        },
+        {
+          "id": "f:frontend/src/api/todoApi.ts:updateTodo",
+          "name": "updateTodo",
+          "file": "frontend/src/api/todoApi.ts",
+          "line": 27,
+          "exported": true,
+          "calls": [],
+          "calledBy": []
+        },
+        {
+          "id": "f:frontend/src/api/todoApi.ts:deleteTodo",
+          "name": "deleteTodo",
+          "file": "frontend/src/api/todoApi.ts",
+          "line": 34,
+          "exported": true,
+          "calls": [],
+          "calledBy": []
+        },
+        {
+          "id": "f:frontend/src/context/AuthContext.tsx:AuthProvider",
+          "name": "AuthProvider",
+          "file": "frontend/src/context/AuthContext.tsx",
+          "line": 19,
+          "exported": true,
+          "calls": [],
+          "calledBy": []
+        },
+        {
+          "id": "f:frontend/src/context/AuthContext.tsx:useAuth",
+          "name": "useAuth",
+          "file": "frontend/src/context/AuthContext.tsx",
+          "line": 53,
+          "exported": true,
+          "calls": [],
+          "calledBy": []
+        }
+      ]
+    },
+    "apiMap": {
+      "endpoints": []
+    }
+  }
+}

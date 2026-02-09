@@ -1,0 +1,495 @@
+{
+  "version": "3.0.0",
+  "projectId": "4956ea9d-5280-465c-bec3-4b2ce01b7f91",
+  "project": {
+    "name": "agent-weaver",
+    "description": "AI Software Agency - Gemini CLI Extension. A full dev team simulated by specialized agents with shared memory, human verification, and git-based team collaboration.",
+    "requirements": [],
+    "techStack": [
+      "TypeScript",
+      "Node.js",
+      "Next.js",
+      "React",
+      "MCP SDK",
+      "Tree-sitter"
+    ],
+    "isExistingProject": true
+  },
+  "agents": {
+    "product-manager": {
+      "role": "product-manager",
+      "status": "working",
+      "lastActive": "2026-02-09T10:52:56.368Z",
+      "currentTask": "Break down the extensive requirements (Task + Project + Workflow app) into a product specification and user stories. Prioritize features for a 'Foundation' phase vs 'Advanced' phase. Focus on the core Task/Project model and the Offline-first requirement."
+    },
+    "architect": {
+      "role": "architect",
+      "status": "working",
+      "lastActive": "2026-02-09T10:52:40.606Z",
+      "currentTask": "Analyze the existing codebase and the new requirements for a cross-platform Task + Project + Workflow app. Propose a system architecture and file structure that supports the complex data model (tasks, projects, portfolios, recurrence, dependencies, etc.) and offline-first mobile usage."
+    },
+    "developer": {
+      "role": "developer",
+      "status": "idle",
+      "lastActive": "2026-02-09T10:07:25.394Z"
+    },
+    "qa": {
+      "role": "qa",
+      "status": "idle",
+      "lastActive": "2026-02-09T10:07:25.394Z"
+    },
+    "code-reviewer": {
+      "role": "code-reviewer",
+      "status": "idle",
+      "lastActive": "2026-02-09T10:07:25.394Z"
+    }
+  },
+  "entries": [
+    {
+      "agent": "product-manager",
+      "phase": "plan",
+      "type": "artifact",
+      "title": "Benchmark Roadmap Table",
+      "content": "| Phase | Goal | Key Metrics |\n|-------|------|-------------|\n| 1. Foundation | Verify existing Auth/Todo CRUD | Test pass rate, Coverage |\n| 2. Evolution | Add Task Reminders & Group Chat | Feature completeness |\n| 3. Optimization | Migrate to SQLite/Postgres | Latency, Throughput |\n| 4. Verification | Autonomous testing loops | Regression count |",
+      "metadata": {
+        "type": "table"
+      },
+      "id": "1db81fcf-aa78-415f-8868-2989bde32793",
+      "timestamp": "2026-02-09T10:17:07.768Z"
+    },
+    {
+      "agent": "architect",
+      "phase": "plan",
+      "type": "artifact",
+      "title": "Plan Metrics",
+      "content": "- **Total Changes:** 2\n- **Files Affected:** 2 (New)\n- **Documentation Coverage:** 100%\n- **Verification Readiness:** High",
+      "metadata": {
+        "type": "kpi"
+      },
+      "id": "b56e09bb-bc6b-4f52-8319-edf75a0a1e9d",
+      "timestamp": "2026-02-09T10:17:07.784Z"
+    },
+    {
+      "agent": "architect",
+      "phase": "plan",
+      "type": "artifact",
+      "title": "Current Architecture Diagram",
+      "content": "flowchart TD\n  Client[\"Frontend (React)\"] -- \"REST API\" --> Server[\"Backend (Express)\"]\n  Server -- \"Read/Write\" --> DB[\"todos.json\"]\n  Client -- \"State\" --> Context[\"React Context\"]",
+      "metadata": {
+        "type": "diagram"
+      },
+      "id": "796e92f4-c0fe-4b1f-a4dd-699ab4f6390a",
+      "timestamp": "2026-02-09T10:53:36.928Z"
+    },
+    {
+      "agent": "architect",
+      "phase": "plan",
+      "type": "artifact",
+      "title": "Proposed Architecture Diagram",
+      "content": "flowchart TD\n  Client[\"Frontend (React)\"] -- \"Reactive Queries\" --> LocalDB[\"WatermelonDB (SQLite/IndexedDB)\"]\n  LocalDB -- \"Sync Protocol\" --> SyncService[\"Sync API (Express)\"]\n  SyncService -- \"Prisma ORM\" --> RemoteDB[\"PostgreSQL\"]\n  Auth[\"Auth Service\"] -- \"JWT/Workspaces\" --> SyncService\n  NLP[\"NLP Parser\"] -- \"Parses Input\" --> LocalDB\n  Recurrence[\"Recurrence Service\"] -- \"Generates Tasks\" --> SyncService",
+      "metadata": {
+        "type": "diagram"
+      },
+      "id": "54f29f55-6276-4b6f-947d-1b9d09dd522b",
+      "timestamp": "2026-02-09T10:53:36.947Z"
+    },
+    {
+      "agent": "architect",
+      "phase": "plan",
+      "type": "artifact",
+      "title": "Plan Metrics",
+      "content": "- **Total Changes:** 8\n- **Files Affected:** 8\n- **Complexity:** High (Large architectural shift)\n- **Priority:** High (Foundation building)",
+      "metadata": {
+        "type": "kpi"
+      },
+      "id": "bbaa2739-ad63-40a8-ad67-66f33745a7a6",
+      "timestamp": "2026-02-09T10:53:36.965Z"
+    },
+    {
+      "agent": "product-manager",
+      "phase": "plan",
+      "type": "artifact",
+      "title": "Prioritized Change Groups",
+      "content": "1. **Data Layer Foundation** (must-have) - Advanced Model, Postgres Migration, Recurrence Service.\n2. **Offline-First Sync** (must-have) - Sync Engine (Client), Sync API (Backend).\n3. **Capture & Productivity** (should-have) - Natural Language Parser.\n4. **Project Management Views** (should-have) - Kanban Board View.",
+      "metadata": {
+        "type": "list"
+      },
+      "id": "934837b2-da9a-432e-b1e2-021642c697cb",
+      "timestamp": "2026-02-09T10:53:36.982Z"
+    },
+    {
+      "agent": "architect",
+      "phase": "plan",
+      "type": "artifact",
+      "title": "File Change Map Table",
+      "content": "| File | Change | Priority | Complexity |\n|------|--------|----------|------------|\n| `backend/src/models/todoModel.ts` | Advanced Model & Postgres Migration | Must | Large |\n| `NEW: backend/src/services/recurrenceService.ts` | Recurrence Service (RRULE) | Must | Medium |\n| `NEW: frontend/src/api/syncEngine.ts` | Frontend Offline Sync Engine | Must | Large |\n| `NEW: backend/src/routes/sync.ts` | Backend Sync API | Must | Medium |\n| `NEW: frontend/src/utils/nlpParser.ts` | NLP Task Parser | Should | Medium |\n| `NEW: frontend/src/components/KanbanBoard.tsx` | Kanban Board View | Should | Medium |\n| `NEW: README.md` | Root Documentation | Must | Small |\n| `NEW: BENCHMARK.md` | Performance Roadmap | Must | Small |",
+      "metadata": {
+        "type": "table"
+      },
+      "id": "2e8bb27b-6ce8-4258-a714-8232abbfc094",
+      "timestamp": "2026-02-09T10:53:44.133Z"
+    },
+    {
+      "agent": "system",
+      "phase": "plan",
+      "type": "memory-map",
+      "title": "Code Memory Map",
+      "content": "## Indexed Codebase Overview\n\n### Statistics\n- **Total Files**: 25\n- **Functions**: 46\n- **Classes**: 0\n- **Interfaces**: 10\n- **Dependencies**: 26 edges\n\n### Key Modules\n1. **frontend/src/components/** (4 files)\n   - TodoForm, TodoList, TodoItem, Filters\n   - All UI components for todo management\n\n2. **backend/src/controllers/** (3 files)\n   - authController, groupController, todoController\n   - Business logic layer\n\n3. **backend/src/models/** (3 files)\n   - User, Group, Todo models\n   - Data schemas\n\n### Most Connected Functions\n1. `getTodos` - Called by 4 modules\n2. `authMiddleware` - Used across 4 routes\n3. `createTodo` - Core CRUD function\n\n### Memory Insights\n- Backend follows MVC pattern\n- Frontend uses React Context for state\n- Clean separation of API layer\n- No circular dependencies detected",
+      "metadata": {
+        "type": "memory-map",
+        "stats": {
+          "totalFiles": 25,
+          "functions": 46,
+          "classes": 0,
+          "interfaces": 10,
+          "dependencies": 26
+        }
+      },
+      "id": "mem-map-1",
+      "timestamp": "2026-02-09T14:30:00.000Z"
+    }
+  ],
+  "files": [],
+  "widgets": [],
+  "phase": "ready",
+  "createdAt": "2026-02-09T10:07:25.394Z",
+  "updatedAt": "2026-02-09T10:53:44.133Z",
+  "plan": {
+    "id": "f5c9c01f-15c1-43d8-aa66-f5954f225c77",
+    "version": "1.0.0",
+    "createdAt": "2026-02-09T10:16:24.756Z",
+    "updatedAt": "2026-02-09T10:53:31.192Z",
+    "summary": "Transform the existing simple Todo app into a robust, offline-first Task + Project + Workflow platform. This involves a total overhaul of the data layer, moving to PostgreSQL and implementing a local-first sync engine. Key features include hierarchical project management, NLP task capture, and standard compliance with recurrence (RRULE) and complex task lifecycles.",
+    "goals": [
+      "Implement a hierarchical data model (Portfolio > Project > Task) with advanced metadata.",
+      "Enable full offline-first functionality with background synchronization.",
+      "Support natural language task capture and complex recurrence rules.",
+      "Establish a scalable workspace-based permission system."
+    ],
+    "approach": "1. **Backend Infrastructure:** Replace JSON-based storage with PostgreSQL and Prisma. Implement a push/pull sync API.\n2. **Frontend Architecture:** Integrate WatermelonDB for local persistence. Refactor state management to work with the sync engine.\n3. **Core Features:** Implement the expanded Task/Project schema, RRULE service, and NLP parser.\n4. **Views:** Develop Kanban and advanced List views using the new data model.",
+    "changeGroups": [
+      {
+        "id": "doc-verification",
+        "name": "Documentation & Verification",
+        "description": "Establish core project documentation and verification metrics.",
+        "agent": "architect",
+        "changes": [
+          {
+            "id": "create-root-readme",
+            "file": "NEW: README.md",
+            "changeType": "create",
+            "title": "Create root README.md",
+            "description": "Create a comprehensive root README.md explaining the Project Weaver agency, project structure, and setup instructions.",
+            "rationale": "The user explicitly requested a README to understand the project and tool structure.",
+            "priority": "must-have",
+            "complexity": "small",
+            "affectedFunctions": [],
+            "affectedClasses": [],
+            "affectedTypes": [],
+            "dependencies": []
+          },
+          {
+            "id": "create-benchmark-roadmap",
+            "file": "NEW: BENCHMARK.md",
+            "changeType": "create",
+            "title": "Create BENCHMARK.md Roadmap",
+            "description": "Create BENCHMARK.md defining clear KPIs, test cases, and verification steps to evaluate the AI Agency's performance.",
+            "rationale": "The user wants to test if the tool actually works through a benchmark roadmap.",
+            "priority": "must-have",
+            "complexity": "small",
+            "affectedFunctions": [],
+            "affectedClasses": [],
+            "affectedTypes": [],
+            "dependencies": [
+              "create-root-readme"
+            ]
+          }
+        ],
+        "order": 0
+      },
+      {
+        "id": "data-layer-foundation",
+        "name": "Data Layer Foundation",
+        "description": "Foundation data layer for the new Task + Project + Workflow system.",
+        "agent": "product-manager",
+        "changes": [
+          {
+            "id": "backend-schema-overhaul",
+            "file": "backend/src/models/todoModel.ts",
+            "changeType": "modify",
+            "title": "Advanced Data Model & Database Migration",
+            "description": "Expand the backend models to support the complex data model: Workspaces, Portfolios, Projects, and Tasks with advanced fields (RRULE, dependencies, urgency score, custom fields). Migrate from JSON to PostgreSQL.",
+            "rationale": "The existing simple Todo model cannot support the hierarchical and detailed data requirements of the new app.",
+            "priority": "must-have",
+            "complexity": "large",
+            "dependencies": []
+          },
+          {
+            "id": "recurrence-service-backend",
+            "file": "NEW: backend/src/services/recurrenceService.ts",
+            "changeType": "create",
+            "title": "Recurrence Rule Service",
+            "description": "Implement server-side logic to handle recurring tasks using the RRULE standard. Generates task instances based on rules and handles exceptions.",
+            "rationale": "Requirement for daily/weekly/monthly recurrence with custom rules.",
+            "priority": "must-have",
+            "complexity": "medium",
+            "dependencies": []
+          }
+        ],
+        "order": 1
+      },
+      {
+        "id": "offline-first-sync",
+        "name": "Offline-First Sync",
+        "description": "Implementation of the offline-first requirement.",
+        "agent": "product-manager",
+        "changes": [
+          {
+            "id": "offline-sync-engine-client",
+            "file": "NEW: frontend/src/api/syncEngine.ts",
+            "changeType": "create",
+            "title": "Frontend Offline Sync Engine",
+            "description": "Introduce a local-first sync engine on the frontend using WatermelonDB or similar. This will manage local storage (SQLite/IndexedDB) and background sync with the server.",
+            "rationale": "Essential for the 'Offline-first mobile usage' requirement. Ensures zero-latency interactions and reliable data capture.",
+            "priority": "must-have",
+            "complexity": "large",
+            "dependencies": []
+          },
+          {
+            "id": "backend-sync-api",
+            "file": "NEW: backend/src/routes/sync.ts",
+            "changeType": "create",
+            "title": "Backend Sync API",
+            "description": "Implement a push/pull sync API on the backend to handle delta updates from clients and conflict resolution.",
+            "rationale": "Server-side counterpart to the frontend sync engine. Handles persistence and distribution of changes.",
+            "priority": "must-have",
+            "complexity": "medium",
+            "dependencies": []
+          }
+        ],
+        "order": 2
+      },
+      {
+        "id": "capture-productivity",
+        "name": "Capture & Productivity",
+        "description": "Core productivity features for fast task capture.",
+        "agent": "product-manager",
+        "changes": [
+          {
+            "id": "natural-language-capture",
+            "file": "NEW: frontend/src/utils/nlpParser.ts",
+            "changeType": "create",
+            "title": "Natural Language Task Parser",
+            "description": "Implement a natural language parser for 'Quick Add' functionality. Supports parsing due dates, priorities, and projects from strings like 'Call Sam tomorrow 4pm #sales p1'.",
+            "rationale": "High-value UX feature requested for efficient task entry.",
+            "priority": "should-have",
+            "complexity": "medium",
+            "dependencies": []
+          }
+        ],
+        "order": 3
+      },
+      {
+        "id": "project-views",
+        "name": "Project Management Views",
+        "description": "Visual project management views.",
+        "agent": "product-manager",
+        "changes": [
+          {
+            "id": "kanban-view-component",
+            "file": "NEW: frontend/src/components/KanbanBoard.tsx",
+            "changeType": "create",
+            "title": "Kanban Board View",
+            "description": "Implement a Kanban board view for projects, allowing drag-and-drop status transitions.",
+            "rationale": "Standard project management requirement for tracking work across statuses.",
+            "priority": "should-have",
+            "complexity": "medium",
+            "dependencies": []
+          }
+        ],
+        "order": 4
+      }
+    ],
+    "architectureNotes": "The system follows a local-first architectural pattern. The frontend maintains a full or partial copy of the user's data in a local SQLite/IndexedDB database managed by WatermelonDB. All UI interactions are performed against the local DB, ensuring zero latency and offline capability. A background sync service synchronizes local changes with the PostgreSQL backend using a version-based delta sync protocol.",
+    "riskAssessment": "The primary risk is the complexity of synchronization and conflict resolution. We mitigate this by using WatermelonDB's established sync protocol. Data integrity during the migration from JSON to Postgres is another risk, which we address through automated Prisma migrations.",
+    "fileMap": [
+      {
+        "file": "NEW: README.md",
+        "exists": false,
+        "language": "unknown",
+        "changes": [
+          {
+            "changeId": "create-root-readme",
+            "changeType": "create",
+            "summary": "Create root README.md"
+          }
+        ],
+        "totalChanges": 1,
+        "maxPriority": "must-have"
+      },
+      {
+        "file": "NEW: BENCHMARK.md",
+        "exists": false,
+        "language": "unknown",
+        "changes": [
+          {
+            "changeId": "create-benchmark-roadmap",
+            "changeType": "create",
+            "summary": "Create BENCHMARK.md Roadmap"
+          }
+        ],
+        "totalChanges": 1,
+        "maxPriority": "must-have"
+      },
+      {
+        "file": "backend/src/models/todoModel.ts",
+        "exists": true,
+        "language": "TypeScript",
+        "changes": [
+          {
+            "changeId": "backend-schema-overhaul",
+            "changeType": "modify",
+            "summary": "Advanced Data Model & Database Migration"
+          }
+        ],
+        "totalChanges": 1,
+        "maxPriority": "must-have"
+      },
+      {
+        "file": "NEW: backend/src/services/recurrenceService.ts",
+        "exists": false,
+        "language": "unknown",
+        "changes": [
+          {
+            "changeId": "recurrence-service-backend",
+            "changeType": "create",
+            "summary": "Recurrence Rule Service"
+          }
+        ],
+        "totalChanges": 1,
+        "maxPriority": "must-have"
+      },
+      {
+        "file": "NEW: frontend/src/api/syncEngine.ts",
+        "exists": false,
+        "language": "unknown",
+        "changes": [
+          {
+            "changeId": "offline-sync-engine-client",
+            "changeType": "create",
+            "summary": "Frontend Offline Sync Engine"
+          }
+        ],
+        "totalChanges": 1,
+        "maxPriority": "must-have"
+      },
+      {
+        "file": "NEW: backend/src/routes/sync.ts",
+        "exists": false,
+        "language": "unknown",
+        "changes": [
+          {
+            "changeId": "backend-sync-api",
+            "changeType": "create",
+            "summary": "Backend Sync API"
+          }
+        ],
+        "totalChanges": 1,
+        "maxPriority": "must-have"
+      },
+      {
+        "file": "NEW: frontend/src/utils/nlpParser.ts",
+        "exists": false,
+        "language": "unknown",
+        "changes": [
+          {
+            "changeId": "natural-language-capture",
+            "changeType": "create",
+            "summary": "Natural Language Task Parser"
+          }
+        ],
+        "totalChanges": 1,
+        "maxPriority": "should-have"
+      },
+      {
+        "file": "NEW: frontend/src/components/KanbanBoard.tsx",
+        "exists": false,
+        "language": "unknown",
+        "changes": [
+          {
+            "changeId": "kanban-view-component",
+            "changeType": "create",
+            "summary": "Kanban Board View"
+          }
+        ],
+        "totalChanges": 1,
+        "maxPriority": "should-have"
+      }
+    ],
+    "discussion": [
+      {
+        "agent": "architect",
+        "type": "observation",
+        "content": "The project is well-structured with a clear separation of concerns between the Express backend and React frontend. The backend uses a traditional MVC-like structure (routes -> controllers -> models), and the frontend uses a clean API service layer and Context for state management. \n\nTo meet the user's request for a README and Benchmark Roadmap, we should:\n1. Establish a root-level README.md that provides a high-level overview of the AI Software Agency's approach and how this specific project fits into it.\n2. Create a BENCHMARK.md that defines clear, measurable goals for the project's performance and functionality, which can be used to verify the tool's effectiveness.\n3. Consolidate architecture documentation into the .weaver/docs collection.",
+        "id": "c177f81e-881b-4389-8d5e-3f98349f220c",
+        "timestamp": "2026-02-09T10:16:24.756Z"
+      },
+      {
+        "agent": "product-manager",
+        "type": "observation",
+        "content": "The product strategy for this project is to showcase how Project Weaver can manage a full-stack application. \n\nContent Requirements for README.md:\n- Clear differentiation between Backend (Express/Node) and Frontend (React/Vite).\n- Instructions for local development (Ports, environment variables if any).\n- Visual feature list: Authentication, Collaborative Groups, and Task Management.\n\nContent Requirements for BENCHMARK.md:\n- A multi-phase roadmap to test the 'Action Era' capabilities:\n  1. 'Foundation': Existing features verification.\n  2. 'Evolution': Adding new features like 'Task Reminders' or 'Group Chat'.\n  3. 'Optimization': Refactoring the JSON persistence to a real DB.\n  4. 'Verification': Ensuring no regressions through autonomous testing loops.",
+        "id": "61bf31f0-15a2-4db5-a6ea-587d7013f220",
+        "timestamp": "2026-02-09T10:16:53.223Z"
+      },
+      {
+        "agent": "product-manager",
+        "type": "agreement",
+        "content": "I agree with the Architect's proposal to create the README.md and BENCHMARK.md files in the codebase. While our standard protocol is to use the centralized doc collection, fulfilling the user's specific request for visible files is priority. I will provide the detailed content for these files.",
+        "id": "a658f4dc-972e-4d4b-aa0d-dab79c62d902",
+        "timestamp": "2026-02-09T10:16:57.574Z"
+      },
+      {
+        "agent": "architect",
+        "type": "observation",
+        "content": "The current codebase is a basic Todo app using JSON storage on the backend and React Context on the frontend. To meet the requirements for a cross-platform, offline-first Task + Project + Workflow app, we need a significant architectural shift:\n\n1. **Persistence & Sync:** Move away from `todos.json`. Implement a sync-enabled architecture. For offline-first, we'll need a local database (e.g., IndexedDB/SQLite) and a sync protocol (e.g., Replicache, WatermelonDB, or a custom CRDT-based solution).\n2. **Data Model:** The required model is highly relational (Tasks -> Projects -> Portfolios, Tasks -> Dependencies, Tasks -> Tags). A relational database (Postgres) is best for the backend.\n3. **Cross-Platform:** The current Vite/React setup works for web. For mobile, we should consider React Native to share business logic and the sync engine, or ensure the web app is a high-quality PWA with service workers and local DB.\n4. **Service Layer:** Logic for recurrence (RRULE parsing), urgency scoring, and dependency validation needs to be centralized in a service layer that can be shared or consistently implemented on both client and server.\n5. **Security & Permissions:** The requirement for granular permissions and auditability means we need a robust RBAC/ABAC system and an event-log for all changes.",
+        "id": "0c509ebe-b159-41e1-a298-829532236c58",
+        "timestamp": "2026-02-09T10:52:48.697Z"
+      },
+      {
+        "agent": "product-manager",
+        "type": "observation",
+        "content": "The product vision for this Task + Project + Workflow app is ambitious. To deliver this effectively, we must prioritize the 'Foundation' which enables the offline-first experience and the complex relational data model.\n\n**Product Observations:**\n1. **Offline-First is Non-Negotiable:** For a mobile-usage-first app, the ability to capture tasks instantly without network is critical. This drives our architectural choice of a local-first DB.\n2. **Unified Data Model:** Tasks shouldn't just be 'completed' or 'not'. They need a lifecycle (Inbox -> Planned -> ... -> Archived). Projects and Portfolios provide the necessary hierarchy for scaling from personal to team use.\n3. **Quick Add:** The natural language input (e.g., 'Call Sam tomorrow 4pm') is a high-value UX feature for the 'Capture' phase.\n4. **Permissions:** Moving from simple 'owner' to granular workspace roles is essential for the team/shared project requirements.\n\n**Proposed Phasing:**\n- **Phase 1 (Foundation):** Task/Project/Portfolio models, Auth/Workspaces, Offline sync, List/Board views.\n- **Phase 2 (Workflow):** Dependencies, Subtasks, Custom Fields, Calendar/Timeline views.\n- **Phase 3 (Enterprise):** Automations, Auditability, Advanced Conflict Resolution.",
+        "id": "fe719cf2-e375-46dc-a4bd-e313fc8133d9",
+        "timestamp": "2026-02-09T10:53:02.454Z"
+      },
+      {
+        "agent": "architect",
+        "type": "decision",
+        "content": "Decision: We will use WatermelonDB for the frontend local-first persistence. \nRationale: \n1. It supports SQLite on mobile (via React Native) and IndexedDB on web, providing a consistent API for cross-platform usage.\n2. It's optimized for high performance with large datasets, which is important for 'full-text search across tasks, comments, attachments'.\n3. It has a built-in sync primitive that simplifies implementing the push/pull sync API.\n4. It works well with the relational nature of our data model (Tasks/Projects/Portfolios).",
+        "id": "e3d5d41e-8ec5-4f72-84ce-93b258f6f625",
+        "timestamp": "2026-02-09T10:53:17.652Z"
+      },
+      {
+        "agent": "architect",
+        "type": "decision",
+        "content": "Decision: We will use PostgreSQL with Prisma as the ORM on the backend.\nRationale:\n1. PostgreSQL is robust, supports complex relational queries (essential for portfolios/projects/tasks hierarchy), and has excellent full-text search capabilities (TSVector).\n2. Prisma provides type safety and easy schema migrations, which is critical as we build out the complex data model.\n3. We will utilize row-level security (RLS) or a dedicated middleware layer to handle the granular workspace-scoped permissions.",
+        "id": "4538f682-fd30-4432-82b0-5422c455835c",
+        "timestamp": "2026-02-09T10:53:21.172Z"
+      }
+    ],
+    "diagrams": [
+      {
+        "id": "current-architecture",
+        "title": "Current Simple Architecture",
+        "type": "current-architecture",
+        "mermaidCode": "flowchart TD\n  Client[\"Frontend (React)\"] -- \"REST API\" --> Server[\"Backend (Express)\"]\n  Server -- \"Read/Write\" --> DB[\"todos.json\"]\n  Client -- \"State\" --> Context[\"React Context\"]"
+      },
+      {
+        "id": "proposed-architecture",
+        "title": "Proposed Local-First Architecture",
+        "type": "proposed-architecture",
+        "mermaidCode": "flowchart TD\n  Client[\"Frontend (React)\"] -- \"Reactive Queries\" --> LocalDB[\"WatermelonDB (SQLite/IndexedDB)\"]\n  LocalDB -- \"Sync Protocol\" --> SyncService[\"Sync API (Express)\"]\n  SyncService -- \"Prisma ORM\" --> RemoteDB[\"PostgreSQL\"]\n  Auth[\"Auth Service\"] -- \"JWT/Workspaces\" --> SyncService\n  NLP[\"NLP Parser\"] -- \"Parses Input\" --> LocalDB\n  Recurrence[\"Recurrence Service\"] -- \"Generates Tasks\" --> SyncService"
+      }
+    ]
+  }
+}

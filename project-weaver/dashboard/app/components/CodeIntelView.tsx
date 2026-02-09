@@ -245,7 +245,7 @@ function generateCallGraphDiagram(codeMaps: CodeMaps, filter: string): string {
   filtered.forEach((fn, i) => {
     const shortId = `F${i}`
     idMap.set(fn.id, shortId)
-    const label = fn.name.length > 25 ? fn.name.slice(0, 22) + '...' : fn.name
+    const label = fn.name.length > 15 ? fn.name.slice(0, 12) + '...' : fn.name
     if (fn.exported) {
       lines.push(`  ${shortId}(["${label}"])`)
     } else {
@@ -604,8 +604,10 @@ function DependenciesTab({ codeMaps, searchQuery }: { codeMaps: CodeMaps; search
           Call Graph {searchQuery ? `(filtered: "${searchQuery}")` : '(top connected)'}
         </button>
         {showCallDiagram && codeMaps.callGraph.functions.length > 0 && (
-          <div className="mb-4">
-            <MermaidDiagram chart={callDiagram} className="max-h-[400px]" />
+          <div className="mb-4 overflow-auto">
+            <div className="min-w-0" style={{ fontSize: '10px' }}>
+              <MermaidDiagram chart={callDiagram} className="max-h-[300px] text-[8px]" />
+            </div>
           </div>
         )}
       </div>

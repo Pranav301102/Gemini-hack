@@ -13,6 +13,7 @@ import {
   HiSparkles,
 } from 'react-icons/hi'
 import EnrichmentPanel from './EnrichmentPanel'
+import GitVersionManager from './GitVersionManager'
 
 interface ChangeGroup {
   id: string
@@ -340,6 +341,12 @@ const PlanNavigator: React.FC<PlanNavigatorProps> = ({
           </button>
         </div>
       )}
+
+      {/* Git Version Management */}
+      <div className="px-4 py-3 border-t border-gray-800 mt-auto">
+        <h3 className="text-xs font-semibold text-gray-400 uppercase mb-3">Version Control</h3>
+        <GitVersionManager projectPath={projectPath} />
+      </div>
     </div>
   )
 }
