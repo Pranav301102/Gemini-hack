@@ -17,7 +17,7 @@
 **[Quick cuts showing: frustration, repeated questions, wasted time]**
 
 ---
-
+å
 ## ACT 1: THE SOLUTION (0:20-0:50)
 
 ### Introduce Project Weaver

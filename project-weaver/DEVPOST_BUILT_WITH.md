@@ -1,7 +1,7 @@
 # Built With
 
 ## AI & LLM
-- **Google Gemini 2.0 Flash** - Core AI reasoning engine powering all 5 specialized agents
+- **Google Gemini 3.0 Flash** - Core AI reasoning engine powering all 5 specialized agents
 - **Model Context Protocol (MCP)** - Standard protocol for AI agent tool integration
 
 ## Frontend
