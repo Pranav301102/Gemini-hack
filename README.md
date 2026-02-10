@@ -199,21 +199,44 @@ A Next.js dashboard connected via SSE that shows:
 
 ### Install
 
+#### Option 1: Install from GitHub (Recommended)
+
+```bash
+# Install the extension via Gemini CLI
+gemini extensions install https://github.com/Pranav301102/Gemini-hack
+
+# Verify installation
+gemini extensions list
+```
+
+The extension will automatically:
+- Clone the repository
+- Install dependencies
+- Build the MCP server
+- Register with Gemini CLI
+
+#### Option 2: Install from Local Path
+
 ```bash
 # Clone the repo
-git clone <repo-url>
-cd agent-weaver
+git clone https://github.com/Pranav301102/Gemini-hack
+cd Gemini-hack/project-weaver
 
 # Build the MCP server
 npm install
 npm run build
 
-# Install the dashboard
-cd dashboard
-npm install
-cd ..
+# Install the extension from local path
+gemini extensions install .
 
-# Install and start the Hub server (for team sync)
+# Verify installation
+gemini extensions list
+```
+
+#### Optional: Set up Team Collaboration Hub
+
+```bash
+# Install and start the Hub server (for team sync features)
 cd hub
 npm install
 npm start &  # Runs on http://localhost:4200
@@ -239,20 +262,29 @@ vercel
 
 ### Use with Gemini CLI
 
+Once installed, the extension is available in any Gemini CLI session:
+
 ```bash
 # Navigate to any project you want to work on
 cd ~/my-project
 
-# Start Gemini CLI (it auto-discovers the extension)
+# Start Gemini CLI
 gemini
 
-# Then use any command:
+# The Agent Weaver extension is now available!
+# Use any command:
 /read          # Scan and index the codebase
 /build         # Plan the work
 /implement     # Write the code
 /test          # Run tests
 /review        # Code review
 /dashboard     # Open the live dashboard
+/status        # Quick project status check
+```
+
+**Update the extension:**
+```bash
+gemini extensions update agent-weaver
 ```
 
 ### Run the Dashboard Standalone
