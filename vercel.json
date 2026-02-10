@@ -1,0 +1,7 @@
+{
+  "version": 2,
+  "buildCommand": "cd project-weaver/dashboard && npm install && npm run build",
+  "outputDirectory": "project-weaver/dashboard/.next",
+  "framework": "nextjs",
+  "installCommand": "cd project-weaver/dashboard && npm install"
+}
