@@ -93,6 +93,7 @@ export interface AnnotationData {
 
 export interface AnnotationsData {
   version: string
+  generatedAt?: string
   annotations: AnnotationData[]
   stats?: {
     total: number
